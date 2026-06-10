@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine # PostgreSQL 16 이미지를 사용
+    container_name: game-archive-postgres
+    restart: unless-stopped
+    ports: 
+      - "5432:5432" # 내 컴퓨터의 5432 포트를 PostgreSQL 컨테이너와 연결
+    environment:
+      POSTGRES_DB: game_archive # 처음 생성할 DB 이름
+      POSTGRES_USER: game_archive_user # DB 사용자 이름
+      POSTGRES_PASSWORD: game_archive_password # DB 사용자 비밀번호
+    volumes:
+    - postgres_data:/var/lib/postgresql/data # 컨테이너를 껐다 켜도 DB 데이터가 유지되게 함 
+
+volumes:
+  postgres_data:
