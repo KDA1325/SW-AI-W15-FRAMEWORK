@@ -1,0 +1,295 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+:root {
+  --register-primary: #000000;
+  --register-secondary: #5d5f5f;
+  --register-surface: #f9f9f9;
+  --register-surface-container: #eeeeee;
+  --register-surface-lowest: #ffffff;
+  --register-surface-bright: #f9f9f9;
+  --register-grid: #e2e2e2;
+  --register-on-primary: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.register-page {
+  background-color: var(--register-surface-lowest);
+  background-image:
+    linear-gradient(var(--register-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--register-grid) 1px, transparent 1px);
+  background-position: center top;
+  background-size: 32px 32px;
+  color: var(--register-primary);
+  font-family: Geist, system-ui, sans-serif;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.register-canvas {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 120px 32px 32px;
+  position: relative;
+  z-index: 1;
+}
+
+.register-layout {
+  align-items: center;
+  display: grid;
+  gap: 128px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  max-width: 1200px;
+  width: 100%;
+}
+
+.register-logo {
+  display: flex;
+  flex-direction: column;
+  font-family: DotGothic16, monospace;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.register-logo div:nth-child(2) {
+  margin-left: 64px;
+}
+
+.register-logo div:nth-child(3) {
+  margin-left: 128px;
+}
+
+.register-logo-rule {
+  background-color: var(--register-primary);
+  display: block;
+  height: 8px;
+  margin-top: 32px;
+  width: 100%;
+}
+
+.register-logo p {
+  color: var(--register-secondary);
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin: 16px 0 0;
+}
+
+.register-terminal {
+  background-color: var(--register-surface-container);
+  border: 2px solid var(--register-primary);
+  box-shadow: 8px 8px 0 0 var(--register-primary);
+  padding: 48px;
+  position: relative;
+}
+
+.register-terminal-bar {
+  align-items: center;
+  background-color: var(--register-primary);
+  border-bottom: 2px solid var(--register-primary);
+  color: var(--register-on-primary);
+  display: flex;
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  height: 32px;
+  justify-content: space-between;
+  left: 0;
+  line-height: 1;
+  padding: 0 16px;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.register-window-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.register-window-controls span {
+  background-color: var(--register-surface-lowest);
+  border: 1px solid var(--register-primary);
+  display: block;
+  height: 12px;
+  width: 12px;
+}
+
+.register-terminal-body {
+  margin-top: 32px;
+}
+
+.register-terminal-body h1 {
+  border-bottom: 2px solid var(--register-primary);
+  display: inline-block;
+  font-family: DotGothic16, monospace;
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 0 0 32px;
+  padding-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.register-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.register-field > span {
+  align-items: center;
+  display: flex;
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  gap: 8px;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.register-field .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.register-field input {
+  background-color: var(--register-surface-lowest);
+  border: 2px solid var(--register-primary);
+  border-radius: 0;
+  color: var(--register-primary);
+  font-family: Geist, system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 12px;
+  transition:
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+  width: 100%;
+}
+
+.register-field input:focus {
+  background-color: var(--register-surface-bright);
+  border-bottom: 2px solid var(--register-primary);
+  box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+.register-field input::placeholder {
+  color: #c6c6c6;
+}
+
+.register-submit {
+  background-color: var(--register-primary);
+  border: 2px solid var(--register-primary);
+  color: var(--register-on-primary);
+  cursor: pointer;
+  font-family: DotGothic16, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 16px;
+  padding: 16px;
+  text-transform: uppercase;
+  transition:
+    background-color 100ms ease,
+    color 100ms ease,
+    opacity 100ms ease,
+    transform 100ms ease;
+  width: 100%;
+}
+
+.register-submit:hover,
+.register-submit:focus-visible {
+  background-color: var(--register-surface-lowest);
+  color: var(--register-primary);
+  outline: none;
+}
+
+.register-submit:active {
+  transform: translateY(4px);
+}
+
+.register-submit:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.register-message {
+  color: var(--register-secondary);
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  line-height: 1;
+  margin: -4px 0 0;
+  text-align: center;
+}
+
+.register-back-link {
+  align-self: center;
+  border-bottom: 1px solid transparent;
+  color: var(--register-secondary);
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin-top: 8px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
+}
+
+.register-back-link:hover {
+  border-color: var(--register-primary);
+  color: var(--register-primary);
+}
+
+@media (max-width: 767px) {
+  .register-canvas {
+    align-items: flex-start;
+    padding: 48px 24px 32px;
+  }
+
+  .register-layout {
+    gap: 48px;
+    grid-template-columns: 1fr;
+  }
+
+  .register-logo {
+    font-size: 36px;
+  }
+
+  .register-logo div:nth-child(2) {
+    margin-left: 32px;
+  }
+
+  .register-logo div:nth-child(3) {
+    margin-left: 64px;
+  }
+
+  .register-terminal {
+    padding: 40px 24px 32px;
+  }
+
+  .register-terminal-body h1 {
+    font-size: 24px;
+  }
+}

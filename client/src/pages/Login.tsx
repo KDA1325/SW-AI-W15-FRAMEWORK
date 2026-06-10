@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../api'
 import '../styles/login.css'
 
@@ -108,9 +109,9 @@ function Login() {
 
             {message ? <p className="login-message">{message}</p> : null}
 
-            <a className="create-account-link" href="#create-account">
+            <Link className="create-account-link" to="/register">
               CREATE ACCOUNT
-            </a>
+            </Link>
           </form>
         </div>
 
