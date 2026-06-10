@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../api'
 import '../styles/login.css'
+import LoginPendingView from './LoginPendingView'
 
 type LoginState = {
   email: string
@@ -61,61 +62,70 @@ function Login() {
         </div>
       </section>
 
-      <section className="login-panel" aria-labelledby="login-heading">
-        <div className="login-form-shell">
-          <h2 id="login-heading">LOGIN</h2>
+      <section
+        className={`login-panel${isSubmitting ? ' is-pending' : ''}`}
+        aria-labelledby="login-heading"
+      >
+        {isSubmitting ? (
+          <LoginPendingView email={form.email} />
+        ) : (
+          <>
+            <div className="login-form-shell">
+              <h2 id="login-heading">LOGIN</h2>
 
-          <form className="login-form" onSubmit={handleSubmit}>
-            <label className="login-field">
-              <span>IDENTIFIER</span>
-              <input
-                autoComplete="email"
-                name="email"
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    email: event.target.value,
-                  }))
-                }
-                placeholder="USER_EMAIL"
-                type="email"
-                value={form.email}
-              />
-            </label>
+              <form className="login-form" onSubmit={handleSubmit}>
+                <label className="login-field">
+                  <span>IDENTIFIER</span>
+                  <input
+                    autoComplete="email"
+                    name="email"
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        email: event.target.value,
+                      }))
+                    }
+                    placeholder="USER_EMAIL"
+                    type="email"
+                    value={form.email}
+                  />
+                </label>
 
-            <label className="login-field">
-              <span>ACCESS CODE</span>
-              <input
-                autoComplete="current-password"
-                name="password"
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    password: event.target.value,
-                  }))
-                }
-                placeholder="PASSWORD"
-                type="password"
-                value={form.password}
-              />
-            </label>
+                <label className="login-field">
+                  <span>ACCESS CODE</span>
+                  <input
+                    autoComplete="current-password"
+                    name="password"
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        password: event.target.value,
+                      }))
+                    }
+                    placeholder="PASSWORD"
+                    type="password"
+                    value={form.password}
+                  />
+                </label>
 
-            <button className="login-submit" disabled={isSubmitting} type="submit">
-              <span>{isSubmitting ? 'CONNECTING' : 'START_SESSION'}</span>
-              <span className="material-symbols-outlined" aria-hidden="true">
-                terminal
-              </span>
-            </button>
+                <button className="login-submit" disabled={isSubmitting} type="submit">
+                  <span>START_SESSION</span>
+                  <span className="material-symbols-outlined" aria-hidden="true">
+                    terminal
+                  </span>
+                </button>
 
-            {message ? <p className="login-message">{message}</p> : null}
+                {message ? <p className="login-message">{message}</p> : null}
 
-            <Link className="create-account-link" to="/register">
-              CREATE ACCOUNT
-            </Link>
-          </form>
-        </div>
+                <Link className="create-account-link" to="/register">
+                  CREATE ACCOUNT
+                </Link>
+              </form>
+            </div>
 
-        <p className="secure-copy">SECURE TERMINAL CONNECTION</p>
+            <p className="secure-copy">SECURE TERMINAL CONNECTION</p>
+          </>
+        )}
       </section>
     </main>
   )

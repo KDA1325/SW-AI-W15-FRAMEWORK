@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>GAMING JOURNAL CLUB</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Geist:wght@400;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#5d5f5f",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-surface": "#1a1c1c",
+                        "surface-tint": "#5e5e5e",
+                        "on-error": "#ffffff",
+                        "primary": "#000000",
+                        "surface-container-highest": "#e2e2e2",
+                        "inverse-primary": "#c6c6c6",
+                        "on-tertiary-container": "#848484",
+                        "surface-container-high": "#e8e8e8",
+                        "tertiary-fixed": "#e3e2e2",
+                        "on-tertiary-fixed": "#1b1c1c",
+                        "on-secondary-container": "#616363",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-bright": "#f9f9f9",
+                        "on-background": "#1a1c1c",
+                        "on-surface-variant": "#4c4546",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "background": "#f9f9f9",
+                        "inverse-surface": "#2f3131",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "primary-fixed": "#e2e2e2",
+                        "inverse-on-surface": "#f1f1f1",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#eeeeee",
+                        "on-primary-fixed": "#1b1b1b",
+                        "on-tertiary-fixed-variant": "#464747",
+                        "tertiary": "#000000",
+                        "tertiary-fixed-dim": "#c7c6c6",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#1b1c1c",
+                        "primary-container": "#1b1b1b",
+                        "secondary-container": "#dfe0e0",
+                        "outline-variant": "#cfc4c5",
+                        "on-primary": "#ffffff",
+                        "error": "#ba1a1a",
+                        "outline": "#7e7576",
+                        "secondary-fixed": "#e2e2e2",
+                        "surface-dim": "#dadada",
+                        "on-primary-container": "#848484",
+                        "on-primary-fixed-variant": "#474747",
+                        "on-secondary-fixed-variant": "#454747",
+                        "surface-variant": "#e2e2e2",
+                        "error-container": "#ffdad6",
+                        "surface": "#f9f9f9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin": "32px",
+                        "gutter": "24px",
+                        "unit": "4px",
+                        "container-max": "1200px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Geist"],
+                        "headline-lg": ["DotGothic16"],
+                        "headline-xl": ["DotGothic16"],
+                        "label-caps": ["DotGothic16"],
+                        "ui-button": ["DotGothic16"],
+                        "headline-lg-mobile": ["DotGothic16"],
+                        "body-md": ["Geist"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-xl": ["48px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "label-caps": ["14px", { "lineHeight": "1.0", "letterSpacing": "0.1em", "fontWeight": "400" }],
+                        "ui-button": ["16px", { "lineHeight": "1.0", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .blueprint-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, #e2e2e2 1px, transparent 1px),
+                linear-gradient(to bottom, #e2e2e2 1px, transparent 1px);
+        }
+        
+        .nav-link-hover {
+            position: relative;
+        }
+        .nav-link-hover:hover::before {
+            content: ">";
+            position: absolute;
+            left: -16px;
+            color: #000;
+        }
+    </style>
+</head>
+<body class="bg-surface-container-lowest text-primary font-body-md h-screen w-full overflow-hidden flex flex-col md:flex-row blueprint-grid selection:bg-primary selection:text-on-primary">
+<div class="flex-1 flex flex-col relative p-margin">
+<nav class="w-full flex gap-8 font-label-caps text-label-caps uppercase text-primary">
+<a class="nav-link-hover hover:font-bold transition-all" href="#">ARCHIVE</a>
+<a class="nav-link-hover hover:font-bold transition-all" href="#">REVIEW</a>
+<a class="nav-link-hover hover:font-bold transition-all" href="#">LATEST</a>
+</nav>
+<div class="flex-1 flex flex-col justify-center items-start pl-0 md:pl-16">
+<h1 class="font-headline-xl text-headline-xl uppercase tracking-tighter leading-none md:text-[80px] cursor-default">
+<div class="flex flex-col gap-2 hover:gap-8 transition-all duration-500 ease-in-out">
+<span class="block">GAMING</span>
+<span class="block ml-[20%] md:ml-[30%]" style="white-space: nowrap; min-width: max-content;">JOURNAL</span>
+<span class="block">CLUB</span>
+</div></h1>
+</div>
+<div class="font-label-caps text-label-caps text-primary uppercase flex items-center"><span class="">CONNECTING_TO_HOST...</span><span class="material-symbols-outlined animate-spin ml-2 text-[14px]">progress_activity</span></div>
+</div>
+<div class="w-full md:w-[480px] border-t-2 md:border-t-0 md:border-l-2 border-primary h-full flex flex-col p-margin shadow-[-10px_0_0_0_rgba(0,0,0,0.05)] z-10 relative bg-primary">
+<div class="flex-1 flex flex-col justify-center gap-8 max-w-[320px] mx-auto w-full">
+<h2 class="font-headline-lg text-headline-lg uppercase text-center w-full text-on-primary">LOGIN</h2>
+<form class="flex flex-col gap-6 w-full">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase text-on-primary">IDENTIFIER</label>
+<input class="w-full bg-surface-container-lowest border-2 border-primary p-4 font-label-caps text-label-caps text-primary rounded-none focus:ring-0 focus:outline-none focus:bg-primary focus:text-on-primary transition-colors border-on-primary" placeholder="USER_ID" type="text">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase text-on-primary">ACCESS CODE</label>
+<input class="w-full bg-surface-container-lowest border-2 border-primary p-4 font-label-caps text-label-caps text-primary rounded-none focus:ring-0 focus:outline-none focus:bg-primary focus:text-on-primary transition-colors border-on-primary" placeholder="********" type="password">
+</div>
+<div class="pt-4">
+<button class="w-full bg-surface-container-lowest border-2 border-primary p-4 font-ui-button text-ui-button text-primary uppercase hover:bg-primary hover:text-on-primary transition-colors duration-150 flex justify-center items-center gap-2 group" type="button"><span class="">ESTABLISHING_CONNECTION...</span><span class="material-symbols-outlined animate-spin" style="font-variation-settings: 'FILL' 1;">progress_activity</span></button>
+</div>
+<div class="text-center mt-4">
+<a class="font-label-caps text-label-caps text-secondary transition-colors underline decoration-1 underline-offset-4 hover:text-on-primary" href="#">CREATE ACCOUNT</a>
+</div>
+</form>
+</div>
+<div class="font-label-caps text-[10px] text-secondary text-center uppercase tracking-widest mt-auto text-on-primary">
+            SECURE TERMINAL CONNECTION
+        </div>
+</div>
+</body></html>

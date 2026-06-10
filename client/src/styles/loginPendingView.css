@@ -1,0 +1,117 @@
+.login-panel.is-pending {
+  background-color: var(--login-primary);
+}
+
+.login-pending-shell {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 32px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 320px;
+  width: 100%;
+}
+
+.login-pending-heading {
+  color: var(--login-on-primary);
+  font-family: DotGothic16, monospace;
+  font-size: 32px;
+  line-height: 1.2;
+  margin: 0;
+  text-align: center;
+}
+
+.login-pending-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.login-pending-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-pending-field span {
+  color: var(--login-on-primary);
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.login-pending-field input {
+  background-color: var(--login-surface-lowest);
+  border: 2px solid var(--login-on-primary);
+  border-radius: 0;
+  color: var(--login-primary);
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 1;
+  padding: 16px;
+  width: 100%;
+}
+
+.login-pending-button {
+  align-items: center;
+  background-color: var(--login-surface-lowest);
+  border: 2px solid var(--login-primary);
+  color: var(--login-primary);
+  cursor: wait;
+  display: flex;
+  font-family: DotGothic16, monospace;
+  font-size: 16px;
+  font-weight: 700;
+  gap: 8px;
+  justify-content: center;
+  line-height: 1;
+  margin-top: 16px;
+  min-height: 52px;
+  padding: 16px;
+  text-transform: uppercase;
+  width: 100%;
+}
+
+.login-pending-button .material-symbols-outlined {
+  font-variation-settings: "FILL" 1;
+}
+
+.pending-spin {
+  animation: pending-spin 1s linear infinite;
+}
+
+.login-pending-create-link {
+  color: var(--login-secondary);
+  font-family: DotGothic16, monospace;
+  font-size: 14px;
+  line-height: 1;
+  margin-top: 16px;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 150ms ease;
+}
+
+.login-pending-create-link:hover {
+  color: var(--login-on-primary);
+}
+
+.login-pending-secure-copy {
+  color: var(--login-on-primary);
+  font-family: DotGothic16, monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  margin: auto 0 0;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+@keyframes pending-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
