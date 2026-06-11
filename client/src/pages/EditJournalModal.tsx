@@ -24,9 +24,9 @@ function EditJournalModal({ isOpen, onClose }: EditJournalModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/50 p-4">
-      <div className="w-full max-w-2xl border-4 border-primary bg-surface-container-lowest p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-        <div className="mb-8 flex items-center justify-between border-b-4 border-primary pb-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[var(--gjc-primary)]/50 p-4">
+      <div className="w-full max-w-2xl border-4 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+        <div className="mb-8 flex items-center justify-between border-b-4 border-[var(--gjc-primary)] pb-4">
           <h2 className="font-headline-lg text-3xl uppercase tracking-widest">
             EDIT_JOURNAL
           </h2>
@@ -94,13 +94,13 @@ function EditJournalModal({ isOpen, onClose }: EditJournalModalProps) {
 
           <div className="mt-4 flex flex-col gap-4 md:flex-row">
             <button
-              className="flex-grow border-2 border-primary bg-primary py-4 font-ui-button uppercase tracking-widest text-on-primary transition-colors hover:bg-surface-variant hover:text-primary"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] py-4 font-ui-button uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-surface-container-lowest)] hover:text-[var(--gjc-primary)]"
               type="submit"
             >
               SAVE
             </button>
             <button
-              className="flex-grow border-2 border-primary bg-surface-container-lowest py-4 font-ui-button uppercase tracking-widest text-primary transition-colors hover:bg-surface-variant"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] py-4 font-ui-button uppercase tracking-widest text-primary transition-colors hover:bg-[var(--gjc-surface-container)]"
               onClick={onClose}
               type="button"
             >
