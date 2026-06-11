@@ -1,0 +1,23 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Review Detail.html의 <style> 태그에서 분리한 페이지 전용 CSS입니다. */
+body { background-color: var(--gjc-background); color: var(--gjc-primary); }
+        .pixel-hatch {
+            background-image: repeating-linear-gradient(45deg, #000 0, #000 2px, transparent 2px, transparent 4px);
+        }
+        .blinking-cursor::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .nav-link:hover::before {
+            content: '>';
+            position: absolute;
+            left: -16px;
+        }
+        .nav-link { position: relative; display: inline-flex; align-items: center; }
+
