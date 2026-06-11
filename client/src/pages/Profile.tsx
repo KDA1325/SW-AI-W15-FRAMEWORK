@@ -97,7 +97,7 @@ function Profile() {
           <div className="p-6 flex flex-col items-center justify-center hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all step-transition group cursor-default relative hover:z-10 hover:scale-105 hover:ring-4 hover:ring-[var(--gjc-primary)]">
             <span className="font-label-caps text-[var(--gjc-secondary)] group-hover:text-[var(--gjc-surface-dim)] transition-colors duration-100 mb-2">GAMES</span>
             <span className="font-headline-xl text-headline-xl group-hover:hidden">142</span>
-            <span className="hidden group-hover:flex font-headline-lg text-[8px] text-center leading-tight">
+            <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-[16px] text-center leading-tight">
               OWNED GAMES: 142 <br />
               RATED GAMES: 87
             </span>
@@ -105,7 +105,7 @@ function Profile() {
           <div className="p-6 flex flex-col items-center justify-center hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all step-transition group cursor-default relative hover:z-10 hover:scale-105 hover:ring-4 hover:ring-[var(--gjc-primary)]">
             <span className="font-label-caps text-[var(--gjc-secondary)] group-hover:text-[var(--gjc-surface-dim)] transition-colors duration-100 mb-2">ACHIEVEMENTS</span>
             <span className="font-headline-xl text-headline-xl group-hover:hidden">120</span>
-            <span className="hidden group-hover:flex font-headline-lg text-[16px] text-center leading-tight">
+            <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-[16px] text-center leading-tight">
               120 ACHIEVEMENTS <br />
               ACROSS 34 GAMES
             </span>
@@ -118,7 +118,7 @@ function Profile() {
               RECENT GAME
             </span>
             <span className="font-headline-xl text-headline-xl group-hover:hidden">34H</span>
-            <span className="hidden group-hover:flex font-headline-lg text-center leading-tight uppercase text-[16px]">
+            <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-center leading-tight uppercase text-[16px]">
               SHADOWS OF AETERNA
               <br />
               ...
