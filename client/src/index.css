@@ -3,6 +3,101 @@
   width: 100%;
 }
 
+:root {
+  --gjc-on-tertiary-fixed-variant: #464747;
+  --gjc-surface-container-lowest: #ffffff;
+  --gjc-primary-container: #1b1b1b;
+  --gjc-tertiary-container: #1b1c1c;
+  --gjc-secondary: #5d5f5f;
+  --gjc-on-surface-variant: #4c4546;
+  --gjc-error: #ba1a1a;
+  --gjc-surface-tint: #5e5e5e;
+  --gjc-surface: #f9f9f9;
+  --gjc-on-primary-fixed-variant: #474747;
+  --gjc-on-tertiary-container: #848484;
+  --gjc-on-secondary-container: #616363;
+  --gjc-surface-container-low: #f3f3f3;
+  --gjc-outline-variant: #cfc4c5;
+  --gjc-on-primary-container: #848484;
+  --gjc-background: #f9f9f9;
+  --gjc-error-container: #ffdad6;
+  --gjc-primary-fixed: #e2e2e2;
+  --gjc-on-tertiary: #ffffff;
+  --gjc-on-primary: #ffffff;
+  --gjc-primary-fixed-dim: #c6c6c6;
+  --gjc-surface-bright: #f9f9f9;
+  --gjc-inverse-on-surface: #f1f1f1;
+  --gjc-surface-container-high: #e8e8e8;
+  --gjc-secondary-container: #dfe0e0;
+  --gjc-on-secondary: #ffffff;
+  --gjc-tertiary-fixed: #e3e2e2;
+  --gjc-on-tertiary-fixed: #1b1c1c;
+  --gjc-outline: #7e7576;
+  --gjc-inverse-surface: #2f3131;
+  --gjc-on-primary-fixed: #1b1b1b;
+  --gjc-surface-container: #eeeeee;
+  --gjc-surface-dim: #dadada;
+  --gjc-surface-container-highest: #e2e2e2;
+  --gjc-primary: #000000;
+  --gjc-on-background: #1a1c1c;
+  --gjc-secondary-fixed-dim: #c6c6c7;
+  --gjc-tertiary: #000000;
+  --gjc-secondary-fixed: #e2e2e2;
+  --gjc-on-secondary-fixed-variant: #454747;
+  --gjc-surface-variant: #e2e2e2;
+  --gjc-tertiary-fixed-dim: #c7c6c6;
+  --gjc-on-secondary-fixed: #1a1c1c;
+  --gjc-on-error-container: #93000a;
+  --gjc-on-error: #ffffff;
+  --gjc-on-surface: #1a1c1c;
+  --gjc-inverse-primary: #c6c6c6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
+}
+
+.static-html-page {
+  min-height: 100svh;
+}
+
+.pixel-hatch {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(0, 0, 0, 0.1) 4px,
+    rgba(0, 0, 0, 0.1) 8px
+  );
+}
+
+.blinking-cursor::after,
+.cursor-blink::after {
+  animation: gjc-blink 1s step-end infinite;
+  content: "_";
+}
+
+.animate-analyzing {
+  animation: gjc-analyzing-bar 1.8s steps(12, end) infinite;
+  transform-origin: left;
+}
+
+@keyframes gjc-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes gjc-analyzing-bar {
+  0% {
+    transform: scaleX(0.08);
+  }
+
+  100% {
+    transform: scaleX(1);
+  }
 }
