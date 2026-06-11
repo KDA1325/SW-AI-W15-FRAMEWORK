@@ -66,7 +66,7 @@ function Journals() {
                         EDIT
                       </button>
                       <button
-                        className="border border-primary bg-[var(--gjc-error)] px-3 py-1 font-label-caps text-[10px] font-bold uppercase text-error transition-colors hover:bg-surface-variant"
+                        className="border border-primary bg-[var(--gjc-on-error-fixed)] px-3 py-1 font-label-caps text-[10px] font-bold uppercase text-error transition-colors hover:bg-surface-variant"
                         onClick={() => setActiveModal('delete-review')}
                         type="button"
                       >
@@ -122,7 +122,7 @@ function Journals() {
                         EDIT
                       </button>
                       <button
-                        className="border border-[var(--gjc-primary)] bg-[var(--gjc-on-error-container)] px-4 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-surface)]  transition-colors hover:bg-surface-variant"
+                        className="border border-[var(--gjc-primary)] bg-[var(--gjc-on-error-fixed)] px-4 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-surface)]  transition-colors hover:bg-surface-variant"
                         onClick={() => setActiveModal('delete-journal')}
                         type="button"
                       >
