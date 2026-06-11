@@ -51,14 +51,18 @@ function Journals() {
                 WRITE <span className="material-symbols-outlined text-sm">add</span>
               </Link>
             </h2>
+            <select className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200">
+              <option value="rating">별점순</option>
+              <option value="latest">최신순</option>
+              <option value="oldest">오래된 순</option>
+            </select>
           </div>
 
           {/* TODO: 카드 클릭 후 드래그로 스크롤 가능하게 처리 */}
-          {/* TODO: 정렬 옵션 */}
           <div className="flex gap-8 overflow-x-auto pb-12" id="reviews-scroll-container">
             {reviews.map(([title, rating, copy]) => (
               <article className="group relative w-[320px] flex-shrink-0 cursor-crosshair" key={title}>
-                <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden border-2 border-primary bg-surface-container-high grayscale transition-all duration-300 hover:grayscale-0">
+                <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden border-2 border-[var(--gjc-primary)] bg-surface-container-high grayscale transition-all duration-300 hover:grayscale-0">
                   <span className="font-headline-xl text-5xl">{title.slice(0, 2)}</span>
                   <div className="absolute inset-0 flex flex-col bg-[var(--gjc-primary)] p-6 text-[var(--gjc-on-primary)] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     <div className="absolute right-4 top-4 z-10 flex gap-2">  
@@ -93,7 +97,7 @@ function Journals() {
         </section>
 
         <section>
-          {/* TODO: 페이지네이션, 정렬, 보기 개수 선택 옵션 */}
+          {/* TODO: 페이지네이션 */}
           <div className="mb-6 flex items-center justify-between border-b-2 border-[var(--gjc-primary)] pb-3">
             <h2 className="flex items-center gap-3 font-headline-lg text-headline-lg uppercase">
               <div className="w-2 h-8 bg-[var(--gjc-primary)]"></div>
@@ -105,6 +109,23 @@ function Journals() {
                 WRITE <span className="material-symbols-outlined text-sm">add</span>
               </Link>
             </h2>
+            <div className="flex flex-wrap items-center gap-4 font-label-caps text-xs tracking-wider">
+              <div className="flex items-center gap-2">
+                <span className="font-label-caps">SORT_BY:</span>
+                <select className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200" id="sort-select">
+                  <option value="latest">최신순</option>
+                  <option value="oldest">오래된 순</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-label-caps">SHOW:</span>
+                <select className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200" id="per-page-select">
+                  <option value="5">5개씩 보기</option>
+                  <option value="10">10개씩 보기</option>
+                  <option value="15">15개씩 보기</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div className="flex flex-col gap-6">
@@ -139,11 +160,12 @@ function Journals() {
                     {title}
                   </h3>
                   <p className="mb-6 font-body-md text-body-md text-on-surface">{copy}</p>
-                  <Link
-                    className="mt-auto flex w-fit items-center gap-2 border-b-2 border-[var(--gjc-primary)] pb-0.5 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
-                    to="/journal-detail"
-                  >
-                    VIEW_LOG <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <Link className="mt-auto flex items-center justify-between" to="/journal-detail">
+                    <span className="font-label-caps text-xs tracking-wider text-secondary">2026. 05. 19</span>
+                    <span className="flex items-center gap-2 border-b-2 border-primary pb-0.5 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary">
+                      VIEW_LOG
+                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                    </span>
                   </Link>
                 </div>
               </article>
