@@ -1,0 +1,167 @@
+﻿<!-- Recommend 원본 HTML에서 head/script/style을 제외하고 React 컴포넌트가 렌더링할 body 조각만 남긴 파일입니다. -->
+<!-- Shared Component: TopNavBar (From SCREEN_6) -->
+<header class="flex justify-between items-center w-full px-margin py-4 border-b-2 sticky top-0 z-50 bg-white border-black text-black" style="font-family: DotGothic16, sans-serif;">
+  <div class="flex justify-between items-center w-full max-w-container-max mx-auto">
+    <!-- Brand -->
+    <a class="block w-[180px] hover:opacity-80 transition-opacity" href="#">
+      <img alt="GAMING JOURNAL CLUB" class="h-12 w-auto object-contain" src="{{DATA:IMAGE:IMAGE_32}}">
+    </a>
+    <!-- Navigation Links -->
+    <nav class="hidden md:flex gap-8 items-center font-label-caps text-label-caps">
+      <a class="px-2 py-1 hover:bg-black hover:text-white transition-colors" href="#">PROFILE</a>
+      <a class="px-2 py-1 hover:bg-black hover:text-white transition-colors" href="#">RECOMMEND</a>
+      <a class="px-2 py-1 border-b-4 border-black hover:bg-black hover:text-white transition-colors" href="#">JOURNALS</a>
+      <a class="px-2 py-1 hover:bg-black hover:text-white transition-colors" href="#">TIMELINE</a>
+    </nav>
+    <!-- Action Links -->
+    <div class="hidden md:flex gap-6 items-center font-label-caps text-label-caps">
+      <a class="hover:underline decoration-2 underline-offset-4" href="#">SETTINGS</a>
+      <a class="border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-colors uppercase" href="#">LOGOUT</a>
+    </div>
+  </div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin py-20 flex flex-col gap-[80px]"><div class="flex flex-col items-center gap-4 w-full mb-2">
+  <div class="w-full flex flex-col items-center gap-4">
+    <!-- Sync Button Container -->
+    <button class="w-full border-2 border-primary rounded-xl p-4 flex items-center justify-center gap-4 bg-white hover:bg-surface-container transition-colors group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
+      <div class="border-2 border-primary p-1 flex items-center justify-center">
+        <span class="material-symbols-outlined text-3xl font-bold group-hover:rotate-180 transition-transform duration-500">sync</span>
+      </div>
+      <span class="font-headline-lg text-headline-lg tracking-tighter">SYNC_DATA</span>
+    </button>
+    
+    <!-- Description Text -->
+    <p class="font-label-caps text-label-caps text-secondary text-center leading-relaxed" style="white-space: nowrap;">
+      ?숆린??踰꾪듉???꾨Ⅴ硫?理쒓렐 寃뚯엫 ?됯?, ?쇱?, ?뚮젅??湲곕줉??理쒖떊?뷀븯??AI媛 ?곗씠?곕? ?щ텇?앺븯怨?留욎땄 寃뚯엫??異붿쿇?⑸땲??
+    </p>
+    
+    <!-- Last Sync Timestamp -->
+    <div class="bg-white border border-outline-variant px-3 py-1">
+      <span class="font-label-caps text-[10px] text-secondary uppercase">LAST_SYNC: 2024. 10. 12 14:30</span>
+    </div>
+  </div>
+</div>
+<!-- Top Section (Analysis) -->
+<section class="flex flex-col md:flex-row gap-8">
+<!-- Left Card: Play Style -->
+<div class="flex-1 bg-surface-container-lowest p-8 border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile mb-2 text-primary uppercase">?섏쓽 ?뚮젅???ㅽ???/h2>
+<p class="font-label-caps text-label-caps mb-8 text-secondary">(?꾩쟾怨쇱젣, 寃뚯엫 ?쇱? 湲곕줉 湲곕컲 遺꾩꽍)</p>
+<div class="bg-surface-container-lowest p-8 flex items-center justify-center min-h-[300px] relative overflow-hidden border-2 border-primary">
+<!-- Simulated Word Cloud -->
+<span class="absolute font-body-md text-2xl text-primary" style="top: 20%; left: 15%;">議곗슜??/span>
+<span class="absolute font-headline-xl text-5xl font-bold text-primary" style="top: 25%; left: 30%;">?깆빱</span>
+<span class="absolute font-headline-lg text-3xl font-bold text-primary" style="top: 15%; right: 25%;">吏쒕┸??/span>
+<span class="absolute font-body-md text-xl text-secondary" style="top: 25%; right: 15%;">?쇰뱶諛?/span>
+<span class="absolute font-headline-lg text-4xl font-bold text-primary" style="top: 35%; left: 15%;">?닿렇濡?/span>
+<span class="absolute font-headline-xl text-6xl font-bold text-primary" style="top: 50%; left: 35%;">?닿렇濡?/span>
+<span class="absolute font-headline-xl text-5xl font-bold text-primary" style="top: 45%; right: 15%;">?먮윭</span>
+<span class="absolute font-headline-lg text-3xl font-bold text-primary" style="top: 65%; left: 20%;">?먮왂</span>
+<span class="absolute font-headline-lg text-4xl font-bold text-primary" style="top: 65%; left: 45%;">?먮윭</span>
+<span class="absolute font-headline-lg text-3xl font-bold text-primary" style="top: 65%; right: 20%;">?묐젰</span>
+<span class="absolute font-headline-lg text-4xl font-bold text-primary" style="top: 80%; left: 35%;">吏쒕┸??/span>
+<span class="absolute font-body-md text-2xl text-secondary" style="top: 80%; right: 25%;">?뚰떚</span>
+</div>
+</div>
+<!-- Right Card: Enjoyed Games -->
+<div class="flex-1 bg-surface-container-lowest p-8 border-2 border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile mb-2 text-primary uppercase">?닿? 利먭꺼??寃뚯엫??/h2>
+<p class="font-label-caps text-label-caps mb-8 text-secondary">(寃뚯엫 ?됯?, ?뚮젅??湲곕줉 湲곕컲 遺꾩꽍)</p>
+<div class="relative min-h-[300px] flex items-center justify-center p-8">
+<span class="absolute text-xl font-body-md text-primary border border-primary px-3 py-1" style="top: 20%; left: 20%;">#硫뷀?踰꾩뒪</span>
+<span class="absolute text-xl font-body-md text-primary border border-primary px-3 py-1" style="top: 15%; right: 20%;">#?ㅽ뵂?붾뱶</span>
+<span class="absolute text-xl font-body-md text-primary border border-primary px-3 py-1" style="top: 45%; left: 45%; transform: translate(-50%, -50%);">#?뚮뱶諛뺤뒪</span>
+<span class="absolute text-xl font-body-md text-primary border border-primary px-3 py-1" style="top: 65%; left: 15%;">#?쒕??덉씠??/span>
+<span class="absolute text-xl font-body-md text-primary border border-primary px-3 py-1" style="top: 75%; right: 25%;">#RPG</span>
+</div>
+</div>
+</section>
+<!-- Middle Section (Recommendations) -->
+<section class="w-full">
+<h2 class="font-headline-lg text-headline-lg mb-12 text-primary uppercase">異붿쿇 寃뚯엫</h2>
+<div class="flex items-center gap-6">
+<!-- Left Arrow -->
+<button class="p-2 text-primary bg-surface-container-lowest border-2 border-primary hover:bg-primary hover:text-on-primary transition-colors focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+<span class="material-symbols-outlined text-4xl">chevron_left</span>
+</button>
+<!-- Carousel Track -->
+<div class="flex-1 overflow-hidden">
+<div class="flex gap-6">
+<!-- Game Card 1 -->
+<div class="w-[280px] h-[400px] bg-surface-container-lowest flex-shrink-0 flex flex-col border-2 border-primary transition-all cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px]">
+<div class="relative flex-1 p-2">
+<img alt="Game Cover" class="w-full h-full object-cover border-2 border-primary grayscale group-hover:grayscale-0 transition-all duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkWH8Rt6q2wJWsZaos0J6JV9mCJ6E55Vu4LZ-JuC9ehUh5T3uZhLEkS0Q4ygUikzdgw6kqmr1_41JAcJZBnXXDQ_SOoaBjG0kvTwJCiAE9y2QjcMmHBEBq9JCqEfcs0QzbGEptJKQGmBxSQhmyfqjpKslMuIx6bv-30KCveZvGZXLaR9kdyVwop16tS8zB0_JRFKkqQ0kCUAjsWu_k0XkJVmKyLUm3tEbi2-Y2l_EctNBKamTM_ohSZnwLste5P7qlt8o_ypEVe5II">
+<span class="absolute top-4 left-4 bg-primary text-on-primary px-2 py-1 font-label-caps text-xs">PC</span>
+<span class="absolute top-4 left-12 bg-primary text-on-primary px-2 py-1 font-label-caps text-xs ml-2">STEAM</span>
+</div>
+<div class="p-4 border-t-2 border-primary bg-surface-container-lowest flex justify-between items-end"><span class="font-label-caps text-xs text-primary uppercase group-hover:hidden">ELDRITCH_VOID</span><span class="font-label-caps text-xs text-primary uppercase hidden group-hover:block">RPG / ROGUELIKE</span></div>
+</div>
+<!-- Game Card 2 -->
+<div class="w-[280px] h-[400px] bg-surface-container-lowest flex-shrink-0 flex flex-col border-2 border-primary transition-all cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px]">
+<div class="relative flex-1 p-2">
+<img alt="Game Cover" class="w-full h-full object-cover border-2 border-primary grayscale group-hover:grayscale-0 transition-all duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlFEDZSWxFAo-HR5U0M7MXbZAhGvUD785QlaIeCRfegxjvkhElB-RwYfH06B9WuJCQoL93Y-mPoraGKN61sieKUqKzXfUOuyScACV2KiecT2-fLz6nfeUiQGULnchl5rV2cCK887T8SSfUplkMttAczQS6PDgYVzI6BeK4Bwhzl9EvuJfFNZcEFx85XDDFFCofGMu_CEDviBd3w3R0j_x1vSlMTQXd_X_Uojr2c2UxViWDDn5nXPGKCE9uWl666QT5SV1gkeYEIOzb">
+<span class="absolute top-4 left-4 bg-primary text-on-primary px-2 py-1 font-label-caps text-xs">CONSOLE</span>
+</div>
+<div class="p-4 border-t-2 border-primary bg-surface-container-lowest flex justify-between items-end"><span class="font-label-caps text-xs text-primary uppercase group-hover:hidden">SYSTEM_CRITICAL</span><span class="font-label-caps text-xs text-primary uppercase hidden group-hover:block">ACTION / PLATFORMER</span></div>
+</div>
+<!-- Game Card 3 -->
+<div class="w-[280px] h-[400px] bg-surface-container-lowest flex-shrink-0 flex flex-col border-2 border-primary transition-all cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px]">
+<div class="relative flex-1 p-2">
+<img alt="Game Cover" class="w-full h-full object-cover border-2 border-primary grayscale group-hover:grayscale-0 transition-all duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1OgqYB14ytC_hzzQEX2-tnU7HvBau3nYm4S4Wkf6178S5zSQ1oHOErbw8g9GzCjYTIXBJE4teTNsQOdAk2aOdRsqNobC56rUkRjk1V3J8h6AcYP403cQsBL_e6SK56K8KY335fJd5x-1hWHFPBNwLdWMRpXqvQ7d65l6IpMXs7COg_79zNiqw6Bx4aoF0ZhKBYNVX6eg2RLm5fQ2QCAHcwYSnp_6O02JmVqaSYa4zat0Sf55clsWq0pgkqA1wjNdkI8sQOjzsi1jf">
+<span class="absolute top-4 left-4 bg-primary text-on-primary px-2 py-1 font-label-caps text-xs">MOBILE</span>
+</div>
+<div class="p-4 border-t-2 border-primary bg-surface-container-lowest flex justify-between items-end"><span class="font-label-caps text-xs text-primary uppercase group-hover:hidden">NEON_DRIFT_88</span><span class="font-label-caps text-xs text-primary uppercase hidden group-hover:block">PUZZLE / ADVENTURE</span></div>
+</div>
+<!-- Game Card 4 -->
+<div class="w-[280px] h-[400px] bg-surface-container-lowest flex-shrink-0 flex flex-col border-2 border-primary transition-all cursor-pointer group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px]">
+<div class="relative flex-1 p-2">
+<img alt="Game Cover" class="w-full h-full object-cover border-2 border-primary grayscale group-hover:grayscale-0 transition-all duration-300" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBULMSe0jyJmVYB6RF6anX2A_NfpTyw-m8eGnPueA69ClPFJxQ6pFKIUREQwa2ajHL6AUiW0H-FLw7o36bHVyGe0MvOExkBbjLMNZLYmKu_Sy4PqdJB0Dfun-hLhM3ZnuNmZD0A0kzNmWg60rwExb9NgZQmNdGw5yJTZrtPviovdX-FvbXZ7CtOBNYiixJcHcfhXTeGdGt_3pvmgCJNnRcdYdvJVGJ16bHWsRcuNfxHa3IZq8AsWWE0lndhgyX_iU6fsveIgyQwMK3n">
+<span class="absolute top-4 left-4 bg-primary text-on-primary px-2 py-1 font-label-caps text-xs">PC</span>
+</div>
+<div class="p-4 border-t-2 border-primary bg-surface-container-lowest flex justify-between items-end"><span class="font-label-caps text-xs text-primary uppercase group-hover:hidden">MONOLITH_X</span><span class="font-label-caps text-xs text-primary uppercase hidden group-hover:block">SOULSLIKE / DARK</span></div>
+</div>
+<!-- Partial Card -->
+<div class="w-[100px] h-[400px] bg-surface-container-lowest flex-shrink-0 flex flex-col border-y-2 border-l-2 border-primary transition-all cursor-pointer group overflow-hidden">
+<div class="relative flex-1 p-2">
+<div class="w-full h-full bg-surface-variant border-2 border-primary"></div>
+</div>
+<div class="p-4 border-t-2 border-primary bg-surface-container-lowest">
+</div>
+</div>
+</div>
+</div>
+<!-- Right Arrow -->
+<button class="p-2 text-primary bg-surface-container-lowest border-2 border-primary hover:bg-primary hover:text-on-primary transition-colors focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none">
+<span class="material-symbols-outlined text-4xl">chevron_right</span>
+</button>
+</div>
+<!-- Progress Bar -->
+</section>
+</main>
+<!-- Shared Component: Footer (From SCREEN_6) -->
+<footer class="w-full border-t-2 border-primary mt-20 bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin py-gutter w-full max-w-container-max mx-auto gap-8 md:gap-0">
+<!-- Brand -->
+<div class="w-[180px] flex items-center justify-center md:justify-start">
+<img alt="Gaming Journal Club Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_LxM4GjqvESEBDiByFsths6jve9ylqYMo_olMXVBHSuYy-3NdXqyqSUu_MazoCLjd3IEbFPYuTwy8_hbEUN2q43ouBcc9d76wDqPzpq8W0QIPjZNx-2fYN4lkG_IGySYggaCOUU6P-05QmXe56P052Pv5-ebOJgON4E_jZC_p1rjHZnJaf8AcXYdePKGjPaDD-e1mllNljL7TlS6r16g0jZZa1HiduOWE3nDi0tc4Jo76Li1je2W1qV-eQG__tsDhAVlpQcgJaK3J">
+</div>
+<!-- Links -->
+<nav class="flex flex-wrap justify-center md:justify-end gap-6 font-label-caps text-label-caps">
+<a class="text-secondary hover:text-primary hover:underline decoration-1 transition-colors" href="#">Terms</a>
+<div class="relative flex flex-col items-center">
+<span class="text-[10px] font-bold text-[#5555FF] mb-1 animate-pulse">AI RECOMMEND</span>
+<a class="relative nav-link-indicator text-primary underline decoration-4 underline-offset-8 px-2 py-1 active:scale-95 transition-transform hover:bg-primary hover:text-on-primary transition-colors duration-100" href="#">
+        RECOMMEND
+    </a>
+</div>
+<a class="text-secondary hover:text-primary hover:underline decoration-1 transition-colors" href="#">Archive</a>
+<a class="text-secondary hover:text-primary hover:underline decoration-1 transition-colors" href="#">Contact</a>
+</nav>
+<!-- Copyright -->
+<div class="font-label-caps text-label-caps text-primary w-full md:w-auto text-center mt-4 md:mt-0 order-last md:order-none">
+                짤 2026 GAMING JOURNAL CLUB. ALL RIGHTS RESERVED.
+            </div>
+</div>
+</footer>
+

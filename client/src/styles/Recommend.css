@@ -1,0 +1,86 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Recommend.html의 <style> 태그에서 분리한 페이지 전용 CSS입니다. */
+/* Brutalist Blueprint Grid Background */
+        body {
+            background-color: var(--gjc-surface-container-lowest);
+            background-image: 
+                linear-gradient(to right, var(--gjc-surface-variant) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--gjc-surface-variant) 1px, transparent 1px);
+            background-size: 32px 32px;
+            background-position: center top;
+        }
+
+        /* Material Symbols Setup */
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        /* Nav Selection Indicator Effect */
+        .nav-link-indicator::before {
+            content: '>';
+            position: absolute;
+            left: -16px;
+            opacity: 0;
+            transition: opacity 0.1s steps(2, end);
+        }
+        .nav-link-indicator:hover::before {
+            opacity: 1;
+        }
+        
+        /* 8-bit Style Step Transition */
+        .step-transition {
+            transition: transform 0.15s steps(4, end), box-shadow 0.15s steps(4, end), background-color 0.1s steps(2, end);
+        }
+
+        /* Logo Float Animation */
+        @keyframes logoFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-6px); }
+            100% { transform: translateY(0px); }
+        }
+        .group:hover .animate-logo-float {
+            animation: logoFloat 2s ease-in-out infinite;
+        }
+
+        .pixel-hatch {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px);
+        }
+        .cursor-blink::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            from, to { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        @keyframes analyzingBar {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+        .animate-analyzing {
+            animation: analyzingBar 2s ease-in-out infinite;
+        }
+
+@keyframes sync-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.syncing-icon {
+  animation: sync-rotate 0.5s linear infinite;
+}
+@keyframes pixel-glitch {
+  0% { transform: translate(0); opacity: 1; }
+  20% { transform: translate(-2px, 2px); opacity: 0.8; }
+  40% { transform: translate(2px, -2px); opacity: 0.9; }
+  60% { transform: translate(-1px, -1px); opacity: 0.7; }
+  80% { transform: translate(1px, 1px); opacity: 0.8; }
+  100% { transform: translate(0); opacity: 1; }
+}
+.refresh-glitch {
+  animation: pixel-glitch 0.2s steps(2) infinite;
+  filter: grayscale(1) contrast(1.5);
+}
+
