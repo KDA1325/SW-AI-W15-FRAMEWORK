@@ -1,0 +1,597 @@
+.edit-profile-stage {
+  font-family: Geist, sans-serif;
+}
+
+.edit-profile-stage input:focus,
+.edit-profile-stage textarea:focus {
+  box-shadow: none;
+  outline: none;
+}
+
+.edit-profile-stage .material-symbols-outlined {
+  vertical-align: middle;
+}
+
+.edit-profile-stage .pixel-hatch {
+  background-image: radial-gradient(var(--gjc-primary) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.edit-profile-stage .blinking-cursor::after {
+  animation: editProfileBlink 1s step-end infinite;
+  content: '_';
+}
+
+@keyframes editProfileBlink {
+  from,
+  to {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+.edit-profile-stage .bottom-0 {
+  bottom: 0;
+}
+
+.edit-profile-stage .left-0 {
+  left: 0;
+}
+
+.edit-profile-stage .left-4 {
+  left: 16px;
+}
+
+.edit-profile-stage .-top-3 {
+  top: -12px;
+}
+
+.edit-profile-stage .fixed {
+  position: fixed;
+}
+
+.edit-profile-stage .absolute {
+  position: absolute;
+}
+
+.edit-profile-stage .relative {
+  position: relative;
+}
+
+.edit-profile-stage .inset-0 {
+  inset: 0;
+}
+
+.edit-profile-stage .z-0 {
+  z-index: 0;
+}
+
+.edit-profile-stage .z-50 {
+  z-index: 50;
+}
+
+.edit-profile-stage .mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.edit-profile-stage .mr-2 {
+  margin-right: 8px;
+}
+
+.edit-profile-stage .mb-2 {
+  margin-bottom: 8px;
+}
+
+.edit-profile-stage .mb-4 {
+  margin-bottom: 16px;
+}
+
+.edit-profile-stage .mb-6 {
+  margin-bottom: 24px;
+}
+
+.edit-profile-stage .mb-8 {
+  margin-bottom: 32px;
+}
+
+.edit-profile-stage .mb-10 {
+  margin-bottom: 40px;
+}
+
+.edit-profile-stage .flex {
+  display: flex;
+}
+
+.edit-profile-stage .grid {
+  display: grid;
+}
+
+.edit-profile-stage .hidden {
+  display: none;
+}
+
+.edit-profile-stage .flex-col {
+  flex-direction: column;
+}
+
+.edit-profile-stage .flex-wrap {
+  flex-wrap: wrap;
+}
+
+.edit-profile-stage .flex-1 {
+  flex: 1 1 0%;
+}
+
+.edit-profile-stage .items-center {
+  align-items: center;
+}
+
+.edit-profile-stage .justify-center {
+  justify-content: center;
+}
+
+.edit-profile-stage .justify-between {
+  justify-content: space-between;
+}
+
+.edit-profile-stage .gap-1 {
+  gap: 4px;
+}
+
+.edit-profile-stage .gap-2 {
+  gap: 8px;
+}
+
+.edit-profile-stage .gap-3 {
+  gap: 12px;
+}
+
+.edit-profile-stage .gap-4 {
+  gap: 16px;
+}
+
+.edit-profile-stage .gap-6 {
+  gap: 24px;
+}
+
+.edit-profile-stage .gap-8 {
+  gap: 32px;
+}
+
+.edit-profile-stage .gap-gutter {
+  gap: 24px;
+}
+
+.edit-profile-stage .grid-cols-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.edit-profile-stage .grid-cols-12 {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.edit-profile-stage .col-span-12 {
+  grid-column: span 12 / span 12;
+}
+
+.edit-profile-stage .space-y-4 > * + * {
+  margin-top: 16px;
+}
+
+.edit-profile-stage .space-y-8 > * + * {
+  margin-top: 32px;
+}
+
+.edit-profile-stage .space-y-margin > * + * {
+  margin-top: 32px;
+}
+
+.edit-profile-stage .aspect-video {
+  aspect-ratio: 16 / 9;
+}
+
+.edit-profile-stage .h-4 {
+  height: 16px;
+}
+
+.edit-profile-stage .h-6 {
+  height: 24px;
+}
+
+.edit-profile-stage .h-20 {
+  height: 80px;
+}
+
+.edit-profile-stage .h-48 {
+  height: 192px;
+}
+
+.edit-profile-stage .h-64 {
+  height: 256px;
+}
+
+.edit-profile-stage .h-full {
+  height: 100%;
+}
+
+.edit-profile-stage .w-1\/3 {
+  width: 33.333333%;
+}
+
+.edit-profile-stage .w-3\/4 {
+  width: 75%;
+}
+
+.edit-profile-stage .w-5\/6 {
+  width: 83.333333%;
+}
+
+.edit-profile-stage .w-20 {
+  width: 80px;
+}
+
+.edit-profile-stage .w-full {
+  width: 100%;
+}
+
+.edit-profile-stage .max-w-container-max {
+  max-width: 1200px;
+}
+
+.edit-profile-stage .max-w-xl {
+  max-width: 576px;
+}
+
+.edit-profile-stage .overflow-hidden {
+  overflow: hidden;
+}
+
+.edit-profile-stage .resize-none {
+  resize: none;
+}
+
+.edit-profile-stage .border {
+  border: 1px solid currentColor;
+}
+
+.edit-profile-stage .border-2 {
+  border: 2px solid currentColor;
+}
+
+.edit-profile-stage .border-4,
+.edit-profile-stage .border-\[4px\] {
+  border: 4px solid currentColor;
+}
+
+.edit-profile-stage .border-b-2 {
+  border-bottom: 2px solid currentColor;
+}
+
+.edit-profile-stage .border-t-2 {
+  border-top: 2px solid currentColor;
+}
+
+.edit-profile-stage .border-none {
+  border: 0;
+}
+
+.edit-profile-stage .border-dashed {
+  border-style: dashed;
+}
+
+.edit-profile-stage .border-primary {
+  border-color: var(--gjc-primary);
+}
+
+.edit-profile-stage .bg-background {
+  background-color: var(--gjc-background);
+}
+
+.edit-profile-stage .bg-primary {
+  background-color: var(--gjc-primary);
+}
+
+.edit-profile-stage .bg-primary-fixed {
+  background-color: var(--gjc-on-primary-container);
+}
+
+.edit-profile-stage .bg-primary\/80 {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.edit-profile-stage .bg-surface {
+  background-color: var(--gjc-surface);
+}
+
+.edit-profile-stage .bg-surface-container {
+  background-color: var(--gjc-surface-container);
+}
+
+.edit-profile-stage .bg-surface-container-high {
+  background-color: var(--gjc-surface-container-high);
+}
+
+.edit-profile-stage .bg-surface-container-highest {
+  background-color: var(--gjc-surface-container-highest);
+}
+
+.edit-profile-stage .bg-surface-dim {
+  background-color: var(--gjc-surface-dim);
+}
+
+.edit-profile-stage .bg-surface-variant {
+  background-color: var(--gjc-surface-variant);
+}
+
+.edit-profile-stage .bg-transparent {
+  background-color: transparent;
+}
+
+.edit-profile-stage .p-0 {
+  padding: 0;
+}
+
+.edit-profile-stage .p-1 {
+  padding: 4px;
+}
+
+.edit-profile-stage .p-4 {
+  padding: 16px;
+}
+
+.edit-profile-stage .p-6 {
+  padding: 24px;
+}
+
+.edit-profile-stage .p-gutter {
+  padding: 24px;
+}
+
+.edit-profile-stage .px-2 {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.edit-profile-stage .px-3 {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.edit-profile-stage .px-4 {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+.edit-profile-stage .px-gutter {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.edit-profile-stage .py-1 {
+  padding-bottom: 4px;
+  padding-top: 4px;
+}
+
+.edit-profile-stage .py-2 {
+  padding-bottom: 8px;
+  padding-top: 8px;
+}
+
+.edit-profile-stage .py-4 {
+  padding-bottom: 16px;
+  padding-top: 16px;
+}
+
+.edit-profile-stage .py-12 {
+  padding-bottom: 48px;
+  padding-top: 48px;
+}
+
+.edit-profile-stage .pt-6 {
+  padding-top: 24px;
+}
+
+.edit-profile-stage .text-primary {
+  color: var(--gjc-primary);
+}
+
+.edit-profile-stage .text-secondary {
+  color: var(--gjc-secondary);
+}
+
+.edit-profile-stage .text-on-background {
+  color: var(--gjc-on-background);
+}
+
+.edit-profile-stage .text-on-primary {
+  color: var(--gjc-on-primary);
+}
+
+.edit-profile-stage .text-on-surface {
+  color: var(--gjc-on-surface);
+}
+
+.edit-profile-stage .font-bold {
+  font-weight: 700;
+}
+
+.edit-profile-stage .font-body-md {
+  font-family: Geist, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.edit-profile-stage .font-headline-lg,
+.edit-profile-stage .font-headline-xl,
+.edit-profile-stage .font-label-caps,
+.edit-profile-stage .font-ui-button {
+  font-family: DotGothic16, sans-serif;
+}
+
+.edit-profile-stage .font-headline-lg,
+.edit-profile-stage .text-headline-lg {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.edit-profile-stage .font-headline-xl,
+.edit-profile-stage .text-headline-xl {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.edit-profile-stage .font-label-caps,
+.edit-profile-stage .text-label-caps {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.edit-profile-stage .font-ui-button,
+.edit-profile-stage .text-ui-button {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.edit-profile-stage .text-3xl {
+  font-size: 30px;
+  line-height: 1.2;
+}
+
+.edit-profile-stage .text-4xl {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.edit-profile-stage .text-\[12px\] {
+  font-size: 12px;
+}
+
+.edit-profile-stage .text-lg {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.edit-profile-stage .text-sm {
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.edit-profile-stage .tracking-tighter {
+  letter-spacing: -0.05em;
+}
+
+.edit-profile-stage .uppercase {
+  text-transform: uppercase;
+}
+
+.edit-profile-stage .object-cover {
+  object-fit: cover;
+}
+
+.edit-profile-stage .grayscale {
+  filter: grayscale(1);
+}
+
+.edit-profile-stage .contrast-125 {
+  filter: grayscale(1) contrast(1.25);
+}
+
+.edit-profile-stage .opacity-30 {
+  opacity: 0.3;
+}
+
+.edit-profile-stage .opacity-50 {
+  opacity: 0.5;
+}
+
+.edit-profile-stage .pointer-events-none {
+  pointer-events: none;
+}
+
+.edit-profile-stage .cursor-pointer {
+  cursor: pointer;
+}
+
+.edit-profile-stage .backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.edit-profile-stage .transition-all {
+  transition-property: all;
+}
+
+.edit-profile-stage .transition-colors {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+}
+
+.edit-profile-stage .duration-75 {
+  transition-duration: 75ms;
+}
+
+.edit-profile-stage .hover\:bg-primary:hover {
+  background-color: var(--gjc-primary);
+}
+
+.edit-profile-stage .hover\:bg-surface:hover {
+  background-color: var(--gjc-surface);
+}
+
+.edit-profile-stage .hover\:text-error:hover {
+  color: var(--gjc-error);
+}
+
+.edit-profile-stage .hover\:text-on-primary:hover {
+  color: var(--gjc-on-primary);
+}
+
+.edit-profile-stage .hover\:text-primary:hover {
+  color: var(--gjc-primary);
+}
+
+.edit-profile-stage .active\:scale-\[0\.98\]:active {
+  transform: scale(0.98);
+}
+
+.edit-profile-stage .focus\:border-primary:focus {
+  border-color: var(--gjc-primary);
+}
+
+.edit-profile-stage .focus\:ring-0:focus {
+  box-shadow: none;
+}
+
+.edit-profile-stage .placeholder\:text-secondary-fixed-dim::placeholder {
+  color: var(--gjc-secondary-fixed-dim);
+}
+
+@media (min-width: 768px) {
+  .edit-profile-stage .md\:flex {
+    display: flex;
+  }
+
+  .edit-profile-stage .md\:flex-row {
+    flex-direction: row;
+  }
+
+  .edit-profile-stage .md\:col-span-4 {
+    grid-column: span 4 / span 4;
+  }
+
+  .edit-profile-stage .md\:col-span-8 {
+    grid-column: span 8 / span 8;
+  }
+
+  .edit-profile-stage .md\:p-10 {
+    padding: 40px;
+  }
+}
