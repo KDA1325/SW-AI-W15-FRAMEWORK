@@ -1,27 +1,41 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
-
+import { api } from '../api'
+  
 function WriteJournal() {
+  const navigate = useNavigate()
   const [gameTitle, setGameTitle] = useState('')
   const [logTitle, setLogTitle] = useState('')
   const [content, setContent] = useState('')
   const [message, setMessage] = useState('')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     // 원본 HTML의 submit script를 React onSubmit으로 바꿔 화면 새로고침 없이 상태만 갱신합니다.
     event.preventDefault()
-    setMessage('CHRONICLE_SYNCED')
+    //setMessage('CHRONICLE_SYNCED')
+    try {
+        // TODO: 실제 POST 요청을 보내야 함
+        await api.post('/post', {
+          gameTitle,
+          logTitle,
+          logcontent: content,
+        })
+        
+        navigate('/journals')
+      } catch {
+        setMessage('POST FAILED')
+      }
   }
 
   return (
     <PageChrome active="journals">
-      <main className="mx-auto w-full max-w-container-max px-margin py-20">
+      <main className="write-journal-page flex-grow w-full max-w-[1200px] mx-auto px-8 py-20 flex flex-col gap-[80px]">
         <div className="mb-16">
           <h1 className="font-headline-xl text-headline-xl uppercase">#JOURNAL</h1>
-          <div className="mt-4 h-2 w-24 bg-primary" />
+          <div className="w-24 h-2 bg-[var(--gjc-primary)] mt-4"></div>
         </div>
-
         <form className="grid grid-cols-12 gap-x-gutter gap-y-12" onSubmit={handleSubmit}>
           <label className="col-span-12 flex flex-col gap-2">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
@@ -84,14 +98,15 @@ function WriteJournal() {
 
           <div className="col-span-12 flex flex-col gap-gutter pt-8 md:flex-row">
             <button
-              className="flex-grow border-2 border-primary bg-primary py-6 font-ui-button text-ui-button uppercase text-on-primary transition-all duration-75 hover:bg-surface hover:text-primary active:scale-95 md:min-w-[240px] md:flex-grow-0"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-on-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface)] hover:text-[var(--gjc-primary)] md:min-w-[240px] md:flex-grow-0"
               type="submit"
             >
               POST
             </button>
             <button
-              className="flex-grow border-2 border-primary bg-surface py-6 font-ui-button text-ui-button uppercase text-primary transition-all duration-75 hover:bg-surface-dim active:scale-95 md:min-w-[240px] md:flex-grow-0"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface-container)] md:min-w-[240px] md:flex-grow-0"
               type="button"
+              onClick={() => navigate('/journals')}
             >
               CANCEL
             </button>

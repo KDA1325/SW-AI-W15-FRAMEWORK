@@ -1,28 +1,43 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
+import { api } from '../api'
 
 function WriteReview() {
+  const navigate = useNavigate()
   const [gameTitle, setGameTitle] = useState('')
   const [reviewTitle, setReviewTitle] = useState('')
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
   const [message, setMessage] = useState('')
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     // 정적 HTML form의 required/value 속성을 React state 기반 제출 흐름으로 변환했습니다.
     event.preventDefault()
-    setMessage('REVIEW_POSTED')
+
+    try {
+      // TODO: 실제 POST 요청을 보내야 함
+      await api.post('/post', {
+        gameTitle,
+        reviewTitle,
+        rating: parseFloat(rating),
+        reviewcontent: review,
+      })
+      
+      navigate('/journals')
+    } catch {
+      setMessage('POST FAILED')
+    }
   }
 
   return (
     <PageChrome active="journals">
-      <main className="mx-auto w-full max-w-container-max px-margin py-20">
+      <main className="write-review-page flex-grow w-full max-w-[1200px] mx-auto px-8 py-20 flex flex-col gap-[80px]">
         <div className="mb-16">
           <h1 className="font-headline-xl text-headline-xl uppercase">#REVIEW</h1>
-          <div className="mt-4 h-2 w-24 bg-primary" />
+          <div className="w-24 h-2 bg-[var(--gjc-primary)] mt-4"></div>
         </div>
-
         <form className="grid grid-cols-12 gap-x-gutter gap-y-10" onSubmit={handleSubmit}>
           <label className="col-span-12 flex flex-col gap-2 md:col-span-8">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
@@ -84,14 +99,15 @@ function WriteReview() {
 
           <div className="col-span-12 flex flex-col gap-gutter pt-8 md:flex-row">
             <button
-              className="flex-grow border-2 border-primary bg-primary py-6 font-ui-button text-ui-button uppercase text-on-primary transition-all duration-75 hover:bg-surface hover:text-primary active:scale-95 md:min-w-[240px] md:flex-grow-0"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-on-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface)] hover:text-[var(--gjc-primary)] md:min-w-[240px] md:flex-grow-0"
               type="submit"
             >
-              POST_REVIEW
+              POST
             </button>
             <button
-              className="flex-grow border-2 border-primary bg-surface py-6 font-ui-button text-ui-button uppercase text-primary transition-all duration-75 hover:bg-surface-dim active:scale-95 md:min-w-[240px] md:flex-grow-0"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface-container)] md:min-w-[240px] md:flex-grow-0"
               type="button"
+              onClick={() => navigate('/journals')}
             >
               CANCEL
             </button>
