@@ -1,0 +1,26 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+/* Write Journal.html의 <style> 태그에서 분리한 페이지 전용 CSS입니다. */
+.material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .pixel-border {
+            border: 2px solid #000;
+        }
+
+        .cursor-block:focus {
+            caret-shape: block;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            background-color: #000 !important;
+            color: #fff !important;
+        }
+
+        /* Custom scrollbar for brutalist feel */
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #fff; border-left: 2px solid #000; }
+        ::-webkit-scrollbar-thumb { background: #000; border: 2px solid #fff; }
