@@ -295,10 +295,6 @@
   background-color: var(--gjc-primary);
 }
 
-.edit-profile-stage .bg-primary-fixed {
-  background-color: var(--gjc-on-primary-container);
-}
-
 .edit-profile-stage .bg-primary\/80 {
   background-color: rgba(0, 0, 0, 0.8);
 }
@@ -540,6 +536,10 @@
 
 .edit-profile-stage .hover\:bg-primary:hover {
   background-color: var(--gjc-primary);
+}
+
+.edit-profile-stage .hover\:bg-primary-fixed:hover {
+  background-color: var(--gjc-primary-fixed);
 }
 
 .edit-profile-stage .hover\:bg-surface:hover {
