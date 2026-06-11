@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '../api'
 import '../styles/login.css'
 import LoginPendingView from './LoginPendingView'
@@ -13,6 +13,7 @@ type LoginState = {
 }
 
 function Login() {
+  const navigate = useNavigate()
   const [form, setForm] = useState<LoginState>({
     email: '',
     password: '',
@@ -30,6 +31,7 @@ function Login() {
     try {
       await api.post('/auth/login', form)
       setMessage('LOGIN SUCCESS')
+      navigate('/profile')
     } catch {
       setMessage('LOGIN FAILED')
     } finally {
