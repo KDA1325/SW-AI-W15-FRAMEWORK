@@ -33,6 +33,8 @@ function Journals() {
     <PageChrome active="journals">
       <main className="journals-page flex-grow w-full max-w-[1200px] mx-auto px-8 py-20 flex flex-col gap-[80px]">
         <section className="flex flex-col gap-4">
+          {/* TODO: 검색 아이콘 추가 */}
+          {/* TODO: 검색 기능 구현 */}
           <input className="w-full bg-surface-container-low border-2 border-[var(--gjc-primary)] py-2 pl-12 pr-4 text-sm font-label-caps placeholder:text-secondary focus:outline-none focus:ring-0 uppercase tracking-wider" placeholder="SEARCH_QUERY: TITLE OR KEYWORD..." type="text"></input>
           {/* <div className="flex items-center justify-between border-b-2 border-primary pb-3" /> */}
         </section>
@@ -51,6 +53,8 @@ function Journals() {
             </h2>
           </div>
 
+          {/* TODO: 카드 클릭 후 드래그로 스크롤 가능하게 처리 */}
+          {/* TODO: 정렬 옵션 */}
           <div className="flex gap-8 overflow-x-auto pb-12" id="reviews-scroll-container">
             {reviews.map(([title, rating, copy]) => (
               <article className="group relative w-[320px] flex-shrink-0 cursor-crosshair" key={title}>
@@ -89,6 +93,7 @@ function Journals() {
         </section>
 
         <section>
+          {/* TODO: 페이지네이션, 정렬, 보기 개수 선택 옵션 */}
           <div className="mb-6 flex items-center justify-between border-b-2 border-[var(--gjc-primary)] pb-3">
             <h2 className="flex items-center gap-3 font-headline-lg text-headline-lg uppercase">
               <div className="w-2 h-8 bg-[var(--gjc-primary)]"></div>
