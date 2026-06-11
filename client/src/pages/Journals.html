@@ -1,0 +1,667 @@
+﻿<!-- Journals 원본 HTML에서 head/script/style을 제외하고 React 컴포넌트가 렌더링할 body 조각만 남긴 파일입니다. -->
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Gaming Journal Club - Journals</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&amp;family=Geist:wght@400;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Configuration -->
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "secondary-fixed-dim": "#c6c6c7",
+                "secondary": "#5d5f5f",
+                "tertiary-fixed": "#e3e2e2",
+                "surface-variant": "#e2e2e2",
+                "primary-fixed-dim": "#c6c6c6",
+                "inverse-on-surface": "#f1f1f1",
+                "on-tertiary": "#ffffff",
+                "on-error": "#ffffff",
+                "outline": "#7e7576",
+                "tertiary-container": "#1b1c1c",
+                "surface": "#f9f9f9",
+                "primary": "#000000",
+                "on-primary-fixed": "#1b1b1b",
+                "surface-dim": "#dadada",
+                "surface-container-lowest": "#ffffff",
+                "secondary-container": "#dfe0e0",
+                "on-tertiary-fixed-variant": "#464747",
+                "on-surface": "#1a1c1c",
+                "error": "#ba1a1a",
+                "on-background": "#1a1c1c",
+                "surface-container-high": "#e8e8e8",
+                "surface-container": "#eeeeee",
+                "error-container": "#ffdad6",
+                "on-secondary-fixed-variant": "#454747",
+                "primary-container": "#1b1b1b",
+                "on-error-container": "#93000a",
+                "surface-container-highest": "#e2e2e2",
+                "surface-tint": "#5e5e5e",
+                "tertiary-fixed-dim": "#c7c6c6",
+                "surface-container-low": "#f3f3f3",
+                "on-primary-fixed-variant": "#474747",
+                "outline-variant": "#cfc4c5",
+                "on-primary-container": "#848484",
+                "surface-bright": "#f9f9f9",
+                "background": "#f9f9f9",
+                "on-surface-variant": "#4c4546",
+                "on-secondary-fixed": "#1a1c1c",
+                "tertiary": "#000000",
+                "on-secondary": "#ffffff",
+                "secondary-fixed": "#e2e2e2",
+                "primary-fixed": "#e2e2e2",
+                "on-secondary-container": "#616363",
+                "on-tertiary-container": "#848484",
+                "on-primary": "#ffffff",
+                "inverse-primary": "#c6c6c6",
+                "inverse-surface": "#2f3131",
+                "on-tertiary-fixed": "#1b1c1c"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "gutter": "24px",
+                "container-max": "1200px",
+                "unit": "4px",
+                "margin": "32px"
+        },
+        "fontFamily": {
+                "headline-lg-mobile": [
+                        "DotGothic16"
+                ],
+                "body-md": [
+                        "Geist"
+                ],
+                "ui-button": [
+                        "DotGothic16"
+                ],
+                "headline-xl": [
+                        "DotGothic16"
+                ],
+                "body-lg": [
+                        "Geist"
+                ],
+                "headline-lg": [
+                        "DotGothic16"
+                ],
+                "label-caps": [
+                        "DotGothic16"
+                ]
+        },
+        "fontSize": {
+                "headline-lg-mobile": [
+                        "24px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-md": [
+                        "16px",
+                        {
+                                "lineHeight": "1.5",
+                                "fontWeight": "400"
+                        }
+                ],
+                "ui-button": [
+                        "16px",
+                        {
+                                "lineHeight": "1.0",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-xl": [
+                        "48px",
+                        {
+                                "lineHeight": "1.1",
+                                "fontWeight": "700"
+                        }
+                ],
+                "body-lg": [
+                        "18px",
+                        {
+                                "lineHeight": "1.6",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "1.2",
+                                "fontWeight": "700"
+                        }
+                ],
+                "label-caps": [
+                        "14px",
+                        {
+                                "lineHeight": "1.0",
+                                "letterSpacing": "0.1em",
+                                "fontWeight": "400"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+
+<!-- Header -->
+<header class="flex justify-between items-center w-full px-8 py-4 border-b-2 sticky top-0 z-50 bg-white border-black font-headline-lg-mobile">
+  <div class="flex justify-between items-center w-full px-8 py-4 max-w-[1200px] mx-auto">
+    <!-- Brand/Logo -->
+    <a href="#" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
+      <div class="h-12 w-auto">
+        {{DATA:IMAGE:IMAGE_32}}
+      </div>
+    </a>
+
+    <!-- Navigation Links -->
+    <nav class="hidden md:flex items-center gap-6">
+      <a href="#" class="px-3 py-2 text-sm tracking-widest transition-colors hover:bg-black hover:text-white uppercase">PROFILE</a>
+      <a href="#" class="px-3 py-2 text-sm tracking-widest transition-colors hover:bg-black hover:text-white uppercase">RECOMMEND</a>
+      <a href="#" class="px-3 py-2 text-sm tracking-widest transition-colors hover:bg-black hover:text-white uppercase border-b-4 border-black">JOURNALS</a>
+      <a href="#" class="px-3 py-2 text-sm tracking-widest transition-colors hover:bg-black hover:text-white uppercase">TIMELINE</a>
+    </nav>
+
+    <!-- Action Links -->
+    <div class="hidden md:flex items-center gap-6">
+      <a href="#" class="px-3 py-2 text-sm tracking-widest transition-colors hover:bg-black hover:text-white uppercase">SETTINGS</a>
+      <a href="#" class="px-4 py-2 text-sm tracking-widest border-2 border-black transition-colors hover:bg-black hover:text-white uppercase font-bold">LOGOUT</a>
+    </div>
+  </div>
+</header>
+<main class="flex-grow w-full max-w-[1200px] mx-auto px-8 py-12">
+<!-- Top Section: Search and Filters -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-12 border-b-2 border-primary pb-4"><div class="relative w-full">
+<div class="absolute left-4 top-3 w-6 h-6 flex items-center justify-center">
+<div class="w-5 h-5 flex items-center justify-center"><img alt="Search" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLsIAljbhywLvqzxmhjlEQCUNNackpZzGtTKVuqQTvfbWiGvmtcUwGVBoSm8slsuFoTOdbidXlkX2FqyPW7BjAH20qxMRxu68BjiU--w5pYnzI4reuYCi5CB3HKu8hh0A-BFglFdiUiF2CQVRHIPHZ_FX4qk5IYhGxuCRbgMrsA3vyYsdKCvquR5Sg6tvk2B9v_z1Eyr_Zi59Ybs1ak6ngL_O9KNVtm38CDtnVxlRFX-lCwnRwKv5iL2nAjI"></div>
+</div>
+<input class="w-full bg-surface-container-low border-2 border-primary py-2 pl-12 pr-4 text-sm font-label-caps placeholder:text-secondary focus:outline-none focus:ring-0 uppercase tracking-wider" placeholder="SEARCH_QUERY: TITLE OR KEYWORD..." type="text">
+</div></div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Journal Logs -->
+<section class="flex flex-col lg:col-span-12"><div class="">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-3xl font-headline-lg uppercase text-primary flex items-center gap-2 tracking-widest">
+<div class="w-2 h-8 bg-primary"></div>
+            REVIEWS
+        <button class="bg-surface-container-lowest text-primary border-2 border-primary px-4 py-1 text-xs font-ui-button hover:bg-primary hover:text-on-primary transition-colors uppercase tracking-widest flex items-center gap-2 ml-4 group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_135}}'">
+<img alt="" class="w-4 h-4 object-contain group-hover:invert transition-all group-hover:brightness-0" src="https://lh3.googleusercontent.com/aida/AP1WRLsSTNtuQ7h1VU8TpNNl_4p2wG2th7UobNdrCFuDPkANbYeoq0wvUhiBCZ8Tf-sJCQU1yy0x61qPVv6ng0yhquEuRpxtyEtqafwKWOirfsBCEefADv5gJfuXcv9XKFQ6Kp39wnK8iPJKRVFPhxP6xZJEg1oINdgTUF0IERUliw4P1_xBFe_8vQxADtNr14TV2r81dvOtEgT4EqyTCmKVtAM_V4R8IBdURPOu2E77th_NpxvJkXddWU3YY_g">
+<span class="">WRITE_REVIEWS</span>
+</button></h2>
+<select class="bg-surface-container-low border-2 border-primary px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200">
+<option value="rating">蹂꾩젏??/option>
+<option value="latest">理쒖떊??/option>
+<option value="oldest">?ㅻ옒????/option>
+</select>
+</div>
+<div class="relative group/slider overflow-visible">
+<div class="gap-8 pb-12 flex overflow-x-auto select-none cursor-crosshair" id="reviews-scroll-container"><!-- Review Card 1 -->
+<div class="group relative cursor-crosshair flex-shrink-0 w-[280px]">
+<div class="aspect-[3/4] border-2 border-primary overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-300">
+<img alt="Cybernetic Drift" class="w-full h-full object-cover" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLuP815alMxcBeieE-oxBl8-nhPLU3-_UZ9tedl-CEEHOllMZJjgKC2U-gcz02101URiCISCZj-RjsqXS1NZw9QAYT_Qlu9AIcfBzBdY8X-Y4wJKKV1kvuZdHvAde8f-PV6kmHYw31my7EH6zb9kMTYKlh2eovUlvqrQFRDILk3h0yFC54k74l2VjoijrrNF4BBVEMGRlQ6lbfyE07nNFl9zs6fTHI5sFDYBq2FzC1xqP10RCTwvlaijiG0">
+<div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-on-primary"><div class="absolute top-4 right-4 flex gap-2 z-10"><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps text-primary">EDIT</button><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button></div>
+<div class="border-b border-on-primary pb-4 mb-4">
+<p class="font-label-caps text-secondary-fixed-dim uppercase mb-2">NOW_VIEWING</p>
+<h3 class="font-headline-lg uppercase leading-tight">Cybernetic Drift</h3>
+</div>
+<div class="flex flex-col gap-4 flex-grow">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Half Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLtQp6-IsWBjKOPX_jfN5C50OUrbGDYCUbVDicGMrkmvD1KasagyBizjBRa_uLNeK63W9uwfmyE4uNeSLv7tIJ5QeL0ZlgiOCrt8AmsDlFL-zEzCK63kRctzZd2I4hoO7ihg1AGeDZv4bU81YiAfmKXOP815Ejxeh6cAgmk5PetCNkbbnNZuKDp3AWpm8oUHIwkjENDx9GHtGITwBnZPtBtJ5AmzZMCQb8ybnTM6mECfvhLJo-1g3DVF3LJp"></div>
+<span class="font-ui-button">RATING: 4.5/5</span>
+</div>
+<p class="font-body-md text-on-primary/90 italic leading-snug">"??룞?곸씤 ?≪뀡怨?源딆씠 ?덈뒗 ?쒖궗媛 ?몄긽?곸엯?덈떎."</p>
+</div>
+<div class="absolute bottom-4 right-4">
+<button class="bg-on-primary text-primary px-3 py-2 font-ui-button text-sm uppercase hover:bg-surface-variant transition-colors flex items-center justify-center">
+<img alt="VIEW LOG" class="h-4 object-contain" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLtLg9A5BLAYHCgc_CvTf6cNFoLopvfHA2A22396sJ2AD0IhEt3OeARBaGHPftS89-ICKQ20M0frlN_mkIzLQXkMSTuI5nP8f3MFERIUP2Na4BxjGeKGEBqnkXOHlxqPxNcrQaaSX6WgC0Plw7DzfFsrxIHl06ZaKPDSmDctzTbrLlsP0NSmAEKkrQiqPdcegYXrD_oxT8zWIly30Gi4mEgATcGLkkHHLwGxnG3V9cvQUhVe_IFkn51-i1s">
+</button>
+</div>
+</div>
+</div>
+<div class="h-10 mt-4"><div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300"><p class="font-label-caps text-xs tracking-widest text-secondary mb-1">LOGGED: 24. 10. 12</p><div class="h-[2px] bg-primary w-full"></div></div></div>
+</div>
+<!-- Review Card 2 -->
+<div class="group relative cursor-crosshair flex-shrink-0 w-[280px]">
+<div class="aspect-[3/4] border-2 border-primary overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-300">
+<img alt="Ruin Quest" class="w-full h-full object-cover" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLskdaG4kQpV8R1PvOE8PcOCZPgWw3rupgfDYCvtTC0DaPdKadubnRqJ1A6tZXoadxlgj99IILVWmqpSm1MC5T0qlKX9x922Y1CMbtDXYcGWL4iHB60fGJGsS7Ee3AVEDp0ot7FUdzOJS11gmuXYN_zbrhTcBAkzwdsKuz8u6JjE8yqpPwS3r3eqiTGYKwqPi79puNrQmLENOAHuaWbBlbs77bCDF85780T1YyRiTOvbx8ErHsjZU0E1UuAz">
+<div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-on-primary"><div class="absolute top-4 right-4 flex gap-2 z-10"><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps text-primary">EDIT</button><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button></div>
+<div class="border-b border-on-primary pb-4 mb-4">
+<p class="font-label-caps text-secondary-fixed-dim uppercase mb-2">NOW_VIEWING</p>
+<h3 class="font-headline-lg uppercase leading-tight">Ruin Quest</h3>
+</div>
+<div class="flex flex-col gap-4 flex-grow">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"></div>
+<span class="font-ui-button">RATING: 5.0/5</span>
+</div>
+<p class="font-body-md text-on-primary/90 italic leading-snug">"?덉감???앹꽦 ?섏쟾??湲댁옣媛먯씠 ??⑦빀?덈떎."</p>
+</div>
+<div class="absolute bottom-4 right-4">
+<button class="bg-on-primary text-primary px-3 py-2 font-ui-button text-sm uppercase hover:bg-surface-variant transition-colors flex items-center justify-center">
+<img alt="VIEW LOG" class="h-4 object-contain" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLtLg9A5BLAYHCgc_CvTf6cNFoLopvfHA2A22396sJ2AD0IhEt3OeARBaGHPftS89-ICKQ20M0frlN_mkIzLQXkMSTuI5nP8f3MFERIUP2Na4BxjGeKGEBqnkXOHlxqPxNcrQaaSX6WgC0Plw7DzfFsrxIHl06ZaKPDSmDctzTbrLlsP0NSmAEKkrQiqPdcegYXrD_oxT8zWIly30Gi4mEgATcGLkkHHLwGxnG3V9cvQUhVe_IFkn51-i1s">
+</button>
+</div>
+</div>
+</div>
+<div class="h-10 mt-4"><div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300"><p class="font-label-caps text-xs tracking-widest text-secondary mb-1">LOGGED: 24. 10. 10</p><div class="h-[2px] bg-primary w-full"></div></div></div>
+</div>
+<!-- Review Card 3 -->
+<div class="group relative cursor-crosshair flex-shrink-0 w-[280px]">
+<div class="aspect-[3/4] border-2 border-primary overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-300">
+<img alt="Starfall: Void" class="w-full h-full object-cover" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLuMY3ERrSxq0Q6bUM886t1SwK6CobPS9gt45kQvrXjd8UZxK4ITJn4Uc9txLcZySEaeNvXI2JJ3EkAdMguqqv9yoDdKpnXuF54lwi6urCtb2F8BptBZntWlJgEVuiNlvVvJYOgxFkvYmF4omwGKvwS66ZdAcuNt1GAANhKoGaGuqIIW_MBFct0I_FT53Kafl54InCulvIvgD60gTuKb4rf0afQzCew6VAJ3ZhiK8UcKYi_OTVupSIS8FWSR">
+<div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-on-primary"><div class="absolute top-4 right-4 flex gap-2 z-10"><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps text-primary">EDIT</button><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button></div>
+<div class="border-b border-on-primary pb-4 mb-4">
+<p class="font-label-caps text-secondary-fixed-dim uppercase mb-2">NOW_VIEWING</p>
+<h3 class="font-headline-lg uppercase leading-tight">Starfall: Void</h3>
+</div>
+<div class="flex flex-col gap-4 flex-grow">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Empty Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLuPmVFRQYTAm_vDCK0JCUsBlAoT6GrGyytbKjEruHR056mWg64n7wEGEkOjcGr5lpv1tuv0KKK_QklSuMirG20HZJ2TqQ-duN2T476FxLNUfJtMXQA5CUAQbWfEQtEbp4x2gcoPnNixJJIwoIEtsJooyxFMfKOOIv5CTHacSk5ETgx-Rp3YrgvQ-di5XzhiCpDBckWVv4YVciSj5MllrPFqtuPy47DjQe0vUkHJiZY42aMGEXdEz6KK9cGH"></div>
+<span class="font-ui-button">RATING: 4.0/5</span>
+</div>
+<p class="font-body-md text-on-primary/90 italic leading-snug">"?곗＜??怨좊룆?⑥쓣 ?쒓컖?곸쑝濡????쒗쁽?덉뒿?덈떎."</p>
+</div>
+<div class="absolute bottom-4 right-4">
+<button class="bg-on-primary text-primary px-3 py-2 font-ui-button text-sm uppercase hover:bg-surface-variant transition-colors flex items-center justify-center">
+<img alt="VIEW LOG" class="h-4 object-contain" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLtLg9A5BLAYHCgc_CvTf6cNFoLopvfHA2A22396sJ2AD0IhEt3OeARBaGHPftS89-ICKQ20M0frlN_mkIzLQXkMSTuI5nP8f3MFERIUP2Na4BxjGeKGEBqnkXOHlxqPxNcrQaaSX6WgC0Plw7DzfFsrxIHl06ZaKPDSmDctzTbrLlsP0NSmAEKkrQiqPdcegYXrD_oxT8zWIly30Gi4mEgATcGLkkHHLwGxnG3V9cvQUhVe_IFkn51-i1s">
+</button>
+</div>
+</div>
+</div>
+<div class="h-10 mt-4"><div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300"><p class="font-label-caps text-xs tracking-widest text-secondary mb-1">LOGGED: 24. 10. 05</p><div class="h-[2px] bg-primary w-full"></div></div></div>
+</div>
+<!-- Review Card 4 -->
+<div class="group relative cursor-crosshair flex-shrink-0 w-[280px]">
+<div class="aspect-[3/4] border-2 border-primary overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-300">
+<img alt="Shadows of Aeterna" class="w-full h-full object-cover" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLuP815alMxcBeieE-oxBl8-nhPLU3-_UZ9tedl-CEEHOllMZJjgKC2U-gcz02101URiCISCZj-RjsqXS1NZw9QAYT_Qlu9AIcfBzBdY8X-Y4wJKKV1kvuZdHvAde8f-PV6kmHYw31my7EH6zb9kMTYKlh2eovUlvqrQFRDILk3h0yFC54k74l2VjoijrrNF4BBVEMGRlQ6lbfyE07nNFl9zs6fTHI5sFDYBq2FzC1xqP10RCTwvlaijiG0">
+<div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col p-6 text-on-primary"><div class="absolute top-4 right-4 flex gap-2 z-10"><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps text-primary">EDIT</button><button class="bg-surface-container-lowest px-3 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button></div>
+<div class="border-b border-on-primary pb-4 mb-4">
+<p class="font-label-caps text-secondary-fixed-dim uppercase mb-2">NOW_VIEWING</p>
+<h3 class="font-headline-lg uppercase leading-tight">Shadows of Aeterna</h3>
+</div>
+<div class="flex flex-col gap-4 flex-grow">
+<div class="flex items-center gap-2">
+<div class="flex items-center gap-1"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Full Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLv3qNideKD1tT18-2wQn2oIsCloOfbbvvxPHC1Mxd43cgPhHb8Zu63ceKmFsz3Xqsz2Bg31N6M9_9saZrexSrd8_d0HynxznGQA76_FYR0hgusdmSHFOJMX5m0JrBCy0eJr5HDlFFBPzLawrJOcL8NNv-wj7b35VXJqHv0aXXCiJwvDPy53o0618_ahHfczw9cD52Wnl2xQzYCW7h2KubY6m-IYz4N2uxuWT_4ciDDeyPFbEyKOihQJZYMB"><img alt="Half Star" class="w-4 h-4" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLtQp6-IsWBjKOPX_jfN5C50OUrbGDYCUbVDicGMrkmvD1KasagyBizjBRa_uLNeK63W9uwfmyE4uNeSLv7tIJ5QeL0ZlgiOCrt8AmsDlFL-zEzCK63kRctzZd2I4hoO7ihg1AGeDZv4bU81YiAfmKXOP815Ejxeh6cAgmk5PetCNkbbnNZuKDp3AWpm8oUHIwkjENDx9GHtGITwBnZPtBtJ5AmzZMCQb8ybnTM6mECfvhLJo-1g3DVF3LJp"></div>
+<span class="font-ui-button">RATING: 4.5/5</span>
+</div>
+<p class="font-body-md text-on-primary/90 italic leading-snug">"怨좎쟾 RPG???뺤닔瑜??꾨??곸쑝濡??ы빐?앺븳 嫄몄옉?낅땲??"</p>
+</div>
+<div class="absolute bottom-4 right-4">
+<button class="bg-on-primary text-primary px-3 py-2 font-ui-button text-sm uppercase hover:bg-surface-variant transition-colors flex items-center justify-center">
+<img alt="VIEW LOG" class="h-4 object-contain" draggable="false" src="https://lh3.googleusercontent.com/aida/AP1WRLtLg9A5BLAYHCgc_CvTf6cNFoLopvfHA2A22396sJ2AD0IhEt3OeARBaGHPftS89-ICKQ20M0frlN_mkIzLQXkMSTuI5nP8f3MFERIUP2Na4BxjGeKGEBqnkXOHlxqPxNcrQaaSX6WgC0Plw7DzfFsrxIHl06ZaKPDSmDctzTbrLlsP0NSmAEKkrQiqPdcegYXrD_oxT8zWIly30Gi4mEgATcGLkkHHLwGxnG3V9cvQUhVe_IFkn51-i1s">
+</button>
+</div>
+</div>
+</div>
+<div class="h-10 mt-4"><div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300"><p class="font-label-caps text-xs tracking-widest text-secondary mb-1">LOGGED: 24. 10. 01</p><div class="h-[2px] bg-primary w-full"></div></div></div>
+</div></div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-6 gap-4">
+<h2 class="text-3xl font-headline-lg uppercase text-primary flex items-center gap-2 tracking-widest">
+<div class="w-2 h-8 bg-primary"></div>JOURNAL_LOGS<button class="bg-surface-container-lowest text-primary border-2 border-primary px-4 py-1 text-xs font-ui-button hover:bg-primary hover:text-on-primary transition-colors uppercase tracking-widest flex items-center gap-2 ml-4 group" onclick="window.location.href='{{DATA:SCREEN:SCREEN_135}}'">
+<img alt="" class="w-4 h-4 object-contain group-hover:invert transition-all group-hover:brightness-0" src="https://lh3.googleusercontent.com/aida/AP1WRLsSTNtuQ7h1VU8TpNNl_4p2wG2th7UobNdrCFuDPkANbYeoq0wvUhiBCZ8Tf-sJCQU1yy0x61qPVv6ng0yhquEuRpxtyEtqafwKWOirfsBCEefADv5gJfuXcv9XKFQ6Kp39wnK8iPJKRVFPhxP6xZJEg1oINdgTUF0IERUliw4P1_xBFe_8vQxADtNr14TV2r81dvOtEgT4EqyTCmKVtAM_V4R8IBdURPOu2E77th_NpxvJkXddWU3YY_g">
+<span class="">WRITE_JOURNAL</span>
+</button></h2>
+<div class="flex flex-wrap gap-4 items-center font-label-caps text-xs tracking-wider">
+<div class="flex items-center gap-2"><span class="">SORT_BY:</span>
+<select class="bg-surface-container-low border-2 border-primary px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200" id="sort-select">
+<option value="latest">理쒖떊??/option>
+<option value="oldest">?ㅻ옒????/option>
+</select>
+</div>
+<div class="flex items-center gap-2"><span class="">SHOW:</span>
+<select class="bg-surface-container-low border-2 border-primary px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200" id="per-page-select">
+<option value="5">5媛쒖뵫 蹂닿린</option>
+<option value="10">10媛쒖뵫 蹂닿린</option>
+<option value="15">15媛쒖뵫 蹂닿린</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Journal Container for Dynamic Injection -->
+<div class="flex flex-col min-h-[400px]" id="journal-container">
+            <article class="flex flex-col md:flex-row border-2 border-primary bg-surface-container-highest fade-in " style="animation-delay: 0s;">
+                <div class="w-full md:w-48 aspect-square border-b-2 md:border-b-0 md:border-r-2 border-primary bg-surface-dim overflow-hidden flex-shrink-0">
+                    <img alt="Game Cover" class="w-full h-full object-cover grayscale contrast-125" src="https://lh3.googleusercontent.com/aida/AP1WRLskdaG4kQpV8R1PvOE8PcOCZPgWw3rupgfDYCvtTC0DaPdKadubnRqJ1A6tZXoadxlgj99IILVWmqpSm1MC5T0qlKX9x922Y1CMbtDXYcGWL4iHB60fGJGsS7Ee3AVEDp0ot7FUdzOJS11gmuXYN_zbrhTcBAkzwdsKuz8u6JjE8yqpPwS3r3eqiTGYKwqPi79puNrQmLENOAHuaWbBlbs77bCDF85780T1YyRiTOvbx8ErHsjZU0E1UuAz">
+                </div>
+                <div class="flex-grow p-6 flex flex-col bg-surface-container-lowest">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-surface-variant px-3 py-1 rounded-none text-[10px] tracking-widest border border-primary uppercase font-bold font-label-caps">GAME TITLE 18</span>
+                        <div class="flex gap-2">
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps">EDIT</button>
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-headline-lg-mobile uppercase mb-2 leading-tight">JOURNAL ENTRY #18</h3>
+                    <p class="font-body-md text-sm line-clamp-2 mb-4">This is an auto-generated entry for GAME TITLE 18. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="text-secondary text-xs font-label-caps tracking-wider">2026. 05. 31</span>
+                        <button class="font-ui-button text-xs uppercase tracking-widest text-primary border-primary hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 border-b-2 pb-0.5">VIEW_LOG <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+                    </div>
+                </div>
+            </article>
+        
+            <article class="flex flex-col md:flex-row border-2 border-primary bg-surface-container-highest fade-in border-t-0" style="animation-delay: 0.05s;">
+                <div class="w-full md:w-48 aspect-square border-b-2 md:border-b-0 md:border-r-2 border-primary bg-surface-dim overflow-hidden flex-shrink-0">
+                    <img alt="Game Cover" class="w-full h-full object-cover grayscale contrast-125" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4=">
+                </div>
+                <div class="flex-grow p-6 flex flex-col bg-surface-container-lowest">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-surface-variant px-3 py-1 rounded-none text-[10px] tracking-widest border border-primary uppercase font-bold font-label-caps">GAME TITLE 9</span>
+                        <div class="flex gap-2">
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps">EDIT</button>
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-headline-lg-mobile uppercase mb-2 leading-tight">JOURNAL ENTRY #9</h3>
+                    <p class="font-body-md text-sm line-clamp-2 mb-4">This is an auto-generated entry for GAME TITLE 9. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="text-secondary text-xs font-label-caps tracking-wider">2026. 05. 19</span>
+                        <button class="font-ui-button text-xs uppercase tracking-widest text-primary border-primary hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 border-b-2 pb-0.5">VIEW_LOG <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+                    </div>
+                </div>
+            </article>
+        
+            <article class="flex flex-col md:flex-row border-2 border-primary bg-surface-container-highest fade-in border-t-0" style="animation-delay: 0.1s;">
+                <div class="w-full md:w-48 aspect-square border-b-2 md:border-b-0 md:border-r-2 border-primary bg-surface-dim overflow-hidden flex-shrink-0">
+                    <img alt="Game Cover" class="w-full h-full object-cover grayscale contrast-125" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4=">
+                </div>
+                <div class="flex-grow p-6 flex flex-col bg-surface-container-lowest">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-surface-variant px-3 py-1 rounded-none text-[10px] tracking-widest border border-primary uppercase font-bold font-label-caps">GAME TITLE 11</span>
+                        <div class="flex gap-2">
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps">EDIT</button>
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-headline-lg-mobile uppercase mb-2 leading-tight">JOURNAL ENTRY #11</h3>
+                    <p class="font-body-md text-sm line-clamp-2 mb-4">This is an auto-generated entry for GAME TITLE 11. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="text-secondary text-xs font-label-caps tracking-wider">2026. 05. 17</span>
+                        <button class="font-ui-button text-xs uppercase tracking-widest text-primary border-primary hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 border-b-2 pb-0.5">VIEW_LOG <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+                    </div>
+                </div>
+            </article>
+        
+            <article class="flex flex-col md:flex-row border-2 border-primary bg-surface-container-highest fade-in border-t-0" style="animation-delay: 0.15000000000000002s;">
+                <div class="w-full md:w-48 aspect-square border-b-2 md:border-b-0 md:border-r-2 border-primary bg-surface-dim overflow-hidden flex-shrink-0">
+                    <img alt="Game Cover" class="w-full h-full object-cover grayscale contrast-125" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4=">
+                </div>
+                <div class="flex-grow p-6 flex flex-col bg-surface-container-lowest">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-surface-variant px-3 py-1 rounded-none text-[10px] tracking-widest border border-primary uppercase font-bold font-label-caps">GAME TITLE 6</span>
+                        <div class="flex gap-2">
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps">EDIT</button>
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-headline-lg-mobile uppercase mb-2 leading-tight">JOURNAL ENTRY #6</h3>
+                    <p class="font-body-md text-sm line-clamp-2 mb-4">This is an auto-generated entry for GAME TITLE 6. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="text-secondary text-xs font-label-caps tracking-wider">2026. 05. 16</span>
+                        <button class="font-ui-button text-xs uppercase tracking-widest text-primary border-primary hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 border-b-2 pb-0.5">VIEW_LOG <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+                    </div>
+                </div>
+            </article>
+        
+            <article class="flex flex-col md:flex-row border-2 border-primary bg-surface-container-highest fade-in border-t-0" style="animation-delay: 0.2s;">
+                <div class="w-full md:w-48 aspect-square border-b-2 md:border-b-0 md:border-r-2 border-primary bg-surface-dim overflow-hidden flex-shrink-0">
+                    <img alt="Game Cover" class="w-full h-full object-cover grayscale contrast-125" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgcng9IjgiIGZpbGw9IiNlOGVhZWQiLz48cGF0aCBkPSJNMTcwIDEzMCBsMzAgNDAgbDIwLTE1IGw0MCA1NSBIMTQweiIgZmlsbD0iI2JkYzFjNiIvPjxjaXJjbGUgY3g9IjI1MCIgY3k9IjEyMCIgcj0iMTgiIGZpbGw9IiNiZGMxYzYiLz48L3N2Zz4=">
+                </div>
+                <div class="flex-grow p-6 flex flex-col bg-surface-container-lowest">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-surface-variant px-3 py-1 rounded-none text-[10px] tracking-widest border border-primary uppercase font-bold font-label-caps">GAME TITLE 8</span>
+                        <div class="flex gap-2">
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps">EDIT</button>
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-headline-lg-mobile uppercase mb-2 leading-tight">JOURNAL ENTRY #8</h3>
+                    <p class="font-body-md text-sm line-clamp-2 mb-4">This is an auto-generated entry for GAME TITLE 8. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="text-secondary text-xs font-label-caps tracking-wider">2026. 05. 16</span>
+                        <button class="font-ui-button text-xs uppercase tracking-widest text-primary border-primary hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 border-b-2 pb-0.5">VIEW_LOG <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+                    </div>
+                </div>
+            </article>
+        </div>
+<!-- Dynamic Pagination -->
+<div class="flex justify-center items-center gap-2 mt-8 mb-4 font-ui-button" id="pagination-container"><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors opacity-30 cursor-not-allowed">&lt;</button><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors bg-primary text-on-primary">1</button><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors hover:bg-primary hover:text-on-primary">2</button><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors hover:bg-primary hover:text-on-primary">3</button><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors hover:bg-primary hover:text-on-primary">4</button><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors hover:bg-primary hover:text-on-primary">5</button><button class="w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors hover:bg-primary hover:text-on-primary">&gt;</button></div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t-2 border-primary mt-12 bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 py-8 w-full max-w-[1200px] mx-auto gap-8 md:gap-0">
+<!-- Brand -->
+<div class="w-[180px] flex items-center justify-center md:justify-start">
+<img alt="Gaming Journal Club Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3uDgsLQwlLW2JmmP-2ZRHIgKGMFlXJiCsbxpRsH0lWdFr253xjbJrY3Lj5tyRBTdw7P81iLq6be5YanrxA0lUnBv_MvuE0_Ho6jMuawLHxBwqaDwQ7LxTHW-SCBaAL4mRsa8e_4pcbwn1LWu82NOoFy9_fJ-UW9jGEMMXzRXdgPVYq1hMumWOXL3dTuubH0JaBdlK3yRGHMsk7kcYQ01PGjydpRurHhQrFkD64tjqcpzLrqEMccNieHGfl0pV4ThXWxpL0F1BpHOe">
+</div>
+<!-- Links -->
+<nav class="flex flex-wrap justify-center gap-6 text-sm tracking-widest font-label-caps">
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Terms</a>
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Privacy</a>
+<a class="text-primary underline decoration-2 underline-offset-4 uppercase" href="#">Archive</a>
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Contact</a>
+</nav>
+<!-- Copyright -->
+<div class="text-sm font-label-caps text-primary w-full md:w-auto text-center mt-4 md:mt-0 uppercase tracking-widest">
+            짤 2026 GAMING JOURNAL CLUB. ALL RIGHTS RESERVED.
+        </div>
+</div>
+</footer>
+<script>
+// 1. Data Structure - Mock Data Generation
+const initialData = [
+    {
+        id: 1,
+        gameTitle: "CYBERNETIC DRIFT",
+        journalTitle: "NEO-SEOUL REFLECTIONS",
+        summary: "A deep dive into the neon-soaked streets of Neo-Seoul. The narrative pacing is impeccable, though combat feels dated. The philosophical themes regarding artificial intelligence are explored with surprising nuance for the genre...",
+        date: "2024. 10. 12",
+        timestamp: new Date("2024-10-12").getTime(),
+        img: "https://lh3.googleusercontent.com/aida/AP1WRLuP815alMxcBeieE-oxBl8-nhPLU3-_UZ9tedl-CEEHOllMZJjgKC2U-gcz02101URiCISCZj-RjsqXS1NZw9QAYT_Qlu9AIcfBzBdY8X-Y4wJKKV1kvuZdHvAde8f-PV6kmHYw31my7EH6zb9kMTYKlh2eovUlvqrQFRDILk3h0yFC54k74l2VjoijrrNF4BBVEMGRlQ6lbfyE07nNFl9zs6fTHI5sFDYBq2FzC1xqP10RCTwvlaijiG0"
+    },
+    {
+        id: 2,
+        gameTitle: "RUIN QUEST",
+        journalTitle: "DUNGEON LOG: LEVEL 3",
+        summary: "Exploring the procedural dungeons of the Underworld. The difficulty curve is steep, but the core loop is incredibly engaging. Currently stuck on the third floor boss, but the upgrade system feels fair.",
+        date: "2024. 10. 10",
+        timestamp: new Date("2024-10-10").getTime(),
+        img: "https://lh3.googleusercontent.com/aida/AP1WRLskdaG4kQpV8R1PvOE8PcOCZPgWw3rupgfDYCvtTC0DaPdKadubnRqJ1A6tZXoadxlgj99IILVWmqpSm1MC5T0qlKX9x922Y1CMbtDXYcGWL4iHB60fGJGsS7Ee3AVEDp0ot7FUdzOJS11gmuXYN_zbrhTcBAkzwdsKuz8u6JjE8yqpPwS3r3eqiTGYKwqPi79puNrQmLENOAHuaWbBlbs77bCDF85780T1YyRiTOvbx8ErHsjZU0E1UuAz"
+    },
+    {
+        id: 3,
+        gameTitle: "STARFALL: THE VOID",
+        journalTitle: "THE SILENCE OF SPACE",
+        summary: "A masterclass in environmental storytelling. The silence of space has never felt so loud. Minimalist design choices reinforce the isolation of the player-character throughout the 40-hour journey.",
+        date: "2024. 10. 05",
+        timestamp: new Date("2024-10-05").getTime(),
+        img: "https://lh3.googleusercontent.com/aida/AP1WRLuMY3ERrSxq0Q6bUM886t1SwK6CobPS9gt45kQvrXjd8UZxK4ITJn4Uc9txLcZySEaeNvXI2JJ3EkAdMguqqv9yoDdKpnXuF54lwi6urCtb2F8BptBZntWlJgEVuiNlvVvJYOgxFkvYmF4omwGKvwS66ZdAcuNt1GAANhKoGaGuqIIW_MBFct0I_FT53Kafl54InCulvIvgD60gTuKb4rf0afQzCew6VAJ3ZhiK8UcKYi_OTVupSIS8FWSR"
+    },
+    {
+        id: 4,
+        gameTitle: "VOID RUNNER",
+        journalTitle: "JOURNAL ENTRY #6",
+        summary: "This is an auto-generated entry for VOID RUNNER. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.",
+        date: "2024. 09. 28",
+        timestamp: new Date("2024-09-28").getTime(),
+        img: "https://lh3.googleusercontent.com/aida/AP1WRLskdaG4kQpV8R1PvOE8PcOCZPgWw3rupgfDYCvtTC0DaPdKadubnRqJ1A6tZXoadxlgj99IILVWmqpSm1MC5T0qlKX9x922Y1CMbtDXYcGWL4iHB60fGJGsS7Ee3AVEDp0ot7FUdzOJS11gmuXYN_zbrhTcBAkzwdsKuz8u6JjE8yqpPwS3r3eqiTGYKwqPi79puNrQmLENOAHuaWbBlbs77bCDF85780T1YyRiTOvbx8ErHsjZU0E1UuAz"
+    },
+    {
+        id: 5,
+        gameTitle: "RETRO RACER",
+        journalTitle: "JOURNAL ENTRY #13",
+        summary: "This is an auto-generated entry for RETRO RACER. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.",
+        date: "2024. 09. 26",
+        timestamp: new Date("2024-09-26").getTime(),
+        img: "https://lh3.googleusercontent.com/aida/AP1WRLuP815alMxcBeieE-oxBl8-nhPLU3-_UZ9tedl-CEEHOllMZJjgKC2U-gcz02101URiCISCZj-RjsqXS1NZw9QAYT_Qlu9AIcfBzBdY8X-Y4wJKKV1kvuZdHvAde8f-PV6kmHYw31my7EH6zb9kMTYKlh2eovUlvqrQFRDILk3h0yFC54k74l2VjoijrrNF4BBVEMGRlQ6lbfyE07nNFl9zs6fTHI5sFDYBq2FzC1xqP10RCTwvlaijiG0"
+    }
+];
+
+// Generate more mock data for pagination
+const generateMockData = () => {
+    let data = [...initialData];
+    for (let i = 6; i <= 25; i++) {
+        const randomDaysAgo = Math.floor(Math.random() * 60) + 10;
+        const dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() - randomDaysAgo);
+        
+        data.push({
+            id: i,
+            gameTitle: `GAME TITLE ${i}`,
+            journalTitle: `JOURNAL ENTRY #${i}`,
+            summary: `This is an auto-generated entry for GAME TITLE ${i}. Experience the classic 8-bit aesthetic with modern mechanics. A journey through a world of pixels and polygons that pushes the boundaries of storytelling.`,
+            date: `${dateObj.getFullYear()}. ${(dateObj.getMonth() + 1).toString().padStart(2, '0')}. ${dateObj.getDate().toString().padStart(2, '0')}`,
+            timestamp: dateObj.getTime(),
+            img: initialData[i % 5].img
+        });
+    }
+    return data;
+};
+
+let journalData = generateMockData();
+let currentPage = 1;
+let itemsPerPage = 5;
+let currentSort = 'latest';
+
+const journalContainer = document.getElementById('journal-container');
+const paginationContainer = document.getElementById('pagination-container');
+const sortSelect = document.getElementById('sort-select');
+const perPageSelect = document.getElementById('per-page-select');
+
+function renderJournals() {
+    // 1. Sort
+    let sortedData = [...journalData];
+    if (currentSort === 'latest') {
+        sortedData.sort((a, b) => b.timestamp - a.timestamp);
+    } else {
+        sortedData.sort((a, b) => a.timestamp - b.timestamp);
+    }
+
+    // 2. Paginate
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedData = sortedData.slice(startIndex, startIndex + itemsPerPage);
+
+    // 3. Render
+    journalContainer.innerHTML = '';
+    paginatedData.forEach((entry, index) => {
+        const isFirst = index === 0;
+        const articleHTML = `
+            <article class="flex flex-col md:flex-row border-2 border-primary bg-surface-container-highest fade-in ${isFirst ? '' : 'border-t-0'}" style="animation-delay: ${index * 0.05}s;">
+                <div class="w-full md:w-48 aspect-square border-b-2 md:border-b-0 md:border-r-2 border-primary bg-surface-dim overflow-hidden flex-shrink-0">
+                    <img alt="Game Cover" class="w-full h-full object-cover grayscale contrast-125" src="${entry.img}">
+                </div>
+                <div class="flex-grow p-6 flex flex-col bg-surface-container-lowest">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-surface-variant px-3 py-1 rounded-none text-[10px] tracking-widest border border-primary uppercase font-bold font-label-caps">${entry.gameTitle}</span>
+                        <div class="flex gap-2">
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase font-label-caps">EDIT</button>
+                            <button class="bg-surface-container-lowest px-4 py-1 rounded-none text-[10px] font-bold border border-primary hover:bg-surface-variant transition-colors uppercase text-error font-label-caps">DELETE</button>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-headline-lg-mobile uppercase mb-2 leading-tight">${entry.journalTitle}</h3>
+                    <p class="font-body-md text-sm line-clamp-2 mb-4">${entry.summary}</p>
+                    <div class="mt-auto flex justify-between items-center">
+                        <span class="text-secondary text-xs font-label-caps tracking-wider">${entry.date}</span>
+                        <button class="font-ui-button text-xs uppercase tracking-widest text-primary border-primary hover:bg-primary hover:text-on-primary transition-colors flex items-center gap-2 border-b-2 pb-0.5">VIEW_LOG <span class="material-symbols-outlined text-sm">arrow_forward</span></button>
+                    </div>
+                </div>
+            </article>
+        `;
+        journalContainer.insertAdjacentHTML('beforeend', articleHTML);
+    });
+
+    renderPagination(sortedData.length);
+}
+
+function renderPagination(totalItems) {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    paginationContainer.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    // Prev Button
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors ${currentPage === 1 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary hover:text-on-primary'}`;
+    prevBtn.textContent = '<';
+    prevBtn.onclick = () => {
+        if (currentPage > 1) {
+            currentPage--;
+            renderJournals();
+        }
+    };
+    paginationContainer.appendChild(prevBtn);
+
+    // Page Numbers
+    for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors ${currentPage === i ? 'bg-primary text-on-primary' : 'hover:bg-primary hover:text-on-primary'}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => {
+            currentPage = i;
+            renderJournals();
+        };
+        paginationContainer.appendChild(pageBtn);
+    }
+
+    // Next Button
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `w-8 h-8 border-2 border-primary flex items-center justify-center transition-colors ${currentPage === totalPages ? 'opacity-30 cursor-not-allowed' : 'hover:bg-primary hover:text-on-primary'}`;
+    nextBtn.textContent = '>';
+    nextBtn.onclick = () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            renderJournals();
+        }
+    };
+    paginationContainer.appendChild(nextBtn);
+}
+
+// Event Listeners
+sortSelect.addEventListener('change', (e) => {
+    currentSort = e.target.value;
+    currentPage = 1; // Reset to first page on sort
+    
+    // UI Feedback
+    sortSelect.classList.add('bg-primary', 'text-on-primary');
+    setTimeout(() => {
+        sortSelect.classList.remove('bg-primary', 'text-on-primary');
+    }, 200);
+
+    renderJournals();
+});
+
+perPageSelect.addEventListener('change', (e) => {
+    itemsPerPage = parseInt(e.target.value, 10);
+    currentPage = 1; // Reset to first page on items per page change
+    
+    // UI Feedback
+    perPageSelect.classList.add('bg-primary', 'text-on-primary');
+    setTimeout(() => {
+        perPageSelect.classList.remove('bg-primary', 'text-on-primary');
+    }, 200);
+
+    renderJournals();
+});
+
+// Initial Render
+renderJournals();
+
+</script>
+<script>(function() { const slider = document.getElementById('reviews-scroll-container'); let isDown = false; let startX; let scrollLeft; slider.addEventListener('mousedown', (e) => { isDown = true; slider.classList.add('cursor-grabbing'); slider.classList.remove('cursor-crosshair'); startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; }); slider.addEventListener('mouseleave', () => { isDown = false; slider.classList.remove('cursor-grabbing'); slider.classList.add('cursor-crosshair'); }); slider.addEventListener('mouseup', () => { isDown = false; slider.classList.remove('cursor-grabbing'); slider.classList.add('cursor-crosshair'); }); slider.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; }); })();</script>
+

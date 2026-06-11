@@ -1,0 +1,98 @@
+﻿<!-- Edit Review Modal 원본 섹션은 전체 편집 화면이라, React 모달 안쪽 content로 사용합니다. -->
+<div class="fixed inset-0 bg-primary/50 z-[100] flex items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-surface-container-lowest border-4 border-primary w-full max-w-5xl max-h-[90vh] overflow-y-auto shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin py-4 border-b-2 border-black sticky top-0 z-50 bg-white">
+    <div class="flex justify-between items-center w-full max-w-[1200px] mx-auto">
+        <!-- Brand -->
+        <a class="block w-[180px] hover:opacity-80 transition-opacity group" href="#">
+            <img alt="GAMING JOURNAL CLUB" class="h-12 w-auto object-contain transition-transform duration-200 animate-logo-float mt-[2px]" src="https://lh3.googleusercontent.com/aida/AP1WRLvK0T-FjgjELMvwpYL3KnEs7fgUATFfy9caFiCpcmBiYKBKNCBA64ZXr9mF5-2vnnlsl3fnRFRmazb4jWDY6hYu3ZfNEHjqmMYSNx8zfKaS6BjYJrCQJ97fF3ZSkw8DrszqDDwnsyc7FdD1Aq1Axc5wuJ9BIKBF7b0i1riJxTA4RsgE2m1dhil7Y-3wf7oIMLFBjjydgn9txoKKHyU-7UStdanPdTSDU_CzxhkqledruOdZHz--GxYLZVP-">
+        </a>
+        <!-- Navigation -->
+        <nav class="hidden md:flex gap-8 items-center text-sm tracking-widest font-ui-button">
+            <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-secondary" href="#">PROFILE</a>
+            <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-secondary" href="#">RECOMMEND</a>
+            <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-black border-b-4 border-black" href="#">JOURNALS</a>
+            <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-secondary" href="#">TIMELINE</a>
+        </nav>
+        <!-- Actions -->
+        <div class="hidden md:flex gap-6 items-center text-sm tracking-widest font-ui-button">
+            <a class="text-secondary hover:text-black hover:underline decoration-2 underline-offset-4" href="#">SETTINGS</a>
+            <a class="text-black border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-colors uppercase" href="#">LOGOUT</a>
+        </div>
+    </div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin py-20">
+<div class="mb-16">
+<h1 class="font-headline-xl text-headline-xl uppercase">#JOURNAL</h1>
+<div class="w-24 h-2 bg-primary mt-4"></div>
+</div>
+<form class="grid grid-cols-12 gap-y-12 gap-x-gutter" id="journalForm">
+<!-- Game Title -->
+<div class="col-span-12 flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">GAME_TITLE *</label>
+<div class="relative">
+<input autocomplete="off" class="w-full bg-surface pixel-border p-4 font-body-lg text-body-lg cursor-block focus:bg-surface focus:text-on-background" id="gameInput" placeholder="ENTER_GAME_TITLE" required="" type="text">
+</div>
+</div>
+<!-- Log Title -->
+<div class="col-span-12 flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">LOG_TITLE *</label>
+<input class="w-full bg-surface pixel-border p-4 font-body-md text-body-md cursor-block focus:bg-surface focus:text-on-background" maxlength="120" placeholder="ENTER_LOG_TITLE" type="text">
+</div>
+<!-- Log Content -->
+<div class="col-span-12 flex flex-col gap-2">
+<label class="font-label-caps text-label-caps uppercase text-on-surface-variant">LOG_CONTENT *</label>
+<div class="pixel-border bg-surface flex flex-col">
+<!-- Toolbar -->
+<div class="border-b-2 border-primary p-2 flex gap-4 bg-surface-container-low">
+<button class="p-1 hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined">format_bold</span>
+</button>
+<button class="p-1 hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined">format_italic</span>
+</button>
+<button class="p-1 hover:bg-primary hover:text-on-primary transition-colors flex items-center justify-center" type="button">
+<span class="material-symbols-outlined">image</span>
+</button>
+<div class="flex-grow"></div>
+<span class="font-label-caps text-[10px] self-center pr-2">MARKDOWN_SUPPORTED</span>
+</div>
+<!-- Textarea -->
+<textarea class="w-full p-6 font-body-md text-body-md min-h-[400px] bg-surface resize-none border-none focus:ring-0 focus:bg-surface focus:text-on-background" placeholder="INITIATE_CHRONICLE_ENTRY..." required=""></textarea>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="col-span-12 flex flex-col md:flex-row gap-gutter pt-8">
+<button class="flex-grow md:flex-grow-0 md:min-w-[240px] bg-primary text-on-primary font-ui-button text-ui-button py-6 pixel-border border-primary hover:bg-surface hover:text-primary transition-all active:scale-95 duration-75 uppercase" type="submit">
+                    POST</button>
+<button class="flex-grow md:flex-grow-0 md:min-w-[240px] bg-surface text-primary font-ui-button text-ui-button py-6 pixel-border border-primary hover:bg-surface-dim transition-all active:scale-95 duration-75 uppercase" onclick="window.history.back()" type="button">
+                    CANCEL
+                </button>
+</div>
+</form>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t-2 border-primary mt-12 bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 py-8 w-full max-w-[1200px] mx-auto gap-8 md:gap-0">
+<!-- Brand -->
+<div class="w-[180px] flex items-center justify-center md:justify-start">
+<img alt="Gaming Journal Club Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3uDgsLQwlLW2JmmP-2ZRHIgKGMFlXJiCsbxpRsH0lWdFr253xjbJrY3Lj5tyRBTdw7P81iLq6be5YanrxA0lUnBv_MvuE0_Ho6jMuawLHxBwqaDwQ7LxTHW-SCBaAL4mRsa8e_4pcbwn1LWu82NOoFy9_fJ-UW9jGEMMXzRXdgPVYq1hMumWOXL3dTuubH0JaBdlK3yRGHMsk7kcYQ01PGjydpRurHhQrFkD64tjqcpzLrqEMccNieHGfl0pV4ThXWxpL0F1BpHOe">
+</div>
+<!-- Links -->
+<nav class="flex flex-wrap justify-center gap-6 text-sm tracking-widest font-label-caps">
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Terms</a>
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Privacy</a>
+<a class="text-primary underline decoration-2 underline-offset-4 uppercase" href="#">Archive</a>
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Contact</a>
+</nav>
+<!-- Copyright -->
+<div class="text-sm font-label-caps text-primary w-full md:w-auto text-center mt-4 md:mt-0 uppercase tracking-widest">
+            짤 2026 GAMING JOURNAL CLUB. ALL RIGHTS RESERVED.
+        </div>
+</div>
+</footer>
+  </div>
+</div>
+

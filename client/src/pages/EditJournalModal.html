@@ -1,0 +1,28 @@
+﻿<!-- Edit Journal Modal 원본 overlay 조각입니다. -->
+<div class="fixed inset-0 bg-primary/50 z-[100] flex items-center justify-center p-4" id="edit-modal-backdrop">
+<div class="bg-surface-container-lowest border-4 border-primary w-full max-w-2xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]" id="edit-modal">
+<div class="flex justify-between items-center mb-8 border-b-4 border-primary pb-4">
+<h2 class="text-3xl font-headline-lg uppercase tracking-widest">EDIT_JOURNAl</h2>
+<button class="text-primary hover:bg-primary hover:text-on-primary p-1 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="flex flex-col gap-6">
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-sm tracking-widest uppercase">GAME_TITLE</label>
+<input class="w-full bg-surface-container-low border-2 border-primary p-3 font-label-caps focus:outline-none focus:ring-0 uppercase tracking-wider" type="text" value="CYBERNETIC DRIFT">
+</div>
+<div class="flex flex-col gap-2">
+<label class="font-label-caps text-sm tracking-widest uppercase">LOG_TITLE</label>
+<input class="w-full bg-surface-container-low border-2 border-primary p-3 font-label-caps focus:outline-none focus:ring-0 uppercase tracking-wider" type="text" value="NEO-SEOUL REFLECTIONS">
+</div>
+<div class="flex flex-col gap-2"><div class="flex justify-between items-end mb-1"><label class="font-label-caps text-sm tracking-widest uppercase">LOG_CONTENT</label><div class="flex gap-2 mb-1"></div></div><div class="flex flex-col border-2 border-primary bg-surface-container-low"><div class="flex border-b-2 border-primary p-1 gap-1 bg-surface-container-high"><button class="w-8 h-8 flex items-center justify-center border border-transparent hover:border-primary hover:bg-surface-container-lowest" title="Bold" type="button"><span class="material-symbols-outlined text-lg">format_bold</span></button><button class="w-8 h-8 flex items-center justify-center border border-transparent hover:border-primary hover:bg-surface-container-lowest" title="Italic" type="button"><span class="material-symbols-outlined text-lg">format_italic</span></button><button class="w-8 h-8 flex items-center justify-center border border-transparent hover:border-primary hover:bg-surface-container-lowest" title="Heading" type="button"><span class="material-symbols-outlined text-lg">format_h1</span></button><button class="w-8 h-8 flex items-center justify-center border border-transparent hover:border-primary hover:bg-surface-container-lowest" title="Link" type="button"><span class="material-symbols-outlined text-lg">link</span></button><button class="w-8 h-8 flex items-center justify-center border border-transparent hover:border-primary hover:bg-surface-container-lowest" title="Quote" type="button"><span class="material-symbols-outlined text-lg">format_quote</span></button><button class="w-8 h-8 flex items-center justify-center border border-transparent hover:border-primary hover:bg-surface-container-lowest" title="Insert Image" type="button"><span class="material-symbols-outlined text-lg">image</span></button></div><textarea class="w-full bg-transparent p-3 font-body-md text-sm h-48 focus:outline-none focus:ring-0 border-none" placeholder="Enter your journal entry here... Use the toolbar to insert images directly into the flow.">A deep dive into the neon-soaked streets of Neo-Seoul. The narrative pacing is impeccable, though combat feels dated.</textarea></div></div>
+
+<div class="flex flex-col md:flex-row gap-4 mt-4">
+<button class="flex-grow bg-primary text-on-primary py-4 font-ui-button uppercase tracking-widest hover:bg-surface-variant hover:text-primary transition-colors border-2 border-primary" type="submit">SAVE</button>
+<button class="flex-grow bg-surface-container-lowest text-primary py-4 font-ui-button uppercase tracking-widest border-2 border-primary hover:bg-surface-variant transition-colors" type="button">CANCEL</button>
+</div>
+</form>
+</div>
+</div>
+
