@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
+/* Login.html의 Tailwind theme 색상 중 로그인 화면에서 실제로 쓰는 값만 CSS 변수로 옮겼습니다. */
 :root {
   --login-primary: #000000;
   --login-secondary: #5d5f5f;
@@ -22,6 +23,7 @@ body {
 }
 
 .blueprint-grid {
+  /* HTML의 인라인 .blueprint-grid 스타일을 재사용 가능한 CSS 클래스로 분리한 것입니다. */
   background-size: 32px 32px;
   background-image:
     linear-gradient(to right, var(--login-grid) 1px, transparent 1px),
@@ -29,6 +31,7 @@ body {
 }
 
 .nav-link-hover {
+  /* Tailwind hover:font-bold와 ::before 화살표 효과를 일반 CSS 선택자로 옮겼습니다. */
   color: var(--login-primary);
   position: relative;
   text-decoration: none;
@@ -47,6 +50,7 @@ body {
 }
 
 .login-page {
+  /* body에 몰려 있던 화면 전체 레이아웃 유틸리티를 React 루트 main 클래스가 담당하게 했습니다. */
   background-color: var(--login-surface-lowest);
   color: var(--login-primary);
   display: flex;
@@ -62,6 +66,7 @@ body {
 }
 
 .login-hero {
+  /* HTML의 첫 번째 flex-1 영역입니다. 브랜드 히어로와 내비게이션을 왼쪽 패널로 분리했습니다. */
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -88,6 +93,7 @@ body {
 }
 
 .login-title {
+  /* HTML의 headline 관련 Tailwind 조합을 하나의 제목 컴포넌트 스타일로 묶었습니다. */
   cursor: default;
   display: flex;
   flex-direction: column;
@@ -119,6 +125,7 @@ body {
 }
 
 .status-cursor {
+  /* animate-[pulse_1s_step-end_infinite] 유틸리티를 명시적인 keyframes 애니메이션으로 바꾼 부분입니다. */
   animation: cursor-pulse 1s step-end infinite;
   background-color: var(--login-primary);
   display: block;
@@ -128,6 +135,7 @@ body {
 }
 
 .login-panel {
+  /* HTML의 오른쪽 로그인 패널 유틸리티를 고정 폭, 테두리, 그림자 규칙으로 정리했습니다. */
   background-color: var(--login-surface-high);
   border-left: 2px solid var(--login-primary);
   box-shadow: -10px 0 0 0 rgba(0, 0, 0, 0.05);
@@ -160,6 +168,7 @@ body {
 }
 
 .login-form {
+  /* 정적 form 마크업의 flex/gap 유틸리티를 폼 전용 클래스에 모았습니다. */
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -180,6 +189,7 @@ body {
 }
 
 .login-field input {
+  /* Tailwind input 유틸리티를 일반 CSS로 옮기고, React controlled input이 같은 시각 스타일을 유지하게 했습니다. */
   background-color: var(--login-surface-lowest);
   border: 2px solid var(--login-primary);
   border-radius: 0;
@@ -206,6 +216,7 @@ body {
 }
 
 .login-submit {
+  /* HTML의 group hover 버튼을 CSS hover/focus-visible 규칙으로 바꾸어 접근성과 키보드 포커스를 함께 처리합니다. */
   align-items: center;
   background-color: var(--login-surface-lowest);
   border: 2px solid var(--login-primary);
@@ -293,6 +304,7 @@ body {
 }
 
 @media (max-width: 767px) {
+  /* HTML의 md: 접두사로 나뉘던 반응형 규칙을 모바일 기준 media query로 풀어 쓴 것입니다. */
   .login-page {
     flex-direction: column;
     min-height: 100svh;

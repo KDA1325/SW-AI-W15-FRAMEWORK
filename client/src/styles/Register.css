@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
+/* Register.html의 Tailwind theme 중 회원가입 화면에서 쓰는 색상만 CSS 변수로 정리했습니다. */
 :root {
   --register-primary: #000000;
   --register-secondary: #5d5f5f;
@@ -21,6 +22,7 @@ body {
 }
 
 .register-page {
+  /* HTML body에 있던 배경색, 격자 배경, 기본 폰트를 React 페이지 루트 클래스로 옮겼습니다. */
   background-color: var(--register-surface-lowest);
   background-image:
     linear-gradient(var(--register-grid) 1px, transparent 1px),
@@ -34,6 +36,7 @@ body {
 }
 
 .register-canvas {
+  /* HTML의 Main Content Canvas 유틸리티를 담당합니다. 화면 중앙 정렬과 큰 상단 여백을 이곳에 모았습니다. */
   align-items: center;
   display: flex;
   justify-content: center;
@@ -44,6 +47,7 @@ body {
 }
 
 .register-layout {
+  /* grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-32 조합을 명시적인 CSS grid 규칙으로 바꿨습니다. */
   align-items: center;
   display: grid;
   gap: 128px;
@@ -53,6 +57,7 @@ body {
 }
 
 .register-logo {
+  /* Left Side: Stepped Logo 영역입니다. HTML의 headline 유틸리티를 로고 전용 스타일로 분리했습니다. */
   display: flex;
   flex-direction: column;
   font-family: DotGothic16, monospace;
@@ -64,10 +69,12 @@ body {
 }
 
 .register-logo div:nth-child(2) {
+  /* HTML의 ml-8 md:ml-16 유틸리티를 두 번째 줄 들여쓰기 규칙으로 옮겼습니다. */
   margin-left: 64px;
 }
 
 .register-logo div:nth-child(3) {
+  /* HTML의 ml-16 md:ml-32 유틸리티를 세 번째 줄 들여쓰기 규칙으로 옮겼습니다. */
   margin-left: 128px;
 }
 
@@ -90,6 +97,7 @@ body {
 }
 
 .register-terminal {
+  /* Right Side 터미널 카드입니다. HTML의 배경, 테두리, 그림자 유틸리티를 하나의 카드 클래스로 묶었습니다. */
   background-color: var(--register-surface-container);
   border: 2px solid var(--register-primary);
   box-shadow: 8px 8px 0 0 var(--register-primary);
@@ -98,6 +106,7 @@ body {
 }
 
 .register-terminal-bar {
+  /* absolute top header bar 유틸리티를 CSS로 분리해 터미널 창 제목줄처럼 보이게 합니다. */
   align-items: center;
   background-color: var(--register-primary);
   border-bottom: 2px solid var(--register-primary);
@@ -121,6 +130,7 @@ body {
 }
 
 .register-window-controls span {
+  /* HTML의 세 개 작은 div를 span으로 바꾸고, 창 제어 버튼 모양은 CSS가 담당합니다. */
   background-color: var(--register-surface-lowest);
   border: 1px solid var(--register-primary);
   display: block;
@@ -144,6 +154,7 @@ body {
 }
 
 .register-form {
+  /* HTML의 space-y-6를 form 전용 flex gap으로 바꿔 입력 그룹 간격을 유지합니다. */
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -155,6 +166,7 @@ body {
 }
 
 .register-field > span {
+  /* label 내부 아이콘과 텍스트 정렬 유틸리티를 필드 label 스타일로 모았습니다. */
   align-items: center;
   display: flex;
   font-family: DotGothic16, monospace;
@@ -171,6 +183,7 @@ body {
 }
 
 .register-field input {
+  /* terminal-input과 Tailwind input 유틸리티를 일반 CSS로 옮겨 controlled input에도 같은 모양을 적용합니다. */
   background-color: var(--register-surface-lowest);
   border: 2px solid var(--register-primary);
   border-radius: 0;
@@ -186,6 +199,7 @@ body {
 }
 
 .register-field input:focus {
+  /* Register.html의 Brutalist Input Focus Style을 React CSS 파일로 가져온 부분입니다. */
   background-color: var(--register-surface-bright);
   border-bottom: 2px solid var(--register-primary);
   box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.1);
@@ -197,6 +211,7 @@ body {
 }
 
 .register-submit {
+  /* HTML의 INITIALIZE_ACCOUNT 버튼 유틸리티를 submit 전용 클래스로 분리했습니다. */
   background-color: var(--register-primary);
   border: 2px solid var(--register-primary);
   color: var(--register-on-primary);
@@ -228,6 +243,7 @@ body {
 }
 
 .register-submit:disabled {
+  /* React의 isSubmitting 상태가 disabled 속성으로 내려오면 커서와 투명도로 제출 중임을 표시합니다. */
   cursor: wait;
   opacity: 0.65;
 }
@@ -242,6 +258,7 @@ body {
 }
 
 .register-back-link {
+  /* href="#"였던 링크의 시각 스타일을 유지하면서, 실제 이동은 TSX의 Link 컴포넌트가 맡습니다. */
   align-self: center;
   border-bottom: 1px solid transparent;
   color: var(--register-secondary);
@@ -263,6 +280,7 @@ body {
 }
 
 @media (max-width: 767px) {
+  /* HTML의 md: 접두사 반응형 규칙을 모바일 기준 media query로 풀어 쓴 것입니다. */
   .register-canvas {
     align-items: flex-start;
     padding: 48px 24px 32px;
