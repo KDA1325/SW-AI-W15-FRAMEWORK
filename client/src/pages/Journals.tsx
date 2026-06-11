@@ -17,11 +17,11 @@ const reviews = [
 ]
 
 const journals = [
-  ['GAME TITLE 18', 'JOURNAL ENTRY #18', 'Mapping the final sector before the next clear attempt.'],
-  ['GAME TITLE 17', 'BOSS PATTERN NOTES', 'Second phase punishes greed, but the tell is finally readable.'],
-  ['GAME TITLE 16', 'HIDDEN ROUTE FOUND', 'A fake wall opened into a whole optional region.'],
-  ['GAME TITLE 15', 'BUILD EXPERIMENT', 'Trying a fragile glass-cannon setup for the archive run.'],
-  ['GAME TITLE 14', 'ENDING THOUGHTS', 'The quiet ending worked better than the loud one.'],
+  ['#GAME TITLE 18', 'JOURNAL ENTRY #18', 'Mapping the final sector before the next clear attempt.'],
+  ['#GAME TITLE 17', 'BOSS PATTERN NOTES', 'Second phase punishes greed, but the tell is finally readable.'],
+  ['#GAME TITLE 16', 'HIDDEN ROUTE FOUND', 'A fake wall opened into a whole optional region.'],
+  ['#GAME TITLE 15', 'BUILD EXPERIMENT', 'Trying a fragile glass-cannon setup for the archive run.'],
+  ['#GAME TITLE 14', 'ENDING THOUGHTS', 'The quiet ending worked better than the loud one.'],
 ]
 
 function Journals() {
@@ -43,7 +43,7 @@ function Journals() {
               <div className="w-2 h-8 bg-[var(--gjc-primary)]"></div>
               REVIEW_LOGS
               <Link
-                className="ml-4 flex items-center gap-2 border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-1 font-ui-button text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary"
+                className="ml-4 flex items-center gap-2 border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-1 font-ui-button text-xs uppercase tracking-widest hover:bg-[var(--gjc-surface-container)] hover:text-on-primary"
                 to="/write-review"
               >
                 WRITE <span className="material-symbols-outlined text-sm">add</span>
@@ -94,7 +94,7 @@ function Journals() {
               <div className="w-2 h-8 bg-[var(--gjc-primary)]"></div>
               JOURNAL_LOGS
               <Link
-                className="ml-4 flex items-center gap-2 border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-1 font-ui-button text-xs uppercase tracking-widest hover:bg-primary hover:text-on-primary"
+                className="ml-4 flex items-center gap-2 border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-1 font-ui-button text-xs uppercase tracking-widest hover:bg-[var(--gjc-surface-container)] hover:text-on-primary"
                 to="/write-journal"
               >
                 WRITE <span className="material-symbols-outlined text-sm">add</span>
