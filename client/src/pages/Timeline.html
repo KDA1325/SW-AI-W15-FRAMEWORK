@@ -1,0 +1,359 @@
+﻿<!-- Timeline 원본 HTML에서 head/script/style을 제외하고 React 컴포넌트가 렌더링할 body 조각만 남긴 파일입니다. -->
+<!-- TopAppBar -->
+<header class="sticky w-full top-0 border-b-2 border-primary bg-surface-container-lowest z-50"><div class="flex justify-between items-center w-full px-margin py-4 sticky top-0 z-50 bg-white max-w-container-max mx-auto">
+    <div class="flex items-center gap-4">
+      <a class="block w-auto hover:opacity-80 transition-opacity flex items-center gap-2" href="#">
+        <div class="h-16 w-auto">
+          <img src="https://lh3.googleusercontent.com/aida/AP1WRLvK0T-FjgjELMvwpYL3KnEs7fgUATFfy9caFiCpcmBiYKBKNCBA64ZXr9mF5-2vnnlsl3fnRFRmazb4jWDY6hYu3ZfNEHjqmMYSNx8zfKaS6BjYJrCQJ97fF3ZSkw8DrszqDDwnsyc7FdD1Aq1Axc5wuJ9BIKBF7b0i1riJxTA4RsgE2m1dhil7Y-3wf7oIMLFBjjydgn9txoKKHyU-7UStdanPdTSDU_CzxhkqledruOdZHz--GxYLZVP-" alt="GAMING JOURNAL CLUB Logo" class="h-full w-auto object-contain">
+        </div>
+      </a>
+    </div>
+    <nav class="hidden md:flex gap-8 items-center text-sm tracking-widest font-ui-button">
+      <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-black" href="#">PROFILE</a>
+      <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-black" href="#">RECOMMEND</a>
+      <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-black" href="#">JOURNALS</a>
+      <a class="relative px-2 py-1 hover:bg-black hover:text-white transition-colors text-black border-b-4 border-black" href="#">TIMELINE</a>
+    </nav>
+    <div class="hidden md:flex gap-6 items-center text-sm tracking-widest font-ui-button">
+      <a class="text-black hover:bg-black hover:text-white px-2 py-1 transition-colors" href="#">SETTINGS</a>
+      <a class="text-black border-2 border-black px-4 py-2 hover:bg-black hover:text-white transition-colors uppercase" href="#">LOGOUT</a>
+    </div>
+    <button class="md:hidden text-black"><span class="material-symbols-outlined">menu</span></button>
+  </div></header>
+<div class="flex flex-1 max-w-container-max w-full mx-auto relative">
+<!-- SideNavBar -->
+<!-- Main Content -->
+<main class="flex-1 w-full px-4 md:px-gutter py-12">
+<div class="flex flex-col md:flex-row justify-between items-center mb-12 border-b-2 border-primary pb-4">
+<h2 class="text-3xl font-headline-lg uppercase text-primary flex items-center gap-2 tracking-widest">
+<div class="w-2 h-8 bg-primary"></div>
+    TIMELINE
+  </h2>
+<div class="flex gap-2 mt-4 md:mt-0">
+<button class="px-4 py-2 border-2 border-primary font-ui-button text-xs transition-colors duration-0 cursor-pointer hover:bg-primary hover:text-on-primary" id="filter-all">ALL</button>
+<button class="px-4 py-2 border-2 border-primary font-ui-button text-xs transition-colors duration-0 cursor-pointer bg-primary text-on-primary" id="filter-reviews">REVIEWS</button>
+<button class="px-4 py-2 border-2 border-primary font-ui-button text-xs transition-colors duration-0 cursor-pointer hover:bg-primary hover:text-on-primary" id="filter-journals">JOURNALS</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 relative">
+<!-- Vertical Timeline Line -->
+<div class="hidden md:block absolute left-[8.333%] top-0 bottom-0 w-px bg-primary z-0 border-l-2 border-dashed border-primary opacity-30" style="left: 8.333%;"></div>
+<!-- Feed Items -->
+<div class="col-span-1 md:col-span-10 flex flex-col gap-16 relative z-10 md:col-start-2">
+<!-- Item 1 -->
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<!-- Timestamp Node -->
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.25</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">14:32:00</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+<div class="font-label-caps text-label-caps text-secondary md:hidden ml-4">2024.10.25 // 14:32:00</div>
+</div>
+<!-- Content Card -->
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<!-- User Meta -->
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">robot_2</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">PLAYER_02</div>
+<div class="font-label-caps text-label-caps text-secondary">#GAME TITLE</div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface">
+                                    REVIEW
+                                </div>
+</div>
+<div class="flex flex-col md:flex-row gap-6">
+<!-- Game Cover -->
+<div class="w-full md:w-48 aspect-[3/4] border-2 border-primary bg-surface relative overflow-hidden flex-shrink-0 group-hover:border-4 transition-all duration-0">
+<img alt="Abstract geometric landscape resembling an old 8-bit game level" class="w-full h-full object-cover filter grayscale contrast-125" data-alt="A stark, high-contrast black and white digital landscape evoking retro 8-bit gaming nostalgia. The scene features harsh geometric mountains and pixelated star-fields, designed in a minimalist brutalist aesthetic. Solid blacks and pure whites dominate, devoid of any soft gradients or modern 3D rendering. The overall mood is cold, analytical, and distinctly retro-futuristic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHhCIwfOmX8eesEcnLJ2kacDKXODJarlKbGIHhWEN1g2aVtCoSwMaQ97tNdu748lo98GYXPUU9dJcpbg43TSEKRptmFvdnEK3kG6ESnkxJ3MW_PC3jWQC8e47EiD0AcqrkOYd0GJecUwPqWWMYz6TgZDKU41oSgtFAE9Jmu6c5J6Vo4TS8q0zq6hI9CibqlQHYxbA3nlYi5SADBrTcRVDzUg_TYM1R_qtLKgoi2i7KYW7yd299gemNIhyvV35pQbiPpV21zSMGq567">
+<div class="absolute bottom-0 left-0 right-0 bg-primary text-on-primary p-2 font-label-caps text-label-caps text-center border-t-2 border-primary">
+                                        NEON_DRIFTER
+                                    </div>
+</div>
+<!-- Content -->
+<div class="flex-1 flex flex-col">
+<h3 class="font-headline-lg text-headline-lg md:text-headline-lg-mobile text-primary uppercase mb-2">A Flawed Masterpiece</h3>
+<!-- Rating -->
+<div class="flex gap-1 mb-4 text-primary">
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined">star</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface mb-6 flex-1">
+                                        "The mechanics are intentionally hostile, demanding a level of precision that feels archaic in the modern era. Yet, breaking through the initial friction reveals a beautifully constructed loop. The minimalist aesthetic serves the gameplay perfectly. Frame drops in sector 4 are unacceptable, however."
+                                    </p>
+<div class="flex gap-4 mt-auto pt-4 border-t border-primary">
+<button class="flex items-center gap-2 font-label-caps text-label-caps text-primary hover:bg-primary hover:text-on-primary px-2 py-1 transition-colors duration-0 border border-transparent hover:border-primary">
+<span class="material-symbols-outlined text-[18px]">favorite</span> 24
+                                        </button>
+<button class="flex items-center gap-2 font-label-caps text-label-caps text-primary hover:bg-primary hover:text-on-primary px-2 py-1 transition-colors duration-0 border border-transparent hover:border-primary">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span> 8
+                                        </button>
+<button class="flex items-center gap-2 font-label-caps text-label-caps text-primary hover:bg-primary hover:text-on-primary px-2 py-1 transition-colors duration-0 border border-transparent hover:border-primary ml-auto">
+<span class="material-symbols-outlined text-[18px]">share</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</article>
+<!-- Item 2 -->
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.24</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">09:15:22</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+<div class="font-label-caps text-label-caps text-secondary md:hidden ml-4">2024.10.24 // 09:15:22</div>
+</div>
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">skull</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">USER_99</div>
+<div class="font-label-caps text-label-caps text-secondary"><span style="letter-spacing: 1.4px;">#GAME TITLE</span></div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface">JOURNAL</div>
+</div>
+<div class="flex flex-col md:flex-row gap-6 items-center">
+<div class="w-24 h-24 border-2 border-primary bg-surface flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-colors duration-0">
+<span class="material-symbols-outlined text-[48px]">swords</span>
+</div>
+<div class="flex-1">
+<p class="font-ui-button text-ui-button text-primary mb-2">JOURNAL TITLE</p>
+<p class="font-body-md text-body-md text-on-surface">Attempt #44. The patterns are becoming clear. Expecting to clear the final sector by tonight. Documentation to follow upon success.</p>
+</div>
+</div>
+</div>
+</article>
+<!-- Item 3 -->
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.23</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">23:59:59</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+<div class="font-label-caps text-label-caps text-secondary md:hidden ml-4">2024.10.23 // 23:59:59</div>
+</div>
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">science</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">DR_CRITIQUE</div>
+<div class="font-label-caps text-label-caps text-secondary"><span style="letter-spacing: 1.4px;">#GAME TITLE</span></div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface"><span class="" style="letter-spacing: 1.4px;">REVIEW</span></div>
+</div>
+<div class="flex flex-col md:flex-row gap-6">
+<div class="w-full md:w-48 aspect-[3/4] border-2 border-primary bg-surface relative overflow-hidden flex-shrink-0 group-hover:border-4 transition-all duration-0">
+<img alt="Close up of old CRT monitor pixels" class="w-full h-full object-cover filter grayscale contrast-150" data-alt="Macro photography of a vintage CRT monitor displaying a dense matrix of monochrome pixels. The image captures the distinct scanlines and harsh, glowing white phosphors against a deep black background. The brutalist, high-contrast aesthetic highlights the raw, technical reality of early computing hardware, perfectly aligned with a retro-futuristic journal theme." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLCpNcgc4AHzyXoQffN2OEXIvQ4oATio0lgfZnqc5OEe0yqMZmo9GMWrPM24PGPmnKp8nQZOh7AoJ1zzyLksgJvT62pDhV8IWWzBHbPddvenu__1juToOsSkAXzclulVWUjOsfiUgT0mJ9ZFsxZqpp-k3Y37Q7_OC0GmtPR2eehwjr7T2U3VyFIW3JNfYIIFUaUtfxptQATWzWhV1-twqODFvLOM05aDP1IdKHCWjrszyMJDjJ2zx7MfMFQP5ZB9rj768tg-7LoL_m">
+<div class="absolute bottom-0 left-0 right-0 bg-primary text-on-primary p-2 font-label-caps text-label-caps text-center border-t-2 border-primary">
+                                        SYSTEM_SHOCK
+                                    </div>
+</div>
+<div class="flex-1 flex flex-col">
+<h3 class="font-headline-lg text-headline-lg md:text-headline-lg-mobile text-primary uppercase mb-2">Re-evaluating the Interface</h3>
+<div class="flex gap-1 mb-4 text-primary">
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+<span class="material-symbols-outlined" data-weight="fill">star</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface mb-6 flex-1">
+                                        "Looking back, what was criticized as cluttered is actually incredibly utilitarian. The lack of hand-holding forced a cognitive mapping that modern games bypass completely. We traded depth for accessibility, and it shows."
+                                    </p>
+<div class="flex gap-4 mt-auto pt-4 border-t border-primary">
+<button class="flex items-center gap-2 font-label-caps text-label-caps text-primary hover:bg-primary hover:text-on-primary px-2 py-1 transition-colors duration-0 border border-transparent hover:border-primary">
+<span class="material-symbols-outlined text-[18px]">favorite</span> 128
+                                        </button>
+<button class="flex items-center gap-2 font-label-caps text-label-caps text-primary hover:bg-primary hover:text-on-primary px-2 py-1 transition-colors duration-0 border border-transparent hover:border-primary">
+<span class="material-symbols-outlined text-[18px]">chat_bubble</span> 42
+                                        </button>
+</div>
+</div>
+</div>
+</div>
+</article>
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.22</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">12:00:00</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+</div>
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">videogame_asset</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">RETRO_FAN</div>
+<div class="font-label-caps text-label-caps text-secondary"><span style="letter-spacing: 1.4px;">#GAME TITLE</span></div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface">JOURNAL</div>
+</div>
+<div class="flex flex-col md:flex-row gap-6 items-center">
+<div class="w-24 h-24 border-2 border-primary bg-surface flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-colors duration-0">
+<span class="material-symbols-outlined text-[48px]">joystick</span>
+</div>
+<div class="flex-1">
+<p class="font-ui-button text-ui-button text-primary mb-2">HIDDEN GEMS</p>
+<p class="font-body-md text-body-md text-on-surface">Found an unlabelled cartridge in the basement. The boot screen is just a blinking eye. Proceeding with caution.</p>
+</div>
+</div>
+</div>
+</article>
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.21</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">12:00:00</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+</div>
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">videogame_asset</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">GHOST_IN_SHELL</div>
+<div class="font-label-caps text-label-caps text-secondary"><span style="letter-spacing: 1.4px;">#GAME TITLE</span></div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface">JOURNAL</div>
+</div>
+<div class="flex flex-col md:flex-row gap-6 items-center">
+<div class="w-24 h-24 border-2 border-primary bg-surface flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-colors duration-0">
+<span class="material-symbols-outlined text-[48px]">joystick</span>
+</div>
+<div class="flex-1">
+<p class="font-ui-button text-ui-button text-primary mb-2">HIDDEN GEMS</p>
+<p class="font-body-md text-body-md text-on-surface">Found an unlabelled cartridge in the basement. The boot screen is just a blinking eye. Proceeding with caution.</p>
+</div>
+</div>
+</div>
+</article>
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.22</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">12:00:00</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+</div>
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">videogame_asset</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">RETRO_FAN</div>
+<div class="font-label-caps text-label-caps text-secondary"><span style="letter-spacing: 1.4px;">#GAME TITLE</span></div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface">JOURNAL</div>
+</div>
+<div class="flex flex-col md:flex-row gap-6 items-center">
+<div class="w-24 h-24 border-2 border-primary bg-surface flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-colors duration-0">
+<span class="material-symbols-outlined text-[48px]">joystick</span>
+</div>
+<div class="flex-1">
+<p class="font-ui-button text-ui-button text-primary mb-2">HIDDEN GEMS</p>
+<p class="font-body-md text-body-md text-on-surface">Found an unlabelled cartridge in the basement. The boot screen is just a blinking eye. Proceeding with caution.</p>
+</div>
+</div>
+</div>
+</article>
+<article class="relative flex flex-col md:flex-row gap-6 group">
+<div class="flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32">
+<div class="font-label-caps text-label-caps text-secondary hidden md:block">2024.10.21</div>
+<div class="font-label-caps text-label-caps text-primary font-bold hidden md:block">12:00:00</div>
+<div class="w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2"></div>
+</div>
+<div class="flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0">
+<div class="flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed">
+<div class="w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative">
+<div class="absolute inset-0 bg-primary opacity-10 pixel-hatch"></div>
+<span class="material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" style="font-size: 32px;">videogame_asset</span>
+</div>
+<div>
+<div class="font-ui-button text-ui-button text-primary">GHOST_IN_SHELL</div>
+<div class="font-label-caps text-label-caps text-secondary"><span style="letter-spacing: 1.4px;">#GAME TITLE</span></div>
+</div>
+<div class="ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface">JOURNAL</div>
+</div>
+<div class="flex flex-col md:flex-row gap-6 items-center">
+<div class="w-24 h-24 border-2 border-primary bg-surface flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-colors duration-0">
+<span class="material-symbols-outlined text-[48px]">joystick</span>
+</div>
+<div class="flex-1">
+<p class="font-ui-button text-ui-button text-primary mb-2">HIDDEN GEMS</p>
+<p class="font-body-md text-body-md text-on-surface">Found an unlabelled cartridge in the basement. The boot screen is just a blinking eye. Proceeding with caution.</p>
+</div>
+</div>
+</div>
+</article></div>
+<!-- Load More Button -->
+<div class="col-span-1 md:col-span-9 flex justify-center mt-8 z-10 relative md:col-span-10 md:col-start-2">
+<button class="px-8 py-4 border-2 border-primary bg-surface text-primary font-ui-button text-ui-button uppercase hover:bg-primary hover:text-on-primary transition-colors duration-0 flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:shadow-none active:translate-x-1 active:translate-y-1 group" onclick="const container = document.querySelector('.col-span-1.md\\:col-span-10.flex.flex-col.gap-16'); const newItem = `
+&lt;article class='relative flex flex-col md:flex-row gap-6 group'&gt;
+&lt;div class='flex-shrink-0 pt-1 flex md:flex-col items-center md:items-end gap-4 md:gap-1 relative md:w-32'&gt;
+&lt;div class='font-label-caps text-label-caps text-secondary hidden md:block'&gt;2024.10.22&lt;/div&gt;
+&lt;div class='font-label-caps text-label-caps text-primary font-bold hidden md:block'&gt;12:00:00&lt;/div&gt;
+&lt;div class='w-4 h-4 border-2 border-primary bg-on-primary md:absolute top-2 rounded-none group-hover:bg-primary transition-colors duration-0 z-20 md:-left-2'&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='flex-1 border-2 border-primary bg-surface p-6 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-shadow duration-0'&gt;
+&lt;div class='flex items-center gap-4 mb-6 pb-4 border-b border-primary border-dashed'&gt;
+&lt;div class='w-12 h-12 border-2 border-primary bg-surface overflow-hidden relative'&gt;
+&lt;div class='absolute inset-0 bg-primary opacity-10 pixel-hatch'&gt;&lt;/div&gt;
+&lt;span class='material-symbols-outlined absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary' style='font-size: 32px;'&gt;videogame_asset&lt;/span&gt;
+&lt;/div&gt;
+&lt;div&gt;
+&lt;div class='font-ui-button text-ui-button text-primary'&gt;RETRO_FAN&lt;/div&gt;
+&lt;div class='font-label-caps text-label-caps text-secondary'&gt;#NEW_DISCOVERY&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='ml-auto px-3 py-1 border border-primary text-primary font-label-caps text-label-caps bg-surface'&gt;JOURNAL&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class='flex flex-col md:flex-row gap-6 items-center'&gt;
+&lt;div class='w-24 h-24 border-2 border-primary bg-surface flex items-center justify-center flex-shrink-0 group-hover:bg-primary group-hover:text-on-primary transition-colors duration-0'&gt;
+&lt;span class='material-symbols-outlined text-[48px]'&gt;joystick&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class='flex-1'&gt;
+&lt;p class='font-ui-button text-ui-button text-primary mb-2'&gt;HIDDEN GEMS&lt;/p&gt;
+&lt;p class='font-body-md text-body-md text-on-surface'&gt;Found an unlabelled cartridge in the basement. The boot screen is just a blinking eye. Proceeding with caution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/article&gt;`; container.insertAdjacentHTML('beforeend', newItem); container.insertAdjacentHTML('beforeend', newItem.replace('RETRO_FAN', 'GHOST_IN_SHELL').replace('2024.10.22', '2024.10.21'));">LOAD_NEXT_PAGE <img alt="Down arrow" class="w-5 h-5 group-hover:invert transition-all duration-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9Q9ssJNccrklBux2cgfEjlgufCLgxYbscBYQij-i37OG8qDmqztZ-ODTum3lJAssM5-POsjQYBlQSLs1Y7x52osiisAOpykTE0cjIIaurqbbUWREUMkSMVWv0r22rGoL_rt3u9me9jVoc68CUsrjFH9vmBFW5oc1kYkQRcnMKbkAav2wLGJHZrBYeUHORjQG_Xba6fhN8G0MHwTfK1za625czAzom3E9TRH_fhldH_Aq7vah70tepWw2ccdhZ3RhQtxxZPnBtS2AT" style="image-rendering: pixelated;"></button>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="w-full border-t-2 border-primary mt-12 bg-surface-container-lowest">
+<div class="flex flex-col md:flex-row justify-between items-center px-8 py-8 w-full max-w-[1200px] mx-auto gap-8 md:gap-0">
+<!-- Brand -->
+<div class="w-[180px] flex items-center justify-center md:justify-start">
+<img alt="Gaming Journal Club Logo" class="h-12 w-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3uDgsLQwlLW2JmmP-2ZRHIgKGMFlXJiCsbxpRsH0lWdFr253xjbJrY3Lj5tyRBTdw7P81iLq6be5YanrxA0lUnBv_MvuE0_Ho6jMuawLHxBwqaDwQ7LxTHW-SCBaAL4mRsa8e_4pcbwn1LWu82NOoFy9_fJ-UW9jGEMMXzRXdgPVYq1hMumWOXL3dTuubH0JaBdlK3yRGHMsk7kcYQ01PGjydpRurHhQrFkD64tjqcpzLrqEMccNieHGfl0pV4ThXWxpL0F1BpHOe">
+</div>
+<!-- Links -->
+<nav class="flex flex-wrap justify-center gap-6 text-sm tracking-widest font-label-caps">
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Terms</a>
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Privacy</a>
+<a class="text-primary underline decoration-2 underline-offset-4 uppercase" href="#">Archive</a>
+<a class="text-secondary hover:text-primary hover:underline transition-colors uppercase" href="#">Contact</a>
+</nav>
+<!-- Copyright -->
+<div class="text-sm font-label-caps text-primary w-full md:w-auto text-center mt-4 md:mt-0 uppercase tracking-widest">
+            짤 2026 GAMING JOURNAL CLUB. ALL RIGHTS RESERVED.
+        </div>
+</div>
+</footer>
+
