@@ -3,283 +3,164 @@
 
 /* Recommend.html의 <style> 태그에서 분리한 페이지 전용 CSS입니다. */
 /* Brutalist Blueprint Grid Background */
-        body {
-            background-color: var(--gjc-surface-container-lowest);
-            background-image: 
-                linear-gradient(to right, var(--gjc-surface-variant) 1px, transparent 1px),
-                linear-gradient(to bottom, var(--gjc-surface-variant) 1px, transparent 1px);
-            background-position: center top;
-            background-size: 32px 32px;
-        }
+body {
+  background-color: var(--gjc-surface-container-lowest);
+  background-image:
+    linear-gradient(to right, var(--gjc-surface-variant) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--gjc-surface-variant) 1px, transparent 1px);
+  background-position: center top;
+  background-size: 32px 32px;
+}
 
-        /* Material Symbols Setup */
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        
-        .recommend-page {
-          color: var(--gjc-on-surface);
-          font-family: Geist, sans-serif;
-          min-height: 100vh;
-        }
+/* Material Symbols Setup */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
 
-        .recommend-page a {
-          color: inherit;
-          text-decoration: none;
-        }
+.recommend-page {
+  color: var(--gjc-on-surface);
+  font-family: Geist, sans-serif;
+  min-height: 100vh;
+}
 
-        .recommend-page button {
-          cursor: pointer;
-          font: inherit;
-        }
+.recommend-page a {
+  color: inherit;
+  text-decoration: none;
+}
 
-        /* Nav Selection Indicator Effect */
-        .nav-link-indicator::before {
-            content: '>';
-            left: -16px;
-            opacity: 0;
-            position: absolute;
-            transition: opacity 0.1s steps(2, end);
-        }
-        .nav-link-indicator:hover::before {
-            opacity: 1;
-        }
-        
-        /* 8-bit Style Step Transition */
-        .step-transition {
-            transition: 
-              transform 0.15s steps(4, end), 
-              box-shadow 0.15s steps(4, end), 
-              background-color 0.1s steps(2, end);
-        }
+.recommend-page button {
+  cursor: pointer;
+  font: inherit;
+}
 
-        /* Logo Float Animation */
-        @keyframes logoFloat {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-            100% { transform: translateY(0px); }
-        }
-        .group:hover .animate-logo-float {
-            animation: logoFloat 2s ease-in-out infinite;
-        }
+/* Nav Selection Indicator Effect */
+.nav-link-indicator::before {
+  content: '>';
+  left: -16px;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.1s steps(2, end);
+}
 
-        .pixel-hatch {
-            background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.1) 4px, rgba(0,0,0,0.1) 8px);
-        }
-        .cursor-blink::after {
-            content: '_';
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink {
-            from, to { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        @keyframes analyzingBar {
-            0% { width: 0%; }
-            50% { width: 100%; }
-            100% { width: 0%; }
-        }
-        .animate-analyzing {
-            animation: analyzingBar 2s ease-in-out infinite;
-        }
+.nav-link-indicator:hover::before {
+  opacity: 1;
+}
+
+/* 8-bit Style Step Transition */
+.step-transition {
+  transition:
+    transform 0.15s steps(4, end),
+    box-shadow 0.15s steps(4, end),
+    background-color 0.1s steps(2, end);
+}
+
+/* Logo Float Animation */
+@keyframes logoFloat {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.group:hover .animate-logo-float {
+  animation: logoFloat 2s ease-in-out infinite;
+}
+
+.pixel-hatch {
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0, 0, 0, 0.1) 4px, rgba(0, 0, 0, 0.1) 8px);
+}
+
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+  from,
+  to {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes analyzingBar {
+  0% {
+    width: 0%;
+  }
+
+  50% {
+    width: 100%;
+  }
+
+  100% {
+    width: 0%;
+  }
+}
+
+.animate-analyzing {
+  animation: analyzingBar 2s ease-in-out infinite;
+}
 
 @keyframes sync-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
+
 .syncing-icon {
   animation: sync-rotate 0.5s linear infinite;
 }
+
 @keyframes pixel-glitch {
-  0% { transform: translate(0); opacity: 1; }
-  20% { transform: translate(-2px, 2px); opacity: 0.8; }
-  40% { transform: translate(2px, -2px); opacity: 0.9; }
-  60% { transform: translate(-1px, -1px); opacity: 0.7; }
-  80% { transform: translate(1px, 1px); opacity: 0.8; }
-  100% { transform: translate(0); opacity: 1; }
+  0% {
+    transform: translate(0);
+    opacity: 1;
+  }
+
+  20% {
+    transform: translate(-2px, 2px);
+    opacity: 0.8;
+  }
+
+  40% {
+    transform: translate(2px, -2px);
+    opacity: 0.9;
+  }
+
+  60% {
+    transform: translate(-1px, -1px);
+    opacity: 0.7;
+  }
+
+  80% {
+    transform: translate(1px, 1px);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translate(0);
+    opacity: 1;
+  }
 }
+
 .refresh-glitch {
   animation: pixel-glitch 0.2s steps(2) infinite;
   filter: grayscale(1) contrast(1.5);
-}
-
-.recommend-page .bg-white {
-  background-color: #fff;
-}
-
-.recommend-page .bg-black {
-  background-color: #000;
-}
-
-.recommend-page .bg-surface-container {
-  background-color: var(--gjc-surface-container);
-}
-
-.recommend-page .border-black {
-  border-color: #000;
-}
-
-.recommend-page .border-b-4 {
-  border-bottom: 4px solid currentColor;
-}
-
-.recommend-page .border-l-2 {
-  border-left: 2px solid currentColor;
-}
-
-.recommend-page .text-black {
-  color: #000;
-}
-
-.recommend-page .text-white {
-  color: #fff;
-}
-
-.recommend-page .text-\[\#5555FF\] {
-  color: #5555ff;
-}
-
-.recommend-page .text-xs {
-  font-size: 12px;
-  line-height: 1;
-}
-
-.recommend-page .text-xl {
-  font-size: 20px;
-  line-height: 1.4;
-}
-
-.recommend-page .text-2xl {
-  font-size: 24px;
-  line-height: 1.25;
-}
-
-.recommend-page .text-3xl {
-  font-size: 30px;
-  line-height: 1.2;
-}
-
-.recommend-page .text-4xl {
-  font-size: 36px;
-  line-height: 1.1;
-}
-
-.recommend-page .text-5xl {
-  font-size: 48px;
-  line-height: 1;
-}
-
-.recommend-page .text-6xl {
-  font-size: 60px;
-  line-height: 1;
-}
-
-.recommend-page .font-bold {
-  font-weight: 700;
-}
-
-.recommend-page .rounded-xl {
-  border-radius: 0;
-}
-
-.recommend-page .shadow-\[4px_4px_0px_0px_rgba\(0\,0\,0\,1\)\] {
-  box-shadow: 4px 4px 0 0 rgba(0, 0, 0, 1);
-}
-
-.recommend-page .shadow-\[2px_2px_0px_0px_rgba\(0\,0\,0\,1\)\] {
-  box-shadow: 2px 2px 0 0 rgba(0, 0, 0, 1);
-}
-
-.recommend-page .shadow-none {
-  box-shadow: none;
-}
-
-.recommend-page .min-h-\[300px\] {
-  min-height: 300px;
-}
-
-.recommend-page .h-\[400px\] {
-  height: 400px;
-}
-
-.recommend-page .w-\[100px\] {
-  width: 100px;
-}
-
-.recommend-page .w-\[280px\] {
-  width: 280px;
-}
-
-.recommend-page .w-12 {
-  width: 48px;
-}
-
-.recommend-page .left-4 {
-  left: 16px;
-}
-
-.recommend-page .left-12 {
-  left: 48px;
-}
-
-.recommend-page .top-4 {
-  top: 16px;
-}
-
-.recommend-page .ml-2 {
-  margin-left: 8px;
-}
-
-.recommend-page .mb-12 {
-  margin-bottom: 48px;
-}
-
-.recommend-page .flex-shrink-0 {
-  flex-shrink: 0;
-}
-
-.recommend-page .border-outline-variant {
-  border-color: var(--gjc-outline-variant);
-}
-
-.recommend-page .grayscale {
-  filter: grayscale(1);
-}
-
-.recommend-page .group:hover .group-hover\:grayscale-0 {
-  filter: grayscale(0);
-}
-
-.recommend-page .group:hover .group-hover\:rotate-180 {
-  transform: rotate(180deg);
-}
-
-.recommend-page .hover\:bg-black:hover {
-  background-color: #000;
-}
-
-.recommend-page .hover\:bg-surface-container:hover {
-  background-color: var(--gjc-surface-container);
-}
-
-.recommend-page .hover\:text-white:hover {
-  color: #fff;
-}
-
-.recommend-page .hover\:translate-y-\[-4px\]:hover {
-  transform: translateY(-4px);
-}
-
-.recommend-page .active\:translate-x-\[2px\]:active {
-  transform: translateX(2px);
-}
-
-.recommend-page .active\:translate-y-\[2px\]:active {
-  transform: translateY(2px);
-}
-
-.recommend-page .focus\:outline-none:focus {
-  outline: none;
 }
 
 .recommend-nowrap {
@@ -291,4 +172,3 @@
     white-space: normal;
   }
 }
-
