@@ -183,9 +183,8 @@ function Profile() {
             {archiveGames.map((game, index) => (
               <div className="flex flex-col gap-2" key={`${game.title}-${index}`}>
                 <article
-                  className={`aspect-[3/4] border-2 border-primary ${
-                    game.variant === 'dim' ? 'bg-surface-dim' : 'bg-surface-container-lowest'
-                  } flex flex-col justify-between hover:bg-primary hover:text-on-primary transition-all duration-200 cursor-pointer group relative overflow-hidden p-0`}
+                  className={`aspect-[3/4] border-2 border-primary ${game.variant === 'dim' ? 'bg-surface-dim' : 'bg-surface-container-lowest'
+                    } flex flex-col justify-between hover:bg-primary hover:text-on-primary transition-all duration-200 cursor-pointer group relative overflow-hidden p-0`}
                 >
                   <div className="flex-grow flex flex-col overflow-hidden">
                     <img
