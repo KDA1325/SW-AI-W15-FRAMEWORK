@@ -10,11 +10,16 @@ const timelineItems = [
 function Timeline() {
   return (
     <PageChrome active="timeline">
-      <main className="mx-auto w-full max-w-container-max px-margin py-20">
-        <h1 className="mb-16 font-headline-xl text-headline-xl uppercase">TIMELINE</h1>
+      <main className="timeline-page flex-grow w-full max-w-[1200px] mx-auto px-8 py-20 flex flex-col gap-[80px]">
+        <div className="mb-6 flex items-center justify-between border-b-2 border-[var(--gjc-primary)] pb-3">
+          <h2 className="mb-16 flex items-center gap-4 font-headline-xl text-headline-xl uppercase">
+            {/* <span className="w-2 h-8 bg-[var(--gjc-primary)]"></span> */}
+            TIMELINE
+          </h2>
+        </div>
 
         <div className="relative flex flex-col gap-10">
-          <div className="absolute bottom-0 left-[8.333%] top-0 hidden border-l-2 border-dashed border-primary opacity-30 md:block" />
+          <div className="absolute bottom-0 top-0 hidden border-l-2 border-dashed border-primary opacity-60 md:block" />
 
           {timelineItems.map(([date, time, type, title, user]) => (
             <article className="group relative flex flex-col gap-6 md:flex-row" key={`${date}-${time}`}>
