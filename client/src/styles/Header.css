@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+  border-bottom: 2px solid var(--gjc-primary);
+  background-color: var(--gjc-surface-container-lowest);
+}
+
+.header-inner {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1200px;
+  padding: 16px 32px;
+  width: 100%;
+}
+
+.header-logo {
+  display: block;
+  text-decoration: none;
+}
+
+.header-logo-image {
+  display: block;
+  height: 48px;
+  object-fit: contain;
+  width: auto;
+}
+
+.header-logo:hover .header-logo-image {
+  animation: logoFloat 2s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.header-nav {
+  align-items: center;
+  display: none;
+  gap: 32px;
+  font-family: DotGothic16, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.header-link {
+  color: var(--gjc-secondary);
+  padding: 4px 8px;
+  text-decoration: none;
+  transition: color 100ms, background-color 100ms;
+}
+
+.header-link:hover {
+  background-color: var(--gjc-primary);
+  color: var(--gjc-on-primary);
+}
+
+.header-link-active {
+  border-bottom: 4px solid var(--gjc-primary);
+  color: var(--gjc-primary);
+}
+
+.header-actions {
+  align-items: center;
+  display: none;
+  gap: 24px;
+  font-family: DotGothic16, sans-serif;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  line-height: 1;
+}
+
+.header-settings {
+  color: var(--gjc-secondary);
+  text-decoration: none;
+}
+
+.header-settings:hover {
+  color: var(--gjc-primary);
+  text-decoration: underline;
+}
+
+.header-logout {
+  border: 2px solid var(--gjc-primary);
+  color: var(--gjc-primary);
+  padding: 8px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.header-logout:hover {
+  background-color: var(--gjc-primary);
+  color: var(--gjc-on-primary);
+}
+
+@media (min-width: 768px) {
+  .header-nav,
+  .header-actions {
+    display: flex;
+  }
+}
