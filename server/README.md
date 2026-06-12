@@ -1,98 +1,116 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Game Archive Server
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS backend server for authentication and API features.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requirements
 
-## Description
+- Node.js
+- npm
+- Docker Desktop
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Environment Variables
 
-## Project setup
+Create `server/.env` from `server/.env.example`.
 
 ```bash
-$ npm install
+cd server
+cp .env.example .env
 ```
 
-## Compile and run the project
+Required values:
+
+| Name | Description | Local value |
+| --- | --- | --- |
+| `DATABASE_HOST` | PostgreSQL host | `localhost` |
+| `DATABASE_PORT` | PostgreSQL port | `5432` |
+| `DATABASE_USER` | PostgreSQL user | `game_archive_user` |
+| `DATABASE_PASSWORD` | PostgreSQL password | `game_archive_password` |
+| `DATABASE_NAME` | PostgreSQL database name | `game_archive` |
+| `JWT_SECRET` | Secret key used to sign JWT tokens | Use a long random string |
+| `JWT_EXPIRES_IN` | JWT expiration time | `1d` |
+| `CLIENT_URL` | Frontend origin allowed by CORS | `http://localhost:5173` |
+
+Do not commit `server/.env`. It can contain secrets such as `JWT_SECRET`.
+
+## Start PostgreSQL
+
+Run this command from the repository root:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose up -d
 ```
 
-## Run tests
+The Docker PostgreSQL settings are defined in `docker-compose.yml`.
+
+| Docker setting | Server env value |
+| --- | --- |
+| `POSTGRES_DB=game_archive` | `DATABASE_NAME=game_archive` |
+| `POSTGRES_USER=game_archive_user` | `DATABASE_USER=game_archive_user` |
+| `POSTGRES_PASSWORD=game_archive_password` | `DATABASE_PASSWORD=game_archive_password` |
+| `5432:5432` | `DATABASE_HOST=localhost`, `DATABASE_PORT=5432` |
+
+## Install and Run
+
+Run these commands from `server/`:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
+npm run start:dev
 ```
 
-## Deployment
+The server runs at:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+```text
+http://localhost:3000
+```
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The frontend development server is expected at:
+
+```text
+http://localhost:5173
+```
+
+## CORS, Cookies, and JWT
+
+CORS is configured in `src/main.ts`.
+
+- `CLIENT_URL` is the frontend origin allowed to call the API.
+- `credentials: true` allows browser requests to include cookies.
+
+Authentication uses an HTTP-only cookie named `access_token`.
+
+- The cookie is created after login/register.
+- `httpOnly: true` prevents browser JavaScript from reading the token directly.
+- `sameSite: 'lax'` supports normal local development navigation.
+- `secure: false` is for local HTTP development. Use HTTPS and `secure: true` in production.
+
+JWT settings are configured in `src/auth/auth.module.ts`.
+
+- `JWT_SECRET` is required. The server should not start without it.
+- `JWT_EXPIRES_IN` controls token expiration, for example `1d`.
+
+## TypeORM Synchronize
+
+The current local development setting uses:
+
+```ts
+synchronize: true
+```
+
+This lets TypeORM update the local database schema from entity classes during development.
+It is convenient for local work, but it should not be used in production because schema changes can cause data loss.
+
+Before production deployment, replace this with TypeORM migrations.
+
+## Useful Commands
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Run unit tests
+npm run test
+
+# Run e2e tests
+npm run test:e2e
+
+# Build server
+npm run build
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
