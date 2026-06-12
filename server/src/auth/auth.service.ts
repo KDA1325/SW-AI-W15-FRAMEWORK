@@ -12,12 +12,12 @@ import {
 // JWT 토큰을 만들기 위한 NestJS 서비스입니다.
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-//'@nestjs/typeorm'과 typeorm 차이 -> '@nestjs/typeorm'은 NestJS에서 TypeORM을 사용할 때 필요한 모듈과 데코레이터를 제공하는 패키지 
+//'@nestjs/typeorm'과 typeorm 차이 -> '@nestjs/typeorm'은 NestJS에서 TypeORM을 사용할 때 필요한 모듈과 데코레이터를 제공하는 패키지
 // 반면, 'typeorm'은 TypeORM 자체 라이브러리로, 데이터베이스와 상호작용하는 기능을 제공
 // NestJS에서는 '@nestjs/typeorm'을 통해 TypeORM의 Repository를 주입받아 사용할 수 있음
 // 그럼 '@nestjs/typeorm'는 typeorm의 래퍼? -> '@nestjs/typeorm'는 NestJS에서 TypeORM을 더 쉽게 사용할 수 있도록 도와주는 패키지
 // '@nestjs/typeorm'을 통해 TypeORM의 Repository를 주입받아 사용할 수 있는데 typeorm을 또 가져오는 이유 -> Repository 타입을 사용하기 위해서
-// 왜? import { Repository } from '@nestjs/typeorm';하면 안 됨? 
+// 왜? import { Repository } from '@nestjs/typeorm';하면 안 됨?
 // -> '@nestjs/typeorm'에서 Repository 타입을 가져오는 것도 가능하지만, 공식 문서에서는 TypeORM의 Repository 타입을 직접 가져와서 사용하는 것을 권장하기 때문에 typeorm에서 Repository를 가져오는 것이 일반적
 import { Repository } from 'typeorm';
 
@@ -32,7 +32,7 @@ import { Response } from 'express';
 import { User } from './entities/user.entity';
 
 // 로그인 요청 데이터 타입입니다.
-// dto에서 요청 데이터 타입은 가져오는데 응답 데이터 타입은 안 가져오는 이유 
+// dto에서 요청 데이터 타입은 가져오는데 응답 데이터 타입은 안 가져오는 이유
 // -> 응답 데이터는 보통 DB에서 가져온 엔티티 객체에서 필요한 정보만 골라서 반환하기 때문에, DTO로 따로 정의하지 않는 경우가 많습니다.
 import { LoginDto } from './dto/login.dto';
 
@@ -40,7 +40,7 @@ import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 
 // @Injectable()을 붙이면 NestJS가 AuthService를 서비스로 관리합니다.
-// 안 붙이면? -> NestJS가 이 클래스를 인식하지 못해서 DI(의존성 주입)도 안 되고, 다른 서비스나 컨트롤러에서 주입받아 사용할 수도 없음 
+// 안 붙이면? -> NestJS가 이 클래스를 인식하지 못해서 DI(의존성 주입)도 안 되고, 다른 서비스나 컨트롤러에서 주입받아 사용할 수도 없음
 // 그래서 AuthController에서 constructor로 주입받아 사용할 수 있습니다.
 // constructor = 이 클래스가 만들어질 때 필요한 의존성들을 매개변수로 받는 함수 -> NestJS가 이 매개변수들을 보고 필요한 객체를 만들어서 주입해줌
 @Injectable()
@@ -68,7 +68,7 @@ export class AuthService {
     // SQL로 치면 대략 아래와 비슷한 조회를 DB에 보내는 것입니다.
     // SELECT * FROM "User" WHERE email = dto.email LIMIT 1;
     // 단, findUnique는 @unique가 붙은 컬럼이나 id 같은 고유값으로만 조회할 때 사용합니다.
-    
+
     // this.userRepository.findOneBy -> 시간이 걸리는 작업 => await 필요
     const existingUser = await this.userRepository.findOneBy({
       // email 컬럼이 dto.email과 일치하는 레코드를 찾음
@@ -93,7 +93,7 @@ export class AuthService {
     // 4. 새 사용자 객체 생성 및 DB 저장 (create 후 save 진행)
     const newUser = this.userRepository.create({
       email: dto.email,
-      name: dto.name,
+      nickname: dto.nickname,
       passwordHash,
     });
 
@@ -111,7 +111,7 @@ export class AuthService {
 
     // 6. passwordHash를 제외한 안전한 사용자 정보만 응답합니다.
     // 쿠키도 응답? -> 쿠키는 응답 헤더에 Set-Cookie로 포함되어서 클라이언트로 전달됨
-    // 서버에서 클라이언트로 사용자 정보를 왜 응답? 
+    // 서버에서 클라이언트로 사용자 정보를 왜 응답?
     // -> 회원가입이나 로그인 후에 클라이언트가 사용자 정보를 화면에 표시하거나, 애플리케이션 상태를 업데이트할 때 필요하기 때문
     return this.safeUser(user);
   }
@@ -161,7 +161,7 @@ export class AuthService {
     // 그래서 로그인 성공 후에 JWT 토큰을 만들어서 쿠키에 저장할 때도 사용자 정보가 필요함
     // 그러니까 결국 me 함수도 로그인 검증 과정에서 실행되는 거라는 건가
     // -> me 함수는 로그인 검증 과정에서 실행되는 게 아니라, 로그인한 사용자가 자신의 정보를 조회할 때 실행되는 함수임
-    // 그럼 로그인 검증 과정에서 가져온 사용자 정보는 검증 후 아예 삭제되나? 
+    // 그럼 로그인 검증 과정에서 가져온 사용자 정보는 검증 후 아예 삭제되나?
     // -> 로그인 검증 과정에서 가져온 사용자 정보는 검증 후에도 남아있지만, 보통은 로그인 검증이 끝난 후에 JWT 토큰을 만들어서 쿠키에 저장하기 때문에, 그 이후에는 JWT 토큰에서 사용자 ID를 꺼내서 DB에서 다시 사용자 정보를 조회하는 방식으로 구현하는 경우가 많음
     // JWT 토큰을 쿠키로 저장하는데 결국 쿠키에서 사용자 정보를 꺼낸다는 거?
     // -> JWT 토큰에는 사용자 ID 같은 최소한의 정보만 담아서 쿠키에 저장하고, 실제로 사용자 정보를 조회할 때는 JWT 토큰에서 사용자 ID를 꺼내서 DB에서 다시 조회하는 방식이 일반적임
@@ -190,8 +190,8 @@ export class AuthService {
     // 뭐야 사용자가 브라우저 쿠키를 삭제하는 게 아니고 로그아웃 할 때 서버에서 쿠키가 삭제된다고?
     // -> 맞음 사용자가 로그아웃할 때 서버에서 쿠키를 삭제하는 방식으로 로그아웃을 구현하는 경우가 많음
     // 로그아웃할 때 서버에서 쿠키를 삭제하는 이유는, 사용자가 로그아웃 버튼을 클릭하면 서버에서 해당 사용자의 JWT 토큰이 담긴 쿠키를 삭제하여, 이후에 해당 쿠키가 포함된 요청이 오더라도 인증되지 않도록 하기 위함
-    // 쿠키를 삭제했는데 이후에 해당 쿠키가 포함된 요청이 어떻게 옴? 
-    // -> 쿠키를 삭제했는데도 브라우저가 해당 쿠키를 계속 보내는 경우가 있을 수 있음-> 어떻게? 
+    // 쿠키를 삭제했는데 이후에 해당 쿠키가 포함된 요청이 어떻게 옴?
+    // -> 쿠키를 삭제했는데도 브라우저가 해당 쿠키를 계속 보내는 경우가 있을 수 있음-> 어떻게?
     // -> 쿠키 삭제는 브라우저가 해당 쿠키를 더 이상 저장하지 않도록 하는 것이지만, 이미 저장된 쿠키가 완전히 사라지는 것은 아니기 때문에, 브라우저가 해당 쿠키를 계속 보내는 경우가 있을 수 있음
     res.clearCookie('access_token', {
       // httpOnly: true로 설정한 쿠키는 JavaScript에서 직접 삭제할 수 없기 때문에, 서버에서 clearCookie를 사용하여 삭제해야 합니다.
@@ -228,16 +228,16 @@ export class AuthService {
       path: '/',
 
       // 쿠키 유지 시간입니다. 24시간입니다.
-      // 그럼 계속 로그인 되어있어도 24시간 뒤엔 자동 로그아웃과 같은 거임? 
-      // -> JWT 토큰의 만료 시간과 쿠키의 유지 시간을 맞춰주는 것이 일반적이기 때문에, 
+      // 그럼 계속 로그인 되어있어도 24시간 뒤엔 자동 로그아웃과 같은 거임?
+      // -> JWT 토큰의 만료 시간과 쿠키의 유지 시간을 맞춰주는 것이 일반적이기 때문에,
       // JWT 토큰이 만료되면 쿠키도 더 이상 유효하지 않게 되어, 사용자가 다시 로그인해야 하는 상황이 발생할 수 있음
       // 근데 이거 24시간 해도 됨? 너무 길다는 얘기가 나왔는디 -> JWT 토큰의 만료 시간과 쿠키의 유지 시간을 설정할 때는 보안과 사용자 편의성 사이에서 균형을 맞추는 것이 중요함
-      // 그럼 24시간동안... 내 컴퓨터로 한번 로그인하면 로그아웃 하기 전까진 브라우저 창 닫았다가 다시 열어도 로그인 상태라는 거? 
+      // 그럼 24시간동안... 내 컴퓨터로 한번 로그인하면 로그아웃 하기 전까진 브라우저 창 닫았다가 다시 열어도 로그인 상태라는 거?
       // -> 맞음 쿠키의 유지 시간이 24시간으로 설정되어 있다면, 사용자가 로그인한 후에 브라우저 창을 닫았다가 다시 열어도 로그인 상태가 유지될 수 있음
       // 근데 1시간으로 해 두면 1시간 뒤엔 무조건 로그인이 풀린다는 거잖아 -> 맞음 쿠키의 유지 시간이 1시간으로 설정되어 있다면, 사용자가 로그인한 후에 1시간이 지나면 쿠키가 만료되어 로그인 상태가 풀릴 수 있음
       // 그럼 로그인 풀리기 전에 연장은 불가능한가 -> JWT 토큰의 만료 시간을 연장하는 방법은 여러 가지가 있지만, 일반적으로는 사용자가 활동할 때마다 새로운 JWT 토큰을 발급하여 쿠키에 저장하는 방식으로 구현함
-      // 그럼 1시간으로 해도 사용자가 계속 브라우저에서 작업하면 알아서 연장된다는 건가?  
-      // -> 사용자가 API 요청을 보낼 때마다 서버가 새 JWT 만들어서 쿠키 다시 내려주는 방식으로 구현하면 사용자가 계속 활동하는 동안 로그인 시간이 밀림  
+      // 그럼 1시간으로 해도 사용자가 계속 브라우저에서 작업하면 알아서 연장된다는 건가?
+      // -> 사용자가 API 요청을 보낼 때마다 서버가 새 JWT 만들어서 쿠키 다시 내려주는 방식으로 구현하면 사용자가 계속 활동하는 동안 로그인 시간이 밀림
       // 혹은 Access Token + Refresh token 방식으로 구현하면 Access Token 만료되면 Refresh token으로 새 access token 발급받음
       maxAge: 1000 * 60 * 60 * 24,
     });
@@ -248,7 +248,7 @@ export class AuthService {
     return {
       id: user.id,
       email: user.email,
-      name: user.name,
+      nickname: user.nickname,
     };
   }
 }

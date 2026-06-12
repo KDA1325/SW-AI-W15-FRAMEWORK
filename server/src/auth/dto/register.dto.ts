@@ -7,10 +7,10 @@ export class RegisterDto {
   @IsEmail()
   email!: string;
 
-  // name 값이 문자열인지 검사하고, 최소 2글자 이상인지 확인합니다.
+  // nickname 값이 문자열인지 검사하고, 최소 2글자 이상인지 확인합니다.
   @IsString()
   @MinLength(2)
-  name!: string;
+  nickname!: string;
 
   // password 값이 문자열인지 검사하고, 최소 8글자 이상인지 확인합니다.
   @IsString()

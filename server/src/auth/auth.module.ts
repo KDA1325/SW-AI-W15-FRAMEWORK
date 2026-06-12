@@ -13,7 +13,14 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AiProfile } from './entities/aiProfile.entity';
+import { ArchivePost } from './entities/archivePost.entity';
+import { Comment } from './entities/comment.entity';
+import { EmbeddingDocument } from './entities/embeddingDocument.entity';
+import { Game } from './entities/game.entity';
+import { Recommendation } from './entities/recommendation.entity';
 import { User } from './entities/user.entity';
+import { UserGame } from './entities/userGame.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
 // JWT signOptions의 expiresIn 타입을 정확히 맞추기 위해 가져옵니다.
@@ -25,7 +32,16 @@ import type { SignOptions } from 'jsonwebtoken';
   imports: [
     // AuthModule 안에서 User 엔티티를 사용할 수 있도록 등록합니다.
     // forFeature() => TypeORM이 이 모듈에서 특정 엔티티를 사용할 수 있게 해주는 메서드
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([
+      User,
+      Game,
+      UserGame,
+      ArchivePost,
+      Comment,
+      AiProfile,
+      Recommendation,
+      EmbeddingDocument,
+    ]),
     // JWT 인증 전략을 사용하기 위해 PassportModule을 등록합니다.
     PassportModule,
 
