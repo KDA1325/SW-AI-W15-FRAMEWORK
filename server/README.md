@@ -102,6 +102,44 @@ It is convenient for local work, but it should not be used in production because
 
 Before production deployment, replace this with TypeORM migrations.
 
+## Domain Data Model
+
+GJC-63 defines the core data model around users, games, archive posts, comments, AI profiles, recommendations, and embedding documents.
+
+### Entities
+
+| Entity | Purpose |
+| --- | --- |
+| `User` | Authenticated user profile. Stores email, password hash, nickname, bio, profile image, gamer tags, and optional Steam id. |
+| `Game` | Game master data. Stores external ids, title, image, description, genres, platforms, and store/game tags. |
+| `UserGame` | Join entity between `User` and `Game` with playtime, achievement rate, and last played time. |
+| `ArchivePost` | Unified post table for reviews and journals. `type` is `REVIEW` or `JOURNAL`; `rating` is used only for reviews. |
+| `Comment` | Comment table for archive posts. Supports nested replies through `parentCommentId`. |
+| `AiProfile` | One AI-generated taste profile per user, including play style summary and favorite keywords/genres. |
+| `Recommendation` | Recommended game result for a user, including reason, score, and rank. |
+| `EmbeddingDocument` | RAG source document metadata for games, archive posts, and AI profiles. |
+
+### Relationships
+
+```text
+User 1 ── N UserGame N ── 1 Game
+User 1 ── N ArchivePost N ── 1 Game
+ArchivePost 1 ── N Comment
+User 1 ── N Comment
+Comment 1 ── N Comment replies
+User 1 ── 1 AiProfile
+User 1 ── N Recommendation N ── 1 Game
+EmbeddingDocument sourceType/sourceId -> Game | ArchivePost | AiProfile
+```
+
+### Notes
+
+- `ArchivePost` intentionally combines reviews and journals. `rating` is nullable and should be set only when `type = REVIEW`.
+- `Comment.parentCommentId` is nullable. `null` means a top-level comment; a value means the comment is a reply.
+- `EmbeddingDocument.embedding` is not mapped as a TypeORM `@Column` because this project uses PostgreSQL `pgvector`. The `PgvectorSetupService` creates the actual `vector(1536)` column and HNSW index with raw SQL after TypeORM synchronization.
+- User-entered gamer tags are stored on `User.gamerTags`.
+- Store/game tags from Steam are currently stored on `Game.tags` as a `text[]` array. A separate `Tag` entity is not part of the current simplified schema.
+
 ## Useful Commands
 
 ```bash
