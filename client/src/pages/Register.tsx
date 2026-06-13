@@ -1,27 +1,22 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import type { AxiosError } from 'axios'
 import { Link } from 'react-router-dom'
-import { api } from '../api'
+import { api, getApiErrorMessage } from '../api'
 import '../styles/Register.css'
 
 // Register.html의 네 개 입력 필드를 React 상태로 옮긴 형태입니다.
 // confirmPassword는 서버로 보내지 않고 클라이언트에서 비밀번호 확인에만 사용합니다.
 type RegisterForm = {
-  name: string
+  nickname: string
   email: string
   password: string
   confirmPassword: string
 }
 
-type ApiErrorResponse = {
-  message?: string | string[]
-}
-
 function Register() {
   // 정적 HTML input을 controlled input으로 바꾸기 위해 모든 입력값을 form 상태에 모읍니다.
   const [form, setForm] = useState<RegisterForm>({
-    name: '',
+    nickname: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -46,25 +41,16 @@ function Register() {
     try {
       // confirmPassword는 검증용 상태라 API payload에서는 제외합니다.
       await api.post('/auth/register', {
-        name: form.name,
+        nickname: form.nickname,
         email: form.email,
         password: form.password,
       })
       setMessage('ACCOUNT INITIALIZED')
     } catch (error) {
       // NestJS ValidationPipe 에러는 message가 문자열 배열로 올 수 있어서 배열/문자열을 나눠 처리합니다.
-      const axiosError = error as AxiosError<ApiErrorResponse>
-      const responseMessage = axiosError.response?.data?.message
-
-      if (!axiosError.response) {
-        setMessage('SERVER CONNECTION FAILED')
-      } else if (Array.isArray(responseMessage)) {
-        setMessage(responseMessage.join(' / ').toUpperCase())
-      } else if (responseMessage) {
-        setMessage(responseMessage.toUpperCase())
-      } else {
-        setMessage('REGISTRATION FAILED')
-      }
+      // catch (error)의 error는 TypeScript에서 unknown으로 보는 것이 안전합니다.
+      // 그래서 axios 응답 구조를 직접 뒤지지 않고, 공통 함수에 맡겨 화면 메시지만 받습니다.
+      setMessage(getApiErrorMessage(error, 'REGISTRATION FAILED'))
     } finally {
       setIsSubmitting(false)
     }
@@ -122,11 +108,11 @@ function Register() {
                     autoComplete="username"
                     id="identifier"
                     name="identifier"
-                    // HTML의 identifier input은 서버 DTO의 name 필드로 매핑됩니다.
-                    onChange={updateField('name')}
+                    // HTML의 identifier input은 서버 RegisterDto의 nickname 필드로 매핑됩니다.
+                    onChange={updateField('nickname')}
                     placeholder="ENTER_USERNAME_"
                     type="text"
-                    value={form.name}
+                    value={form.nickname}
                   />
                 </label>
 

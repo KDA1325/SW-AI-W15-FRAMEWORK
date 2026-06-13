@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { api } from '../api'
+import { api, getApiErrorMessage } from '../api'
 import '../styles/login.css'
 import LoginPendingView from './LoginPendingView'
 
@@ -32,8 +32,10 @@ function Login() {
       await api.post('/auth/login', form)
       setMessage('LOGIN SUCCESS')
       navigate('/profile')
-    } catch {
-      setMessage('LOGIN FAILED')
+    } catch (error) {
+      // 서버가 보낸 UnauthorizedException 메시지나 ValidationPipe 메시지를 공통 함수로 꺼냅니다.
+      // 이렇게 하면 로그인 화면도 회원가입 화면과 같은 에러 처리 기준을 사용합니다.
+      setMessage(getApiErrorMessage(error, 'LOGIN FAILED'))
     } finally {
       setIsSubmitting(false)
     }
