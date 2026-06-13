@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { PostsModule } from './posts/posts.module';
 import { PgvectorSetupService } from './database/pgvector-setup.service';
 
 @Module({
@@ -31,6 +32,7 @@ import { PgvectorSetupService } from './database/pgvector-setup.service';
       }),
     }),
     AuthModule,
+    PostsModule,
   ],
   providers: [PgvectorSetupService],
 })
