@@ -9,8 +9,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from './comment.entity';
-import { Game } from './game.entity';
-import { User } from './user.entity';
+import { Game } from '../../auth/entities/game.entity';
+import { User } from '../../auth/entities/user.entity';
 
 // 리뷰와 저널을 하나의 ArchivePost 테이블에 함께 저장하기 위한 구분값입니다.
 // 문자열 enum으로 두면 DB와 API 응답에서 REVIEW/JOURNAL처럼 읽기 쉬운 값이 저장됩니다.

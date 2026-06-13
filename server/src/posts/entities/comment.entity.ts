@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { ArchivePost } from './archivePost.entity';
-import { User } from './user.entity';
+import { User } from '../../auth/entities/user.entity';
 
 // 댓글 테이블입니다.
 // 모든 댓글은 ArchivePost 하나에 속하고, parentCommentId를 통해 대댓글 구조를 만들 수 있습니다.

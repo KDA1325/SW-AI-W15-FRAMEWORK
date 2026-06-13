@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ArchivePost } from './archivePost.entity';
+import { ArchivePost } from '../../posts/entities/archivePost.entity';
 import { Recommendation } from './recommendation.entity';
 import { UserGame } from './userGame.entity';
 

@@ -8,8 +8,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AiProfile } from './aiProfile.entity';
-import { ArchivePost } from './archivePost.entity';
-import { Comment } from './comment.entity';
+import { ArchivePost } from '../../posts/entities/archivePost.entity';
+import { Comment } from '../../posts/entities/comment.entity';
 import { Recommendation } from './recommendation.entity';
 import { UserGame } from './userGame.entity';
 
