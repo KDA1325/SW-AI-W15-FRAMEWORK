@@ -9,6 +9,8 @@ import ReviewDetail from './pages/ReviewDetail'
 import Timeline from './pages/Timeline'
 import WriteJournal from './pages/WriteJournal'
 import WriteReview from './pages/WriteReview'
+// default export 함수라 {} 안 씀 
+import ProtectedRoute from './auth/ProtectedRoute'
 
 function App() {
   return (
@@ -16,14 +18,14 @@ function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/recommend" element={<Recommend />} />
-      <Route path="/journals" element={<Journals />} />
-      <Route path="/timeline" element={<Timeline />} />
-      <Route path="/write-review" element={<WriteReview />} />
-      <Route path="/write-journal" element={<WriteJournal />} />
-      <Route path="/journal-detail" element={<JournalDetail />} />
-      <Route path="/review-detail" element={<ReviewDetail />} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/recommend" element={<ProtectedRoute><Recommend /></ProtectedRoute>} />
+      <Route path="/journals" element={<ProtectedRoute><Journals /></ProtectedRoute>} />
+      <Route path="/timeline" element={<ProtectedRoute><Timeline /></ProtectedRoute>} />
+      <Route path="/write-review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
+      <Route path="/write-journal" element={<ProtectedRoute><WriteJournal /></ProtectedRoute>} />
+      <Route path="/journal-detail" element={<ProtectedRoute><JournalDetail /></ProtectedRoute>} />
+      <Route path="/review-detail" element={<ProtectedRoute><ReviewDetail /></ProtectedRoute>} />
     </Routes>
   )
 }
