@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 import { api, getApiErrorMessage } from '../api'
 import '../styles/login.css'
 import LoginPendingView from './LoginPendingView'
@@ -20,7 +21,8 @@ function Login() {
   })
   const [message, setMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const { refreshUser } = useAuth()
+  
   // HTML 시안의 type="button"을 실제 로그인 폼 제출 흐름으로 바꾼 부분입니다.
   // preventDefault로 브라우저 새로고침을 막고 axios 공통 인스턴스로 NestJS API에 요청합니다.
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -30,6 +32,10 @@ function Login() {
 
     try {
       await api.post('/auth/login', form)
+
+      // 로그인 요청 성공 이후 /auth/me 다시 호출, context user 상태 갱신 
+      await refreshUser()
+
       setMessage('LOGIN SUCCESS')
       navigate('/profile')
     } catch (error) {
