@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import '../styles/Register.css'
 
@@ -14,6 +14,7 @@ type RegisterForm = {
 }
 
 function Register() {
+  const navigate = useNavigate()
   // 정적 HTML input을 controlled input으로 바꾸기 위해 모든 입력값을 form 상태에 모읍니다.
   const [form, setForm] = useState<RegisterForm>({
     nickname: '',
@@ -46,6 +47,7 @@ function Register() {
         password: form.password,
       })
       setMessage('ACCOUNT INITIALIZED')
+      navigate('/login')
     } catch (error) {
       // NestJS ValidationPipe 에러는 message가 문자열 배열로 올 수 있어서 배열/문자열을 나눠 처리합니다.
       // catch (error)의 error는 TypeScript에서 unknown으로 보는 것이 안전합니다.
