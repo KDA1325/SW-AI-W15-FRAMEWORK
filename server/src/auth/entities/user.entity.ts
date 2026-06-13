@@ -31,7 +31,7 @@ export class User {
   passwordHash!: string;
 
   // 화면에 표시할 사용자 이름입니다. 기존 name 대신 서비스 도메인 용어인 nickname을 사용합니다.
-  @Column()
+  @Column({ default: 'PLAYER' })
   nickname!: string;
 
   // bio는 사용자가 입력하지 않을 수 있으므로 nullable 컬럼으로 둡니다.
@@ -41,7 +41,7 @@ export class User {
 
   // 프로필 이미지는 없는 사용자가 자연스러우므로 nullable입니다.
   // 기본 이미지는 DB에 저장하지 않고 프론트에서 fallback으로 처리하는 쪽이 단순합니다.
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   profileImageUrl!: string | null;
 
   // PostgreSQL의 text[] 배열 컬럼입니다.
@@ -50,7 +50,7 @@ export class User {
   gamerTags!: string[];
 
   // Steam 계정 연동 전까지는 없을 수 있으므로 nullable입니다.
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   steamId!: string | null;
 
   // User 1명은 여러 UserGame 레코드를 가질 수 있습니다.

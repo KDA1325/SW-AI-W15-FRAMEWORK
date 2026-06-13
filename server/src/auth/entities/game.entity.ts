@@ -20,11 +20,11 @@ export class Game {
 
   // Steam에서 가져온 게임이면 steamAppId가 들어갑니다.
   // 외부 API ID는 중복되면 안 되므로 unique를 둡니다. 아직 모르는 게임은 null일 수 있습니다.
-  @Column({ nullable: true, unique: true })
+  @Column({ type: 'varchar', nullable: true, unique: true })
   steamAppId!: string | null;
 
   // IGDB 같은 다른 게임 DB 연동을 고려한 외부 ID입니다.
-  @Column({ nullable: true, unique: true })
+  @Column({ type: 'varchar', nullable: true, unique: true })
   igdbId!: string | null;
 
   // 사용자에게 보이는 게임 제목입니다.
@@ -32,7 +32,7 @@ export class Game {
   title!: string;
 
   // 표지 이미지 URL입니다. 이미지가 없을 수 있어서 nullable입니다.
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', nullable: true })
   imageUrl!: string | null;
 
   // 게임 설명은 길 수 있으므로 varchar 기본값 대신 text 타입을 씁니다.
