@@ -4,10 +4,8 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   Max,
-  MaxLength,
   Min, 
 } from 'class-validator';
 
