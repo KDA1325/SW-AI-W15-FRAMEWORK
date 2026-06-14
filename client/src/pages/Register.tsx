@@ -104,7 +104,7 @@ function Register() {
                     <span className="material-symbols-outlined" aria-hidden="true">
                       terminal
                     </span>
-                    IDENTIFIER
+                    IDENTIFIER *
                   </span>
                   <input
                     autoComplete="username"
@@ -123,7 +123,7 @@ function Register() {
                     <span className="material-symbols-outlined" aria-hidden="true">
                       mail
                     </span>
-                    EMAIL ADDRESS
+                    EMAIL ADDRESS *
                   </span>
                   <input
                     autoComplete="email"
@@ -142,7 +142,7 @@ function Register() {
                     <span className="material-symbols-outlined" aria-hidden="true">
                       key
                     </span>
-                    ACCESS CODE
+                    ACCESS CODE *
                   </span>
                   <input
                     autoComplete="new-password"

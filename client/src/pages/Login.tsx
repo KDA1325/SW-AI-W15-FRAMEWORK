@@ -91,7 +91,7 @@ function Login() {
 
               <form className="login-form" onSubmit={handleSubmit}>
                 <label className="login-field">
-                  <span>IDENTIFIER</span>
+                  <span>EMAIL</span>
                   <input
                     autoComplete="email"
                     name="email"
