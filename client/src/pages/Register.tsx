@@ -104,7 +104,7 @@ function Register() {
                     <span className="material-symbols-outlined" aria-hidden="true">
                       terminal
                     </span>
-                    IDENTIFIER *
+                    NICKNAME *
                   </span>
                   <input
                     autoComplete="username"
