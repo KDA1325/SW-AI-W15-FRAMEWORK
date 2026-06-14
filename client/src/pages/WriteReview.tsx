@@ -18,11 +18,12 @@ function WriteReview() {
 
     try {
       // TODO: 실제 POST 요청을 보내야 함
-      await api.post('/post', {
+      await api.post('/posts', {
+        type: 'REVIEW',
         gameTitle,
-        reviewTitle,
+        title: reviewTitle,
+        content: review,
         rating: parseFloat(rating),
-        reviewcontent: review,
       })
       
       navigate('/journals')
@@ -60,7 +61,7 @@ function WriteReview() {
             <input
               className="w-full border-2 border-primary bg-surface p-4 font-body-lg text-body-lg"
               max="5"
-              min="0"
+              min="1"
               onChange={(event) => setRating(event.target.value)}
               required
               step="0.5"

@@ -8,7 +8,7 @@ function WriteJournal() {
   const navigate = useNavigate()
   const [gameTitle, setGameTitle] = useState('')
   const [logTitle, setLogTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [logContent, setContent] = useState('')
   const [message, setMessage] = useState('')
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -16,11 +16,11 @@ function WriteJournal() {
     event.preventDefault()
     //setMessage('CHRONICLE_SYNCED')
     try {
-        // TODO: 실제 POST 요청을 보내야 함
-        await api.post('/post', {
+        await api.post('/posts', {
+          type: 'JOURNAL',
           gameTitle,
-          logTitle,
-          logcontent: content,
+          title: logTitle,
+          content: logContent,
         })
         
         navigate('/journals')
@@ -91,7 +91,7 @@ function WriteJournal() {
                 onChange={(event) => setContent(event.target.value)}
                 placeholder="INITIATE_CHRONICLE_ENTRY..."
                 required
-                value={content}
+                value={logContent}
               />
             </div>
           </label>
