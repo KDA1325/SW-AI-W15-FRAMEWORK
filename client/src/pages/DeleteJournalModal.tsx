@@ -1,21 +1,39 @@
+import { useState } from 'react'
+import { api, getApiErrorMessage } from '../api'
+import type { JournalPost } from './Journals'
+
 type DeleteJournalModalProps = {
   isOpen: boolean
+  post: JournalPost | null
   onClose: () => void
+  onDeleted: () => void | Promise<void>
 }
 
-function DeleteJournalModal({ isOpen, onClose }: DeleteJournalModalProps) {
-  if (!isOpen) {
+function DeleteJournalModal({ isOpen, post, onClose, onDeleted }: DeleteJournalModalProps) {
+  const [message, setMessage] = useState('')
+
+  if (!isOpen || !post) {
     return null
+  }
+
+  const handleDelete = async () => {
+    try {
+      setMessage('')
+
+      // Delete the selected journal and refresh the parent list so stale rows are not shown.
+      await api.delete(`/posts/${post.id}`)
+      await onDeleted()
+      onClose()
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, 'JOURNAL DELETE FAILED'))
+    }
   }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-primary/50 p-4">
       <div className="w-full max-w-md border-4 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className="mb-6 flex items-center justify-between border-b-4 border-[var(--gjc-primary)] pb-4">
-          {/* 원본 h2 텍스트와 Material Symbol close 버튼을 JSX className 구조로 변환했습니다. */}
-          <h2 className="font-headline-lg text-2xl uppercase tracking-widest">
-            DELETE_CONFIRMATION
-          </h2>
+          <h2 className="font-headline-lg text-2xl uppercase tracking-widest">DELETE_CONFIRMATION</h2>
           <button
             className="p-1 text-primary transition-colors hover:bg-primary hover:text-on-primary"
             onClick={onClose}
@@ -27,10 +45,12 @@ function DeleteJournalModal({ isOpen, onClose }: DeleteJournalModalProps) {
 
         <div className="mb-8">
           <p className="font-body-md text-sm uppercase leading-relaxed tracking-wider">
-            정말로 이 저널 항목을 영구적으로 삭제하시겠습니까?
+            DELETE JOURNAL: {post.title}
           </p>
-          <div>이 작업은 취소할 수 없습니다.</div>
+          <div>THIS ACTION CANNOT BE UNDONE.</div>
         </div>
+
+        {message ? <p className="mb-4 font-label-caps text-xs uppercase text-primary">{message}</p> : null}
 
         <div className="flex flex-col gap-4 md:flex-row">
           <button
@@ -42,7 +62,7 @@ function DeleteJournalModal({ isOpen, onClose }: DeleteJournalModalProps) {
           </button>
           <button
             className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] py-4 font-ui-button uppercase tracking-widest text-[var(--gjc-primary)] transition-colors hover:border-[var(--gjc-on-error)] hover:bg-[var(--gjc-on-error-container)] hover:text-[var(--gjc-on-primary)]"
-            onClick={onClose}
+            onClick={handleDelete}
             type="button"
           >
             DELETE
