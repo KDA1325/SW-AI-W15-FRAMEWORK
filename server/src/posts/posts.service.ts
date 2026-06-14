@@ -57,10 +57,11 @@ export default class PostsService {
 
     // 게시글 목록을 최신순으로 조회합니다.
     // type이 들어오면 REVIEW 또는 JOURNAL만 필터링하고, 없으면 전체를 반환합니다.
-    async findAll(userId: string, type?: ArchivePostType) {
-        return this.postRepository.find({
+    async findAll(userId: string, type?: ArchivePostType, mineOnly = false) {
+        const posts = await this.postRepository.find({
             where: {
                 ...(type ? { type } : {}),
+                ...(mineOnly ? { userId } : {}),
             },
             relations: {
                 game: true,
@@ -70,6 +71,13 @@ export default class PostsService {
                 createdAt: 'DESC',
             },
         });
+
+        // Timeline still receives all posts, while journals can request mineOnly for just my posts.
+        // canEdit remains useful for shared list UIs that need to hide edit/delete controls.
+        return posts.map((post) => ({
+            ...post,
+            canEdit: post.userId === userId,
+        }));
     }
 
     // 게시글 상세를 조회합니다.
