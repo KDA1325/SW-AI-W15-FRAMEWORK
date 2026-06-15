@@ -352,6 +352,11 @@ function JournalDetail() {
           <>
             <section className="mb-16 grid grid-cols-1 gap-gutter md:grid-cols-12">
               <div className="flex flex-col justify-end md:order-1 md:col-span-8">
+                {/* 이 태그는 Steam/게임 메타 태그가 아니라 게시글 타입 태그입니다.
+                    타임라인 카드 오른쪽에 붙는 REVIEW/JOURNAL 배지와 같은 의미, 같은 디자인을 사용합니다. */}
+                <div className="mb-4 w-fit border border-primary bg-surface px-3 py-1 font-label-caps text-label-caps text-primary">
+                  {post.type}
+                </div>
                 <div className="mb-4">
                   <p className="mb-1 font-label-caps text-label-caps text-secondary">AUTHOR</p>
                   <a className="group flex items-center gap-3" href="#profile">
