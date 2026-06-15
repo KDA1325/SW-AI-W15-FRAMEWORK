@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
+import UpdateCommentDto from './dto/update-comment.dto';
 import { ArchivePostType } from './entities/archivePost.entity';
 import PostsService from './posts.service';
 
@@ -98,6 +99,19 @@ export class PostsController {
     // 서비스에서 post.userId와 req.user.userId를 비교해 본인 글만 수정합니다.
     return this.postsService.update(req.user.userId, id, dto);
   }
+  
+  // PATCH /posts/:postId/comments/:commentId
+  // 현재 로그인한 사용자가 작성한 댓글만 수정합니다.
+  @Patch(':postId/comments/:commentId')
+  updateComment(
+    @Req() req: AuthedRequest,
+    @Param('postId') postId: string,
+    @Param('commentId') commentId: string,
+    @Body() dto: UpdateCommentDto,
+  ) {
+    // 서비스에서 post.userId와 req.user.userId를 비교해 본인 댓글만 수정합니다.
+    return this.postsService.updateComment(req.user.userId, postId, commentId, dto);
+  }
 
   // DELETE /posts/:id
   // The service checks ownership before deleting.
@@ -105,5 +119,13 @@ export class PostsController {
   remove(@Req() req: AuthedRequest, @Param('id') id: string) {
     // 서비스에서 소유자 검사를 통과한 경우에만 삭제됩니다.
     return this.postsService.remove(req.user.userId, id);
+  }
+  
+  // DELETE /posts/:postId/comments/:commentId
+  // 현재 로그인한 사용자가 작성한 댓글만 삭제합니다.
+  @Delete(':postId/comments/:commentId')
+  removeComment(@Req() req: AuthedRequest, @Param('postId') postId: string, @Param('commentId') commentId: string) {
+    // 서비스에서 소유자 검사를 통과한 경우에만 삭제됩니다.
+    return this.postsService.removeComment(req.user.userId, postId, commentId);
   }
 }

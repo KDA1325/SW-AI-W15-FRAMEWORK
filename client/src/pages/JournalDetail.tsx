@@ -1,6 +1,7 @@
 ﻿import { type FormEvent, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
+import { useAuth } from '../auth/AuthContext'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
 import '../styles/JournalDetail.css'
@@ -8,6 +9,7 @@ import '../styles/JournalDetail.css'
 type DetailComment = {
   id: string
   postId: string
+  userId: string
   content: string
   parentCommentId: string | null
   createdAt: string
@@ -42,6 +44,7 @@ function getInitials(value: string) {
 }
 
 function JournalDetail() {
+  const { user } = useAuth()
   // App.tsx에서 /journal-detail/:postId 라우트를 등록했습니다.
   // 여기서 postId는 URL에 들어있는 실제 게시글 id입니다.
   // 예: /journal-detail/abc-123 으로 들어오면 postId === 'abc-123' 이 됩니다.
@@ -52,6 +55,9 @@ function JournalDetail() {
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmittingComment, setIsSubmittingComment] = useState(false)
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
+  const [editingCommentContent, setEditingCommentContent] = useState('')
+  const [commentActionId, setCommentActionId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!postId) {
@@ -114,6 +120,164 @@ function JournalDetail() {
     } finally {
       setIsSubmittingComment(false)
     }
+  }
+
+  const startEditComment = (entry: DetailComment) => {
+    setEditingCommentId(entry.id)
+    setEditingCommentContent(entry.content)
+    setMessage('')
+  }
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null)
+    setEditingCommentContent('')
+  }
+
+  const submitCommentEdit = async (entry: DetailComment) => {
+    if (!post) {
+      return
+    }
+
+    const content = editingCommentContent.trim()
+
+    if (!content) {
+      setMessage('COMMENT CONTENT REQUIRED')
+      return
+    }
+
+    try {
+      setCommentActionId(entry.id)
+      setMessage('')
+
+      const response = await api.patch<JournalDetailPost>(
+        `/posts/${post.id}/comments/${entry.id}`,
+        { content },
+      )
+
+      setPost(response.data)
+      cancelEditComment()
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, 'COMMENT UPDATE FAILED'))
+    } finally {
+      setCommentActionId(null)
+    }
+  }
+
+  const deleteComment = async (entry: DetailComment) => {
+    if (!post) {
+      return
+    }
+
+    const confirmed = window.confirm('댓글을 삭제할까요?')
+
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      setCommentActionId(entry.id)
+      setMessage('')
+
+      await api.delete(`/posts/${post.id}/comments/${entry.id}`)
+
+      setPost((currentPost) => {
+        if (!currentPost) {
+          return currentPost
+        }
+
+        const removeFromTree = (comments: DetailComment[]): DetailComment[] =>
+          comments
+            .filter((commentEntry) => commentEntry.id !== entry.id)
+            .map((commentEntry) => ({
+              ...commentEntry,
+              replies: commentEntry.replies
+                ? removeFromTree(commentEntry.replies)
+                : commentEntry.replies,
+            }))
+
+        return {
+          ...currentPost,
+          comments: removeFromTree(currentPost.comments ?? []),
+        }
+      })
+
+      if (editingCommentId === entry.id) {
+        cancelEditComment()
+      }
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, 'COMMENT DELETE FAILED'))
+    } finally {
+      setCommentActionId(null)
+    }
+  }
+
+  const renderCommentActions = (entry: DetailComment) => {
+    const canManageComment = user?.id === entry.userId
+
+    if (!canManageComment) {
+      return null
+    }
+
+    const isEditing = editingCommentId === entry.id
+    const isProcessing = commentActionId === entry.id
+
+    return (
+      <div className="flex flex-wrap justify-end gap-2">
+        {isEditing ? (
+          <>
+            <button
+              className="border border-primary bg-[var(--gjc-primary)] px-3 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-on-primary)] transition-colors hover:bg-white hover:text-[var(--gjc-primary)] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isProcessing}
+              onClick={() => void submitCommentEdit(entry)}
+              type="button"
+            >
+              SAVE
+            </button>
+            <button
+              className="border border-primary bg-white px-3 py-1 font-label-caps text-[10px] font-bold uppercase transition-colors hover:bg-surface-variant disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isProcessing}
+              onClick={cancelEditComment}
+              type="button"
+            >
+              CANCEL
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="border border-primary bg-white px-3 py-1 font-label-caps text-[10px] font-bold uppercase transition-colors hover:bg-surface-variant disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isProcessing}
+              onClick={() => startEditComment(entry)}
+              type="button"
+            >
+              EDIT
+            </button>
+            <button
+              className="border border-primary bg-[var(--gjc-on-error-fixed)] px-3 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-on-primary)] transition-colors hover:bg-surface-variant disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isProcessing}
+              onClick={() => void deleteComment(entry)}
+              type="button"
+            >
+              DELETE
+            </button>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  const renderCommentContent = (entry: DetailComment) => {
+    if (editingCommentId !== entry.id) {
+      return <p className="font-body-md text-body-md">{entry.content}</p>
+    }
+
+    return (
+      <textarea
+        className="min-h-24 w-full resize-none border border-primary bg-white p-3 font-body-md text-body-md focus:border-primary focus:outline-none focus:ring-0"
+        onChange={(event) => setEditingCommentContent(event.target.value)}
+        value={editingCommentContent}
+      />
+    )
   }
 
   // 상세 API 응답의 comments 안에는 이 게시글에 연결된 댓글들이 들어옵니다.
@@ -265,7 +429,8 @@ function JournalDetail() {
                               {formatDate(entry.createdAt)}
                             </span>
                           </div>
-                          <p className="font-body-md text-body-md">{entry.content}</p>
+                          {renderCommentContent(entry)}
+                          <div className="mt-3">{renderCommentActions(entry)}</div>
                           <div className="mt-4 flex flex-col gap-4">
                             <button
                               className="w-fit font-ui-button text-xs uppercase tracking-widest text-primary hover:underline"
@@ -297,7 +462,8 @@ function JournalDetail() {
                                         {formatDate(reply.createdAt)}
                                       </span>
                                     </div>
-                                    <p className="font-body-md text-body-md">{reply.content}</p>
+                                    {renderCommentContent(reply)}
+                                    <div className="mt-3">{renderCommentActions(reply)}</div>
                                   </div>
                                 </div>
                               ))}

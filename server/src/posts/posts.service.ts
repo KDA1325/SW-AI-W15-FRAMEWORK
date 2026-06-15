@@ -13,6 +13,7 @@ import { Brackets, Repository } from 'typeorm';
 import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
+import UpdateCommentDto from './dto/update-comment.dto';
 import {
     ArchivePost,
     ArchivePostType,
@@ -249,6 +250,22 @@ export default class PostsService {
 
         return this.findOne(userId, id);
     }
+    
+    // 댓글을 수정합니다.
+    // postId와 commentId로 댓글을 찾고, 댓글 작성자만 내용을 바꿀 수 있게 합니다.
+    // 수정 후에는 게시글 상세를 다시 반환해 프론트가 댓글 목록을 갱신할 수 있게 합니다.
+    async updateComment(userId: string, postId: string, commentId: string, dto: UpdateCommentDto) {
+        const comment = await this.findCommentOrThrow(postId, commentId);
+        this.assertCommentOwner(comment, userId);
+        
+        if (dto.content !== undefined) {
+            comment.content = dto.content;
+        }
+
+        await this.commentRepository.save(comment);
+
+        return this.findOne(userId, postId);
+    }
 
     // 게시글을 삭제합니다.
     // 삭제도 수정과 마찬가지로 작성자 본인에게만 허용합니다.
@@ -257,6 +274,18 @@ export default class PostsService {
         this.assertOwner(post, userId);
 
         await this.postRepository.remove(post);
+
+        return { ok: true };
+    }
+
+    // 댓글을 삭제합니다.
+    // 댓글 작성자만 삭제할 수 있습니다.
+    // postId까지 조건에 넣어 URL과 다른 게시글의 댓글이 삭제되는 상황을 막습니다.
+    async removeComment(userId: string, postId: string, commentId: string) {
+        const comment = await this.findCommentOrThrow(postId, commentId);
+        this.assertCommentOwner(comment, userId);
+
+        await this.commentRepository.remove(comment);
 
         return { ok: true };
     }
@@ -295,11 +324,36 @@ export default class PostsService {
         return post;
     }
 
+    // postId와 commentId를 함께 조회해 다른 게시글의 댓글을 잘못 건드리지 않도록 합니다.
+    // 댓글이 없으면 권한 검사나 저장 로직으로 넘어가지 않고 404를 반환합니다.
+    private async findCommentOrThrow(postId: string, commentId: string) {
+        const comment = await this.commentRepository.findOne({
+            where: {
+                id: commentId,
+                postId,
+            },
+        });
+
+        if (!comment) {
+            throw new NotFoundException('댓글을 찾을 수 없습니다.');
+        }
+
+        return comment;
+    }
+
     // 로그인한 사용자와 게시글 작성자가 같은지 검사합니다.
     // 다르면 403으로 막아 "본인 글만 수정/삭제" 완료 기준을 만족시킵니다.
     private assertOwner(post: ArchivePost, userId: string) {
         if (post.userId !== userId) {
             throw new ForbiddenException('본인 글만 수정하거나 삭제할 수 있습니다.');
+        }
+    }
+
+    // 로그인한 사용자와 댓글 작성자가 같은지 검사합니다.
+    // 다르면 403으로 막아 "본인 댓글만 수정/삭제" 완료 기준을 만족시킵니다.
+    private assertCommentOwner(comment: Comment, userId: string) {
+        if (comment.userId !== userId) {
+            throw new ForbiddenException('본인 댓글만 수정하거나 삭제할 수 있습니다.');
         }
     }
 
