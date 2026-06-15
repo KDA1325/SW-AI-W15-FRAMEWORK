@@ -27,13 +27,6 @@ type JournalDetailPost = JournalPost & {
   comments?: DetailComment[]
 }
 
-const tableOfContents = [
-  { label: 'JOURNAL_ENTRY', active: true },
-  { label: 'GAME_CONTEXT' },
-  { label: 'PLAYER_NOTE' },
-  { label: 'COMMENTS', active: true },
-]
-
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR')
 }
@@ -314,7 +307,7 @@ function JournalDetail() {
                 </section>
               </article>
 
-              <aside className="space-y-12 md:col-span-4">
+              {/* <aside className="space-y-12 md:col-span-4">
                 <section className="border-2 border-primary bg-white">
                   <div className="flex h-10 items-center border-b-2 border-primary px-4 journal-hatch-pattern">
                     <h4 className="font-label-caps text-label-caps font-bold">목차</h4>
@@ -332,7 +325,7 @@ function JournalDetail() {
                     ))}
                   </ul>
                 </section>
-              </aside>
+              </aside> */}
             </div>
           </>
         ) : null}
