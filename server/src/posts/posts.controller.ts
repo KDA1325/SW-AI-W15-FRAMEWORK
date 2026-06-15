@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
 import { ArchivePostType } from './entities/archivePost.entity';
@@ -51,10 +52,15 @@ export class PostsController {
     @Req() req: AuthedRequest,
     @Query('type') type?: ArchivePostType,
     @Query('mine') mine?: string,
+    // q는 Journals 검색창에서 넘어오는 검색어입니다.
+    // 예: /posts?type=JOURNAL&mine=true&q=zelda
+    // 컨트롤러는 query string 값을 꺼내기만 하고,
+    // 실제로 제목/본문/게임명 중 어디를 검색할지는 service에서 처리합니다.
+    @Query('q') q?: string,
   ) {
     // type은 REVIEW/JOURNAL 섹션 필터이고, mine=true는 내 게시글만 보는 필터입니다.
     // Query 값은 문자열로 들어오므로 'true'와 직접 비교해 boolean으로 바꿉니다.
-    return this.postsService.findAll(req.user.userId, type, mine === 'true');
+    return this.postsService.findAll(req.user.userId, type, mine === 'true', q);
   }
 
   // GET /posts/:id
@@ -63,6 +69,17 @@ export class PostsController {
   findOne(@Req() req: AuthedRequest, @Param('id') id: string) {
     // 상세 조회에서도 현재 사용자를 넘겨 canEdit을 계산하게 합니다.
     return this.postsService.findOne(req.user.userId, id);
+  }
+
+  // POST /posts/:id/comments
+  // 현재 로그인한 사용자가 특정 게시글에 댓글 또는 대댓글을 작성합니다.
+  @Post(':id/comments')
+  createComment(
+    @Req() req: AuthedRequest,
+    @Param('id') id: string,
+    @Body() dto: CreateCommentDto,
+  ) {
+    return this.postsService.createComment(req.user.userId, id, dto);
   }
 
   // PATCH /posts/:id

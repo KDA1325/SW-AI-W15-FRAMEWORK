@@ -1,4 +1,4 @@
-import { type FormEvent, useEffect, useState } from 'react'
+﻿import { type FormEvent, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import type { JournalPost } from './Journals'
@@ -7,6 +7,7 @@ import '../styles/JournalDetail.css'
 
 type DetailComment = {
   id: string
+  postId: string
   content: string
   parentCommentId: string | null
   createdAt: string
@@ -48,11 +49,16 @@ function getInitials(value: string) {
 }
 
 function JournalDetail() {
+  // App.tsx에서 /journal-detail/:postId 라우트를 등록했습니다.
+  // 여기서 postId는 URL에 들어있는 실제 게시글 id입니다.
+  // 예: /journal-detail/abc-123 으로 들어오면 postId === 'abc-123' 이 됩니다.
+  // 이 값을 API 경로 /posts/:id에 넣어 현재 보고 있는 게시글 하나만 DB에서 조회합니다.
   const { postId } = useParams()
   const [post, setPost] = useState<JournalDetailPost | null>(null)
   const [comment, setComment] = useState('')
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
 
   useEffect(() => {
     if (!postId) {
@@ -65,6 +71,10 @@ function JournalDetail() {
           setIsLoading(true)
           setMessage('')
 
+          // 상세 API 호출 흐름:
+          // 1. 목록에서 넘어온 postId를 이용해 GET /posts/:id 요청을 보냅니다.
+          // 2. 서버는 ArchivePost와 연결된 game, user, comments 정보를 함께 조회합니다.
+          // 3. 응답을 post state에 저장하면 아래 JSX가 DB 값을 기준으로 다시 렌더링됩니다.
           const response = await api.get<JournalDetailPost>(`/posts/${postId}`)
           setPost(response.data)
         } catch (error) {
@@ -81,13 +91,41 @@ function JournalDetail() {
     return () => window.clearTimeout(timeoutId)
   }, [postId])
 
-  const submitComment = (event: FormEvent<HTMLFormElement>) => {
+  const submitComment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setComment('')
+
+    const content = comment.trim()
+
+    if (!post || !content) {
+      return
+    }
+
+    try {
+      setIsSubmittingComment(true)
+      setMessage('')
+
+      const response = await api.post<JournalDetailPost>(`/posts/${post.id}/comments`, {
+        content,
+      })
+
+      setPost(response.data)
+      setComment('')
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, 'COMMENT SAVE FAILED'))
+    } finally {
+      setIsSubmittingComment(false)
+    }
   }
 
+  // 상세 API 응답의 comments 안에는 이 게시글에 연결된 댓글들이 들어옵니다.
+  // 그래도 화면에서는 한 번 더 postId를 확인합니다.
+  // 이유:
+  // - 댓글 엔티티에는 postId 컬럼이 있어서 어떤 게시글의 댓글인지 알 수 있습니다.
+  // - entry.postId === post.id 조건으로 현재 상세 페이지의 게시글 댓글만 남깁니다.
+  // - parentCommentId === null 조건으로 대댓글이 아닌 최상위 댓글만 먼저 화면에 배치합니다.
+  // - 대댓글은 각 댓글의 replies 배열에서 따로 렌더링합니다.
   const topLevelComments = (post?.comments ?? [])
-    .filter((entry) => entry.parentCommentId === null)
+    .filter((entry) => entry.postId === post?.id && entry.parentCommentId === null)
     .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
 
   const gameTitle = post?.game.title ?? 'UNKNOWN_GAME'
@@ -170,30 +208,7 @@ function JournalDetail() {
             <div className="grid grid-cols-1 gap-16 md:grid-cols-12">
               <article className="space-y-8 font-body-lg text-body-lg md:col-span-8">
                 <div>
-                  {/* <h2 className="mb-6 border-b-2 border-primary pb-2 font-headline-lg text-headline-lg uppercase">
-                    JOURNAL_ENTRY
-                  </h2> */}
                   <p className="whitespace-pre-wrap leading-relaxed">{post.content}</p>
-
-                  {/* {post.game.description ? (
-                    <>
-                      <h3 className="mb-4 mt-8 font-headline-lg text-headline-lg-mobile uppercase">
-                        GAME_CONTEXT
-                      </h3>
-                      <p className="mb-8 whitespace-pre-wrap">{post.game.description}</p>
-                    </>
-                  ) : null}
-
-                  {post.game.tags?.length ? (
-                    <ul className="mb-8 list-none space-y-4">
-                      {post.game.tags.map((tag) => (
-                        <li className="flex items-start gap-4" key={tag}>
-                          <span className="material-symbols-outlined mt-1 text-primary">pixel_6</span>
-                          <span>{tag}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null} */}
 
                   {post.game.imageUrl ? (
                     <figure className="mb-12 mt-8">
@@ -228,9 +243,10 @@ function JournalDetail() {
                     <div className="flex justify-end">
                       <button
                         className="border-2 border-primary bg-[var(--gjc-primary)] px-6 py-2 font-ui-button text-ui-button uppercase text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-white)] hover:text-black"
+                        disabled={isSubmittingComment}
                         type="submit"
                       >
-                        등록
+                        {isSubmittingComment ? '등록중...' : '등록'}
                       </button>
                     </div>
                   </form>
@@ -258,27 +274,34 @@ function JournalDetail() {
                             >
                               [ REPLY ]
                             </button>
-                            {(entry.replies ?? []).map((reply) => (
-                              <div
-                                className="ml-8 mt-4 border-t-2 border-surface-container-highest pt-4"
-                                key={reply.id}
-                              >
-                                <div className="border border-primary bg-white p-4">
-                                  <div className="mb-2 flex items-center justify-between gap-4">
-                                    <div className="flex items-center gap-2">
-                                      <span className="material-symbols-outlined text-xs">person</span>
-                                      <span className="font-label-caps text-label-caps font-bold">
-                                        {reply.user.nickname}
+                            {(entry.replies ?? [])
+                              // replies는 특정 댓글의 대댓글 목록입니다.
+                              // 대댓글도 Comment 테이블의 한 행이므로 postId를 가지고 있습니다.
+                              // 혹시 다른 게시글의 대댓글이 섞여 들어오는 상황을 막기 위해
+                              // 현재 post.id와 같은 데이터만 한 번 더 필터링합니다.
+                              .filter((reply) => reply.postId === post.id)
+                              .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
+                              .map((reply) => (
+                                <div
+                                  className="ml-8 mt-4 border-t-2 border-surface-container-highest pt-4"
+                                  key={reply.id}
+                                >
+                                  <div className="border border-primary bg-white p-4">
+                                    <div className="mb-2 flex items-center justify-between gap-4">
+                                      <div className="flex items-center gap-2">
+                                        <span className="material-symbols-outlined text-xs">person</span>
+                                        <span className="font-label-caps text-label-caps font-bold">
+                                          {reply.user.nickname}
+                                        </span>
+                                      </div>
+                                      <span className="font-label-caps text-xs text-secondary">
+                                        {formatDate(reply.createdAt)}
                                       </span>
                                     </div>
-                                    <span className="font-label-caps text-xs text-secondary">
-                                      {formatDate(reply.createdAt)}
-                                    </span>
+                                    <p className="font-body-md text-body-md">{reply.content}</p>
                                   </div>
-                                  <p className="font-body-md text-body-md">{reply.content}</p>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
                           </div>
                         </div>
                       ))
@@ -304,11 +327,6 @@ function JournalDetail() {
                         }`}
                         key={item.label}
                       >
-                        {/* {item.active ? (
-                          <span className="text-xs">&gt;</span>
-                        ) : (
-                          <span className="material-symbols-outlined text-xs">pixel_6</span>
-                        )} */}
                         {item.label}
                       </li>
                     ))}

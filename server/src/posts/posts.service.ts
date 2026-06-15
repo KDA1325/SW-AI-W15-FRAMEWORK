@@ -8,14 +8,16 @@ import {
 } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 
+import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
 import {
     ArchivePost,
     ArchivePostType,
 } from './entities/archivePost.entity';
+import { Comment } from './entities/comment.entity';
 import { Game } from '../auth/entities/game.entity';
 
 // 요청 DTO를 DB 엔티티로 바꾸고 권한 규칙을 보장하기 
@@ -26,6 +28,9 @@ export default class PostsService {
     constructor(
         @InjectRepository(ArchivePost)
         private postRepository: Repository<ArchivePost>,
+
+        @InjectRepository(Comment)
+        private commentRepository: Repository<Comment>,
 
         @InjectRepository(Game)
         private gameRepository: Repository<Game>,
@@ -57,20 +62,55 @@ export default class PostsService {
 
     // 게시글 목록을 최신순으로 조회합니다.
     // type이 들어오면 REVIEW 또는 JOURNAL만 필터링하고, 없으면 전체를 반환합니다.
-    async findAll(userId: string, type?: ArchivePostType, mineOnly = false) {
-        const posts = await this.postRepository.find({
-            where: {
-                ...(type ? { type } : {}),
-                ...(mineOnly ? { userId } : {}),
-            },
-            relations: {
-                game: true,
-                user: true,
-            },
-            order: {
-                createdAt: 'DESC',
-            },
-        });
+    async findAll(
+        userId: string,
+        type?: ArchivePostType,
+        mineOnly = false,
+        query?: string,
+    ) {
+        const keyword = query?.trim();
+        // 목록 조회는 조건이 여러 개 조합됩니다.
+        // - type: REVIEW 목록인지 JOURNAL 목록인지 구분
+        // - mineOnly: 내 글만 볼지, 전체 글을 볼지 구분
+        // - keyword: 제목/본문/게임 타이틀 검색어
+        // TypeORM find()만으로도 단순 조회는 가능하지만,
+        // "post.title OR post.content OR game.title"처럼 OR 조건을 묶고
+        // game 테이블까지 join해서 검색하려면 QueryBuilder가 더 명확합니다.
+        const postsQuery = this.postRepository
+            .createQueryBuilder('post')
+            .leftJoinAndSelect('post.game', 'game')
+            .leftJoinAndSelect('post.user', 'user')
+            .orderBy('post.createdAt', 'DESC');
+
+        if (type) {
+            postsQuery.andWhere('post.type = :type', { type });
+        }
+
+        if (mineOnly) {
+            postsQuery.andWhere('post.userId = :userId', { userId });
+        }
+
+        if (keyword) {
+            // 검색어가 있을 때만 검색 조건을 추가합니다.
+            // Brackets는 괄호 역할을 합니다.
+            // 즉 아래 조건은 SQL로 보면 대략 이런 의미입니다.
+            // AND (
+            //   post.title ILIKE '%검색어%'
+            //   OR post.content ILIKE '%검색어%'
+            //   OR game.title ILIKE '%검색어%'
+            // )
+            // ILIKE는 PostgreSQL에서 대소문자를 구분하지 않는 LIKE 검색입니다.
+            // 그래서 사용자가 게임 제목 일부나 글 본문 키워드를 입력해도 결과를 찾을 수 있습니다.
+            postsQuery.andWhere(
+                new Brackets((qb) => {
+                    qb.where('post.title ILIKE :keyword', { keyword: `%${keyword}%` })
+                        .orWhere('post.content ILIKE :keyword', { keyword: `%${keyword}%` })
+                        .orWhere('game.title ILIKE :keyword', { keyword: `%${keyword}%` });
+                }),
+            );
+        }
+
+        const posts = await postsQuery.getMany();
 
         // Timeline still receives all posts, while journals can request mineOnly for just my posts.
         // canEdit remains useful for shared list UIs that need to hide edit/delete controls.
@@ -88,10 +128,24 @@ export default class PostsService {
             relations: {
                 game: true,
                 user: true,
+                // 상세 페이지 댓글 영역은 댓글 작성자 이름과 대댓글까지 필요합니다.
+                // 그래서 post.comments만 가져오지 않고 comments.user, comments.replies.user까지 함께 가져옵니다.
+                // 이렇게 해두면 프론트에서 댓글마다 추가 API를 호출하지 않고 한 번의 상세 조회로 화면을 그릴 수 있습니다.
                 comments: {
                     user: true,
                     replies: {
                         user: true,
+                    },
+                },
+            },
+            order: {
+                // 댓글은 오래된 댓글부터 아래로 쌓이는 형태가 자연스럽습니다.
+                // createdAt ASC는 먼저 작성된 댓글이 먼저 오도록 정렬한다는 뜻입니다.
+                // replies도 같은 기준으로 정렬해서 대댓글 순서가 매번 흔들리지 않게 합니다.
+                comments: {
+                    createdAt: 'ASC',
+                    replies: {
+                        createdAt: 'ASC',
                     },
                 },
             },
@@ -105,6 +159,37 @@ export default class PostsService {
             ...post,
             canEdit: post.userId === userId,
         };
+    }
+
+    // 댓글 작성 API에서 사용하는 서비스 메서드입니다.
+    // postId는 URL의 /posts/:id/comments에서 온 값이고, userId는 JWT에서 꺼낸 로그인 사용자 id입니다.
+    // 댓글 저장 후에는 새 댓글이 포함된 상세 데이터를 다시 반환해서 프론트가 화면을 바로 갱신할 수 있게 합니다.
+    async createComment(userId: string, postId: string, dto: CreateCommentDto) {
+        await this.findPostOrThrow(postId);
+
+        if (dto.parentCommentId) {
+            const parentComment = await this.commentRepository.findOne({
+                where: {
+                    id: dto.parentCommentId,
+                    postId,
+                },
+            });
+
+            if (!parentComment) {
+                throw new BadRequestException('대댓글을 달 원본 댓글을 찾을 수 없습니다.');
+            }
+        }
+
+        const comment = this.commentRepository.create({
+            postId,
+            userId,
+            parentCommentId: dto.parentCommentId ?? null,
+            content: dto.content,
+        });
+
+        await this.commentRepository.save(comment);
+
+        return this.findOne(userId, postId);
     }
 
     // 게시글을 수정합니다.
