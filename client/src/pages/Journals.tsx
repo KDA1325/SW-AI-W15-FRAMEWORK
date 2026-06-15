@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { type FormEvent, useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import DeleteJournalModal from './DeleteJournalModal'
@@ -42,6 +42,14 @@ function Journals() {
   const [reviews, setReviews] = useState<JournalPost[]>([])
   const [journals, setJournals] = useState<JournalPost[]>([])
   const [message, setMessage] = useState('')
+  // searchInput은 사용자가 검색창에 타이핑하고 있는 현재 값입니다.
+  // searchQuery는 실제 API 요청에 사용할 확정된 검색어입니다.
+  // 두 값을 분리한 이유:
+  // - input onChange마다 바로 API를 호출하면 글자 하나 입력할 때마다 서버 요청이 발생합니다.
+  // - 그래서 사용자가 엔터를 치거나 SEARCH 버튼을 눌렀을 때만 searchQuery를 갱신합니다.
+  // - searchQuery가 바뀌면 fetchPosts가 다시 만들어지고, useEffect가 목록을 다시 불러옵니다.
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [selectedPost, setSelectedPost] = useState<JournalPost | null>(null)
 
   // Journals is a personal archive, so it requests only the signed-in user's posts.
@@ -49,10 +57,21 @@ function Journals() {
   const fetchPosts = useCallback(async () => {
     try {
       setMessage('')
+      // 이 페이지는 REVIEW_LOGS와 JOURNAL_LOGS를 화면에서 분리해서 보여줍니다.
+      // 그래서 API도 type=REVIEW, type=JOURNAL 두 번 호출합니다.
+      // mine=true는 "내가 작성한 게시글만" 가져오도록 서버에 알려주는 값입니다.
+      // 검색어가 있을 때는 q=검색어를 추가해서 서버가 DB에서 제목/본문/게임명 검색을 수행하게 합니다.
+      const reviewParams = new URLSearchParams({ type: 'REVIEW', mine: 'true' })
+      const journalParams = new URLSearchParams({ type: 'JOURNAL', mine: 'true' })
+
+      if (searchQuery) {
+        reviewParams.set('q', searchQuery)
+        journalParams.set('q', searchQuery)
+      }
 
       const [reviewResponse, journalResponse] = await Promise.all([
-        api.get<JournalPost[]>('/posts?type=REVIEW&mine=true'),
-        api.get<JournalPost[]>('/posts?type=JOURNAL&mine=true'),
+        api.get<JournalPost[]>(`/posts?${reviewParams.toString()}`),
+        api.get<JournalPost[]>(`/posts?${journalParams.toString()}`),
       ])
 
       setReviews(reviewResponse.data)
@@ -60,7 +79,7 @@ function Journals() {
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
     }
-  }, [])
+  }, [searchQuery])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -80,17 +99,45 @@ function Journals() {
     setActiveModal(modal)
   }
 
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    // form submit은 엔터 입력과 SEARCH 버튼 클릭 둘 다에서 발생합니다.
+    // trim()으로 앞뒤 공백을 제거한 값을 검색어로 확정합니다.
+    // 만약 공백만 입력했다면 빈 문자열이 되므로 q를 붙이지 않고 전체 목록을 다시 조회합니다.
+    setSearchQuery(searchInput.trim())
+  }
+
   return (
     <PageChrome active="journals">
       <main className="journals-page flex-grow w-full max-w-[1200px] mx-auto px-8 py-20 flex flex-col gap-[80px]">
         <section className="flex flex-col gap-4">
-          {/* Search is still visual-only; API filtering can be added after CRUD flows are stable. */}
-          <input
-            className="w-full bg-surface-container-low border-2 border-[var(--gjc-primary)] py-2 pl-12 pr-4 text-sm font-label-caps placeholder:text-secondary focus:outline-none focus:ring-0 uppercase tracking-wider"
-            placeholder="SEARCH_QUERY: TITLE OR KEYWORD..."
-            type="text"
-          />
+          <form className="flex flex-col gap-3 md:flex-row" onSubmit={handleSearch}>
+            <div className="relative flex-1">
+              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-secondary">
+                search
+              </span>
+              <input
+                className="w-full border-2 border-[var(--gjc-primary)] bg-surface-container-low py-2 pl-12 pr-4 font-label-caps text-sm uppercase tracking-wider placeholder:text-secondary focus:outline-none focus:ring-0"
+                onChange={(event) => setSearchInput(event.target.value)}
+                placeholder="SEARCH_QUERY: GAME TITLE OR KEYWORD..."
+                type="text"
+                value={searchInput}
+              />
+            </div>
+            <button
+              className="flex items-center justify-center gap-2 border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] px-6 py-2 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-surface-container-lowest)] hover:text-[var(--gjc-primary)]"
+              type="submit"
+            >
+              SEARCH
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+          </form>
           {message ? <p className="font-label-caps text-xs uppercase text-primary">{message}</p> : null}
+          {searchQuery ? (
+            <p className="font-label-caps text-xs uppercase tracking-wider text-secondary">
+              SEARCHING: {searchQuery}
+            </p>
+          ) : null}
         </section>
 
         <section className="mb-20">
@@ -146,6 +193,13 @@ function Journals() {
                     <span className="font-ui-button">GAME: {post.game.title}</span>
                     <span className="font-ui-button">RATING: {post.rating ?? '-'}/5</span>
                     <p className="mt-4 font-body-md text-sm leading-relaxed">{post.content}</p>
+                    <Link
+                      className="absolute bottom-4 right-4 flex items-center gap-2 border-b-2 border-on-primary pb-0.5 font-ui-button text-xs uppercase tracking-widest text-on-primary transition-colors hover:bg-on-primary hover:text-primary"
+                      to={`/review-detail/${post.id}`}
+                    >
+                      VIEW_LOG
+                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                    </Link>
                   </div>
                 </div>
               </article>
