@@ -63,6 +63,12 @@ function ReviewDetail() {
           setMessage('')
 
           const response = await api.get<ReviewDetailPost>(`/posts/${postId}`)
+          if (response.data.type !== 'REVIEW') {
+            setPost(null)
+            setMessage('POST ID NOT FOUND')
+            return
+          }
+
           setPost(response.data)
         } catch (error) {
           setPost(null)

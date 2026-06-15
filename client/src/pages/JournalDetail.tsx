@@ -69,6 +69,12 @@ function JournalDetail() {
           // 2. 서버는 ArchivePost와 연결된 game, user, comments 정보를 함께 조회합니다.
           // 3. 응답을 post state에 저장하면 아래 JSX가 DB 값을 기준으로 다시 렌더링됩니다.
           const response = await api.get<JournalDetailPost>(`/posts/${postId}`)
+          if (response.data.type !== 'JOURNAL') {
+            setPost(null)
+            setMessage('POST ID NOT FOUND')
+            return
+          }
+
           setPost(response.data)
         } catch (error) {
           setPost(null)
