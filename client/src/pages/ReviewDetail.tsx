@@ -25,6 +25,26 @@ function getInitials(value: string) {
     .toUpperCase()
 }
 
+function getStarIcon(rating: number, index: number) {
+  const starValue = index + 1
+
+  if (rating >= starValue) {
+    return 'star'
+  }
+
+  if (rating >= starValue - 0.5) {
+    return 'star_half'
+  }
+
+  return 'star'
+}
+
+function getStarFill(rating: number, index: number) {
+  const starValue = index + 1
+
+  return rating >= starValue - 0.5 ? 1 : 0
+}
+
 function ReviewDetail() {
   const { postId } = useParams()
   const [post, setPost] = useState<ReviewDetailPost | null>(null)
@@ -112,8 +132,14 @@ function ReviewDetail() {
                   <div className="flex items-center gap-3">
                     <div className="flex gap-1 text-primary">
                       {Array.from({ length: 5 }).map((_, index) => (
-                        <span className="material-symbols-outlined text-[20px]" key={index}>
-                          {index < Math.round(rating) ? 'star' : 'star_outline'}
+                        <span
+                          className="material-symbols-outlined text-[20px]"
+                          key={index}
+                          style={{
+                            fontVariationSettings: `'FILL' ${getStarFill(rating, index)}, 'wght' 400, 'GRAD' 0, 'opsz' 24`,
+                          }}
+                        >
+                          {getStarIcon(rating, index)}
                         </span>
                       ))}
                     </div>
