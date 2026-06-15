@@ -11,6 +11,8 @@ import '../styles/Journals.css'
 type JournalsModal = 'delete-journal' | 'delete-review' | 'edit-journal' | 'edit-review' | null
 
 export type PostType = 'REVIEW' | 'JOURNAL'
+type PostSort = 'latest' | 'oldest' | 'rating'
+type JournalLimit = 5 | 10 | 15
 
 export type JournalPost = {
   id: string
@@ -51,6 +53,12 @@ function Journals() {
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPost, setSelectedPost] = useState<JournalPost | null>(null)
+  // These controls map directly to GET /posts query params.
+  // Review cards only need sorting, while journal rows also support page size and page movement.
+  const [reviewSort, setReviewSort] = useState<PostSort>('rating')
+  const [journalSort, setJournalSort] = useState<PostSort>('latest')
+  const [journalLimit, setJournalLimit] = useState<JournalLimit>(5)
+  const [journalPage, setJournalPage] = useState(1)
 
   // Journals is a personal archive, so it requests only the signed-in user's posts.
   // Timeline should use /posts without mine=true when it needs every user's posts.
@@ -61,8 +69,20 @@ function Journals() {
       // 그래서 API도 type=REVIEW, type=JOURNAL 두 번 호출합니다.
       // mine=true는 "내가 작성한 게시글만" 가져오도록 서버에 알려주는 값입니다.
       // 검색어가 있을 때는 q=검색어를 추가해서 서버가 DB에서 제목/본문/게임명 검색을 수행하게 합니다.
-      const reviewParams = new URLSearchParams({ type: 'REVIEW', mine: 'true' })
-      const journalParams = new URLSearchParams({ type: 'JOURNAL', mine: 'true' })
+      // Build separate query strings because REVIEW_LOGS and JOURNAL_LOGS have different controls.
+      const reviewParams = new URLSearchParams({
+        type: 'REVIEW',
+        mine: 'true',
+        sort: reviewSort,
+      })
+      // Journal pagination is server-side: limit controls take(), page controls skip().
+      const journalParams = new URLSearchParams({
+        type: 'JOURNAL',
+        mine: 'true',
+        sort: journalSort,
+        limit: String(journalLimit),
+        page: String(journalPage),
+      })
 
       if (searchQuery) {
         reviewParams.set('q', searchQuery)
@@ -79,7 +99,7 @@ function Journals() {
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
     }
-  }, [searchQuery])
+  }, [journalLimit, journalPage, journalSort, reviewSort, searchQuery])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -104,8 +124,14 @@ function Journals() {
     // form submit은 엔터 입력과 SEARCH 버튼 클릭 둘 다에서 발생합니다.
     // trim()으로 앞뒤 공백을 제거한 값을 검색어로 확정합니다.
     // 만약 공백만 입력했다면 빈 문자열이 되므로 q를 붙이지 않고 전체 목록을 다시 조회합니다.
+    // A new search should always start from the first journal page.
+    setJournalPage(1)
     setSearchQuery(searchInput.trim())
   }
+
+  // The API currently returns an array without total count.
+  // If a page is full, there may be another page; otherwise NEXT is disabled.
+  const hasNextJournalPage = journals.length === journalLimit
 
   return (
     <PageChrome active="journals">
@@ -152,11 +178,19 @@ function Journals() {
                 WRITE <span className="material-symbols-outlined text-sm">add</span>
               </Link>
             </h2>
-            <select className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200">
-              <option value="rating">RATING</option>
-              <option value="latest">LATEST</option>
-              <option value="oldest">OLDEST</option>
-            </select>
+            <div className="flex items-center gap-2">
+              <span className="font-label-caps">SORT_BY:</span>
+              <select
+                className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200"
+                id="review-sort-select"
+                onChange={(event) => setReviewSort(event.target.value as PostSort)}
+                value={reviewSort}
+              >
+                <option value="rating">RATING</option>
+                <option value="latest">LATEST</option>
+                <option value="oldest">OLDEST</option>
+              </select>
+            </div>
           </div>
 
           <div className="flex gap-8 overflow-x-auto pb-12" id="reviews-scroll-container">
@@ -222,14 +256,30 @@ function Journals() {
             <div className="flex flex-wrap items-center gap-4 font-label-caps text-xs tracking-wider">
               <div className="flex items-center gap-2">
                 <span className="font-label-caps">SORT_BY:</span>
-                <select className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200" id="sort-select">
+                <select
+                  className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200"
+                  id="journal-sort-select"
+                  onChange={(event) => {
+                    setJournalPage(1)
+                    setJournalSort(event.target.value as PostSort)
+                  }}
+                  value={journalSort}
+                >
                   <option value="latest">LATEST</option>
                   <option value="oldest">OLDEST</option>
                 </select>
               </div>
               <div className="flex items-center gap-2">
                 <span className="font-label-caps">SHOW:</span>
-                <select className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200" id="per-page-select">
+                <select
+                  className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200"
+                  id="journal-per-page-select"
+                  onChange={(event) => {
+                    setJournalPage(1)
+                    setJournalLimit(Number(event.target.value) as JournalLimit)
+                  }}
+                  value={journalLimit}
+                >
                   <option value="5">5</option>
                   <option value="10">10</option>
                   <option value="15">15</option>
@@ -284,6 +334,34 @@ function Journals() {
             ))}
           </div>
         </section>
+
+        <nav
+          aria-label="Journal pagination"
+          className="flex flex-col items-center justify-between gap-4 border-t-2 border-[var(--gjc-primary)] pt-8 font-label-caps text-xs uppercase tracking-widest md:flex-row"
+        >
+          <span className="text-secondary">JOURNAL_PAGE: {journalPage}</span>
+          <div className="flex items-center gap-3">
+            <button
+              className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={journalPage === 1}
+              onClick={() => setJournalPage((page) => Math.max(1, page - 1))}
+              type="button"
+            >
+              PREV
+            </button>
+            <span className="border-2 border-[var(--gjc-primary)] bg-surface-container-low px-4 py-2 text-primary">
+              {journalPage}
+            </span>
+            <button
+              className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={!hasNextJournalPage}
+              onClick={() => setJournalPage((page) => page + 1)}
+              type="button"
+            >
+              NEXT
+            </button>
+          </div>
+        </nav>
       </main>
 
       <EditReviewModal

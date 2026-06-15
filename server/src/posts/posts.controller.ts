@@ -57,10 +57,15 @@ export class PostsController {
     // 컨트롤러는 query string 값을 꺼내기만 하고,
     // 실제로 제목/본문/게임명 중 어디를 검색할지는 service에서 처리합니다.
     @Query('q') q?: string,
+    // 여기 추가하면 posts.service.ts도 findAll() 인자 추가해야 함 
+    // @Query로 받는 값은 기본적으로 URL 쿼리스트링이라 전부 string으로 받음 
+    @Query('sort') sort?: string,
+    @Query('limit') limit?: string,
+    @Query('page') page?: string,
   ) {
     // type은 REVIEW/JOURNAL 섹션 필터이고, mine=true는 내 게시글만 보는 필터입니다.
     // Query 값은 문자열로 들어오므로 'true'와 직접 비교해 boolean으로 바꿉니다.
-    return this.postsService.findAll(req.user.userId, type, mine === 'true', q);
+    return this.postsService.findAll(req.user.userId, type, mine === 'true', q, sort, limit, page);
   }
 
   // GET /posts/:id

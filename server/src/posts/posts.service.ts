@@ -20,6 +20,8 @@ import {
 import { Comment } from './entities/comment.entity';
 import { Game } from '../auth/entities/game.entity';
 
+type PostListSort = 'latest' | 'oldest' | 'rating';
+
 // 요청 DTO를 DB 엔티티로 바꾸고 권한 규칙을 보장하기 
 // PostsService는 컨트롤러에서 받은 DTO를 DB 엔티티로 바꾸고,
 // 게시글 생성/조회/수정/삭제에 필요한 비즈니스 규칙을 보장합니다.
@@ -67,8 +69,15 @@ export default class PostsService {
         type?: ArchivePostType,
         mineOnly = false,
         query?: string,
+        sort?: string,
+        limit?: string,
+        page?: string,
     ) {
         const keyword = query?.trim();
+        const normalizedSort = this.parseListSort(sort);
+        // 기본값 설정? 
+        const normalizedLimit = this.parseListLimit(limit);
+        const normalizedPage = this.parsePositiveNumber(page, 1, 'page');
         // 목록 조회는 조건이 여러 개 조합됩니다.
         // - type: REVIEW 목록인지 JOURNAL 목록인지 구분
         // - mineOnly: 내 글만 볼지, 전체 글을 볼지 구분
@@ -79,8 +88,24 @@ export default class PostsService {
         const postsQuery = this.postRepository
             .createQueryBuilder('post')
             .leftJoinAndSelect('post.game', 'game')
-            .leftJoinAndSelect('post.user', 'user')
-            .orderBy('post.createdAt', 'DESC');
+            .leftJoinAndSelect('post.user', 'user');
+
+        // 오래된 순
+        if (normalizedSort === 'oldest') {
+            postsQuery.orderBy('post.createdAt', 'ASC');
+        }
+        // 평점 순 
+        else if (normalizedSort === 'rating') {
+            postsQuery.orderBy('post.rating', 'DESC', 'NULLS LAST');
+        }
+        // 최신 순  
+        else {
+            postsQuery.orderBy('post.createdAt', 'DESC');
+        }
+
+        postsQuery
+            .take(normalizedLimit)
+            .skip((normalizedPage - 1) * normalizedLimit);
 
         if (type) {
             postsQuery.andWhere('post.type = :type', { type });
@@ -276,6 +301,48 @@ export default class PostsService {
         if (post.userId !== userId) {
             throw new ForbiddenException('본인 글만 수정하거나 삭제할 수 있습니다.');
         }
+    }
+
+    private parseListSort(sort?: string): PostListSort {
+        if (!sort) {
+            return 'latest';
+        }
+        
+        // sort 종류 검증 
+        if (sort === 'latest' || sort === 'oldest' || sort === 'rating') {
+            return sort;
+        }
+
+        throw new BadRequestException('sort는 latest, oldest, rating 중 하나여야 합니다.');
+    }
+
+    private parsePositiveNumber(value: string | undefined, defaultValue: number, field: string) {
+        if (!value) {
+            return defaultValue;
+        }
+
+        const parsed = Number(value);
+
+        if (!Number.isInteger(parsed) || parsed < 1) {
+            throw new BadRequestException(`${field}는 1 이상의 정수여야 합니다.`);
+        }
+
+        return parsed;
+    }
+
+    // 리스트 보기 개수 5, 10, 15개 제한 
+    private parseListLimit(limit?: string) {
+        if (!limit) {
+            return 10;
+        }
+
+        const parsed = Number(limit);
+
+        if (parsed === 5 || parsed === 10 || parsed === 15) {
+            return parsed;
+        }
+
+        throw new BadRequestException('limit must be one of 5, 10, 15.');
     }
 
     // REVIEW는 rating이 필수이고, JOURNAL은 rating을 받지 않는다는 도메인 규칙입니다.
