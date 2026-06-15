@@ -1,7 +1,10 @@
 ﻿import { type FormEvent, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useCallback } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import { useAuth } from '../auth/AuthContext'
+import DeleteJournalModal from './DeleteJournalModal'
+import EditJournalModal from './EditJournalModal'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
 import '../styles/JournalDetail.css'
@@ -29,6 +32,8 @@ type JournalDetailPost = JournalPost & {
   comments?: DetailComment[]
 }
 
+type DetailModal = 'edit-journal' | 'delete-journal' | null
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR')
 }
@@ -45,6 +50,8 @@ function getInitials(value: string) {
 
 function JournalDetail() {
   const { user } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
   // App.tsx에서 /journal-detail/:postId 라우트를 등록했습니다.
   // 여기서 postId는 URL에 들어있는 실제 게시글 id입니다.
   // 예: /journal-detail/abc-123 으로 들어오면 postId === 'abc-123' 이 됩니다.
@@ -59,42 +66,57 @@ function JournalDetail() {
   const [editingCommentContent, setEditingCommentContent] = useState('')
   const [commentActionId, setCommentActionId] = useState<string | null>(null)
 
+  // 상세 페이지 안에서 여는 게시글 관리 모달 상태입니다.
+  // null이면 아무 모달도 열지 않고,
+  // edit-journal이면 수정 모달, delete-journal이면 삭제 확인 모달을 보여줍니다.
+  // 이 값은 post.canEdit이 true인 작성자 본인에게만 버튼으로 변경할 수 있습니다.
+  const [activeModal, setActiveModal] = useState<DetailModal>(null)
+
+  const fetchPost = useCallback(async () => {
+    if (!postId) {
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      setMessage('')
+
+      // 상세 API 호출 흐름:
+      // 1. 목록 또는 타임라인에서 넘어온 postId를 이용해 GET /posts/:id 요청을 보냅니다.
+      // 2. 서버는 게시글의 game, user, comments와 함께 canEdit 값을 내려줍니다.
+      // 3. canEdit은 현재 로그인 사용자가 이 글의 작성자인지 서버에서 계산한 값입니다.
+      //    그래서 저널 목록에서 들어왔든 타임라인에서 들어왔든 같은 기준으로 수정/삭제 버튼을 보여줄 수 있습니다.
+      const response = await api.get<JournalDetailPost>(`/posts/${postId}`)
+      if (response.data.type !== 'JOURNAL') {
+        setPost(null)
+        setMessage('POST ID NOT FOUND')
+        return
+      }
+
+      setPost(response.data)
+    } catch (error) {
+      setPost(null)
+      setMessage(getApiErrorMessage(error, 'POST LOAD FAILED'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [postId])
+
   useEffect(() => {
     if (!postId) {
       return
     }
 
     const timeoutId = window.setTimeout(() => {
-      const fetchPost = async () => {
-        try {
-          setIsLoading(true)
-          setMessage('')
-
-          // 상세 API 호출 흐름:
-          // 1. 목록에서 넘어온 postId를 이용해 GET /posts/:id 요청을 보냅니다.
-          // 2. 서버는 ArchivePost와 연결된 game, user, comments 정보를 함께 조회합니다.
-          // 3. 응답을 post state에 저장하면 아래 JSX가 DB 값을 기준으로 다시 렌더링됩니다.
-          const response = await api.get<JournalDetailPost>(`/posts/${postId}`)
-          if (response.data.type !== 'JOURNAL') {
-            setPost(null)
-            setMessage('POST ID NOT FOUND')
-            return
-          }
-
-          setPost(response.data)
-        } catch (error) {
-          setPost(null)
-          setMessage(getApiErrorMessage(error, 'POST LOAD FAILED'))
-        } finally {
-          setIsLoading(false)
-        }
-      }
-
       void fetchPost()
     }, 0)
 
     return () => window.clearTimeout(timeoutId)
-  }, [postId])
+  }, [fetchPost, postId])
+
+  const closeModal = () => {
+    setActiveModal(null)
+  }
 
   const submitComment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -296,6 +318,10 @@ function JournalDetail() {
   const author = post?.user.nickname ?? 'PLAYER'
   const loggedAt = post ? formatDate(post.createdAt) : '-'
   const statusMessage = postId ? message : 'POST ID NOT FOUND'
+  // Timeline 카드에서 상세로 들어올 때는 Link state에 from: '/timeline'을 담아 보냅니다.
+  // 그 값이 있으면 뒤로가기 링크와 삭제 후 이동 경로를 타임라인으로 맞추고,
+  // 직접 URL을 열었거나 저널 목록에서 들어온 경우에는 기존처럼 /journals로 돌아갑니다.
+  const returnPath = (location.state as { from?: string } | null)?.from ?? '/journals'
 
   return (
     <PageChrome active="journals">
@@ -303,7 +329,7 @@ function JournalDetail() {
         <div className="mb-8">
           <Link
             className="inline-flex items-center gap-2 border-2 border-primary bg-background px-4 py-2 font-ui-button text-ui-button uppercase tracking-widest text-primary transition-colors duration-75 hover:bg-primary hover:text-on-primary"
-            to="/journals"
+            to={returnPath}
           >
             <span aria-hidden="true">&lt;-</span>
             BACK_TO_LIST
@@ -340,6 +366,28 @@ function JournalDetail() {
                 <h1 className="mb-6 font-headline-xl text-[40px] uppercase leading-none md:text-headline-xl">
                   {post.title}
                 </h1>
+
+                {post.canEdit ? (
+                  <div className="mb-6 flex flex-wrap gap-3">
+                    {/* canEdit은 서버에서 계산된 "현재 로그인 사용자가 이 글의 작성자인가" 값입니다.
+                        타임라인에서 들어온 글이어도 상세 API가 canEdit을 다시 내려주므로
+                        내 글이면 여기서 수정/삭제 버튼을 보여줄 수 있습니다. */}
+                    <button
+                      className="border-2 border-primary bg-surface-container-lowest px-5 py-2 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
+                      onClick={() => setActiveModal('edit-journal')}
+                      type="button"
+                    >
+                      EDIT
+                    </button>
+                    <button
+                      className="border-2 border-primary bg-[var(--gjc-on-error-fixed)] px-5 py-2 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
+                      onClick={() => setActiveModal('delete-journal')}
+                      type="button"
+                    >
+                      DELETE
+                    </button>
+                  </div>
+                ) : null}
 
                 <div className="grid w-fit grid-cols-1 gap-6 border border-primary bg-white p-6 sm:grid-cols-2">
                   <div>
@@ -502,6 +550,24 @@ function JournalDetail() {
           </>
         ) : null}
       </main>
+
+      <EditJournalModal
+        isOpen={activeModal === 'edit-journal'}
+        post={post}
+        onClose={closeModal}
+        // 수정 저장이 끝나면 같은 상세 API를 다시 호출합니다.
+        // 이렇게 해야 제목, 본문, 게임 제목처럼 수정된 값이 상세 화면에 즉시 반영됩니다.
+        onSaved={fetchPost}
+      />
+      <DeleteJournalModal
+        isOpen={activeModal === 'delete-journal'}
+        post={post}
+        onClose={closeModal}
+        // 삭제가 끝나면 현재 상세 페이지의 게시글은 더 이상 존재하지 않습니다.
+        // 그래서 모달 안에서 삭제 API가 성공한 뒤, 진입 경로에 맞춰 목록 화면으로 이동합니다.
+        // 타임라인에서 들어온 경우 returnPath는 /timeline이고, 기본값은 /journals입니다.
+        onDeleted={() => navigate(returnPath)}
+      />
     </PageChrome>
   )
 }

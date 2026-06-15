@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
+import DeleteReviewModal from './DeleteReviewModal'
+import EditReviewModal from './EditReviewModal'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
 import '../styles/JournalDetail.css'
@@ -10,6 +12,8 @@ type ReviewDetailPost = JournalPost & {
     platforms?: string[]
   }
 }
+
+type DetailModal = 'edit-review' | 'delete-review' | null
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR')
@@ -46,10 +50,45 @@ function getStarFill(rating: number, index: number) {
 }
 
 function ReviewDetail() {
+  const location = useLocation()
+  const navigate = useNavigate()
   const { postId } = useParams()
   const [post, setPost] = useState<ReviewDetailPost | null>(null)
   const [message, setMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  // 리뷰 상세에서 열 수 있는 게시글 관리 모달 상태입니다.
+  // edit-review는 리뷰 수정 모달, delete-review는 리뷰 삭제 확인 모달입니다.
+  // 실제 버튼은 post.canEdit이 true일 때만 렌더링되므로 작성자 본인만 모달을 열 수 있습니다.
+  const [activeModal, setActiveModal] = useState<DetailModal>(null)
+
+  const fetchPost = useCallback(async () => {
+    if (!postId) {
+      return
+    }
+
+    try {
+      setIsLoading(true)
+      setMessage('')
+
+      // 상세 페이지는 진입 경로와 상관없이 GET /posts/:id 응답의 canEdit을 신뢰합니다.
+      // canEdit은 서버가 현재 로그인 사용자와 게시글 작성자를 비교해서 계산한 값이므로,
+      // 타임라인에서 리뷰를 클릭해서 들어와도 내 게시글이면 수정/삭제 버튼을 보여줄 수 있습니다.
+      const response = await api.get<ReviewDetailPost>(`/posts/${postId}`)
+      if (response.data.type !== 'REVIEW') {
+        setPost(null)
+        setMessage('POST ID NOT FOUND')
+        return
+      }
+
+      setPost(response.data)
+    } catch (error) {
+      setPost(null)
+      setMessage(getApiErrorMessage(error, 'POST LOAD FAILED'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [postId])
 
   useEffect(() => {
     if (!postId) {
@@ -57,32 +96,15 @@ function ReviewDetail() {
     }
 
     const timeoutId = window.setTimeout(() => {
-      const fetchPost = async () => {
-        try {
-          setIsLoading(true)
-          setMessage('')
-
-          const response = await api.get<ReviewDetailPost>(`/posts/${postId}`)
-          if (response.data.type !== 'REVIEW') {
-            setPost(null)
-            setMessage('POST ID NOT FOUND')
-            return
-          }
-
-          setPost(response.data)
-        } catch (error) {
-          setPost(null)
-          setMessage(getApiErrorMessage(error, 'POST LOAD FAILED'))
-        } finally {
-          setIsLoading(false)
-        }
-      }
-
       void fetchPost()
     }, 0)
 
     return () => window.clearTimeout(timeoutId)
-  }, [postId])
+  }, [fetchPost, postId])
+
+  const closeModal = () => {
+    setActiveModal(null)
+  }
 
   const gameTitle = post?.game.title ?? 'UNKNOWN_GAME'
   const platform = post?.game.platforms?.[0] ?? 'UNKNOWN'
@@ -90,6 +112,9 @@ function ReviewDetail() {
   const loggedAt = post ? formatDate(post.createdAt) : '-'
   const rating = post?.rating ?? 0
   const statusMessage = postId ? message : 'POST ID NOT FOUND'
+  // Timeline에서 들어온 경우에는 뒤로가기와 삭제 후 이동을 /timeline으로 맞춥니다.
+  // location.state가 없는 직접 접근은 기존 동작처럼 /journals를 기본 복귀 경로로 사용합니다.
+  const returnPath = (location.state as { from?: string } | null)?.from ?? '/journals'
 
   return (
     <PageChrome active="journals">
@@ -97,7 +122,7 @@ function ReviewDetail() {
         <div className="mb-8">
           <Link
             className="inline-flex items-center gap-2 border-2 border-primary bg-background px-4 py-2 font-ui-button text-ui-button uppercase tracking-widest text-primary transition-colors duration-75 hover:bg-primary hover:text-on-primary"
-            to="/journals"
+            to={returnPath}
           >
             <span aria-hidden="true">&lt;-</span>
             BACK_TO_LIST
@@ -133,6 +158,27 @@ function ReviewDetail() {
                 <h1 className="mb-6 font-headline-xl text-[40px] uppercase leading-none md:text-headline-xl">
                   {post.title}
                 </h1>
+                {post.canEdit ? (
+                  <div className="mb-6 flex flex-wrap gap-3">
+                    {/* 목록이 아니라 타임라인에서 리뷰 상세로 들어와도 권한 판단 방식은 같습니다.
+                        상세 API의 canEdit 값이 true이면 현재 로그인 사용자가 작성자라는 뜻이므로
+                        여기서 EDIT/DELETE 버튼을 보여줍니다. */}
+                    <button
+                      className="border-2 border-primary bg-surface-container-lowest px-5 py-2 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
+                      onClick={() => setActiveModal('edit-review')}
+                      type="button"
+                    >
+                      EDIT
+                    </button>
+                    <button
+                      className="border-2 border-primary bg-[var(--gjc-on-error-fixed)] px-5 py-2 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
+                      onClick={() => setActiveModal('delete-review')}
+                      type="button"
+                    >
+                      DELETE
+                    </button>
+                  </div>
+                ) : null}
                 <div className="mb-4 w-fit border-2 border-[var(--gjc-primary)] bg-white p-4">
                   <p className="mb-2 font-label-caps text-label-caps text-secondary">RATING</p>
                   <div className="flex items-center gap-3">
@@ -220,6 +266,22 @@ function ReviewDetail() {
           </>
         ) : null}
       </main>
+
+      <EditReviewModal
+        isOpen={activeModal === 'edit-review'}
+        post={post}
+        onClose={closeModal}
+        // 리뷰 수정 후에는 상세 데이터를 다시 조회해서 최신 제목/본문/평점이 바로 보이게 합니다.
+        onSaved={fetchPost}
+      />
+      <DeleteReviewModal
+        isOpen={activeModal === 'delete-review'}
+        post={post}
+        onClose={closeModal}
+        // 삭제 후에는 더 이상 현재 postId로 상세 조회가 불가능합니다.
+        // 그래서 삭제 성공 콜백에서 타임라인 또는 저널 목록으로 이동시킵니다.
+        onDeleted={() => navigate(returnPath)}
+      />
     </PageChrome>
   )
 }
