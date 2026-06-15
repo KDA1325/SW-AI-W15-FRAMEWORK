@@ -176,7 +176,7 @@ function ReviewDetail() {
                       EDIT
                     </button>
                     <button
-                      className="border-2 border-primary bg-[var(--gjc-on-error-fixed)] px-5 py-2 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-primary hover:text-on-primary"
+                      className="border-2 border-primary bg-[var(--gjc-on-error-fixed)] px-5 py-2 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-on-primary)] hover:text-[var(--gjc-primary)]"
                       onClick={() => setActiveModal('delete-review')}
                       type="button"
                     >
