@@ -1,44 +1,73 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
-/* Journals.html의 <style> 태그에서 분리한 페이지 전용 CSS입니다. */
 body {
-            background-color: var(--gjc-surface-container-lowest);
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .nav-link-indicator::before {
-            content: '>';
-            position: absolute;
-            left: -16px;
-            opacity: 0;
-            transition: opacity 0.1s steps(2, end);
-        }
-        .nav-link-indicator:hover::before {
-            opacity: 1;
-        }
-        @keyframes logoFloat {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-            100% { transform: translateY(0px); }
-        }
-        .group:hover .animate-logo-float {
-            animation: logoFloat 2s ease-in-out infinite;
-        }
-        select {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 20px;
-        }
-        .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+  background-color: var(--gjc-surface-container-lowest);
+}
 
-#reviews-scroll-container::-webkit-scrollbar { display: none; } #reviews-scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.nav-link-indicator::before {
+  content: '>';
+  left: -16px;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.1s steps(2, end);
+}
+
+.nav-link-indicator:hover::before {
+  opacity: 1;
+}
+
+@keyframes logoFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.group:hover .animate-logo-float {
+  animation: logoFloat 2s ease-in-out infinite;
+}
+
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+  background-position: right 8px center;
+  background-repeat: no-repeat;
+  background-size: 20px;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#reviews-scroll-container {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+#reviews-scroll-container::-webkit-scrollbar {
+  display: none;
+}
