@@ -10,7 +10,7 @@
   vertical-align: middle;
 }
 
-.journal-detail-page .journal-hatch-pattern {
+/* .journal-detail-page .journal-hatch-pattern {
   background-image: repeating-linear-gradient(
     45deg,
     var(--gjc-primary),
@@ -18,7 +18,7 @@
     transparent 1px,
     transparent 4px
   );
-}
+} */
 
 @keyframes journalDetailFadeIn {
   from {
