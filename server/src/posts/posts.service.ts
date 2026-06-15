@@ -88,6 +88,12 @@ export default class PostsService {
             relations: {
                 game: true,
                 user: true,
+                comments: {
+                    user: true,
+                    replies: {
+                        user: true,
+                    },
+                },
             },
         });
 

@@ -25,6 +25,7 @@ function App() {
       <Route path="/write-review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
       <Route path="/write-journal" element={<ProtectedRoute><WriteJournal /></ProtectedRoute>} />
       <Route path="/journal-detail" element={<ProtectedRoute><JournalDetail /></ProtectedRoute>} />
+      <Route path="/journal-detail/:postId" element={<ProtectedRoute><JournalDetail /></ProtectedRoute>} />
       <Route path="/review-detail" element={<ProtectedRoute><ReviewDetail /></ProtectedRoute>} />
     </Routes>
   )

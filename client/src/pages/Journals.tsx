@@ -216,7 +216,7 @@ function Journals() {
                   </div>
                   <h3 className="mb-2 font-headline-lg-mobile text-2xl uppercase leading-tight">{post.title}</h3>
                   <p className="mb-6 font-body-md text-body-md text-on-surface">{post.content}</p>
-                  <Link className="mt-auto flex items-center justify-between" to="/journal-detail">
+                  <Link className="mt-auto flex items-center justify-between" to={`/journal-detail/${post.id}`}>
                     <span className="font-label-caps text-xs tracking-wider text-secondary">
                       {formatDate(post.updatedAt)}
                     </span>
