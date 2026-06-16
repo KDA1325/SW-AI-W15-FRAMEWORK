@@ -4,12 +4,15 @@ import {
   Entity,
   Index,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Comment } from './comment.entity';
+import { Tag } from './tag.entity';
 import { Game } from '../../auth/entities/game.entity';
 import { User } from '../../auth/entities/user.entity';
 
@@ -71,6 +74,16 @@ export class ArchivePost {
   // 실제 외래키는 Comment.postId에 있습니다.
   @OneToMany(() => Comment, (comment) => comment.post)
   comments!: Comment[];
+
+  // 자유 태그는 게시글과 다대다 관계입니다.
+  // 조인 테이블 이름과 컬럼명을 고정해두면 이후 마이그레이션/쿼리에서 구조를 읽기 쉽습니다.
+  @ManyToMany(() => Tag, (tag) => tag.posts)
+  @JoinTable({
+    name: 'ArchivePostTag',
+    joinColumn: { name: 'postId', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'tagId', referencedColumnName: 'id' },
+  })
+  tags!: Tag[];
 
   // 게시글 작성 시각입니다.
   @CreateDateColumn()

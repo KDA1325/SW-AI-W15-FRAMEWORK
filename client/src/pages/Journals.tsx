@@ -14,6 +14,12 @@ export type PostType = 'REVIEW' | 'JOURNAL'
 export type PostSort = 'latest' | 'oldest' | 'rating'
 type JournalLimit = 5 | 10 | 15
 
+export type PostTag = {
+  id: string
+  name: string
+  normalizedName: string
+}
+
 export type JournalPost = {
   id: string
   type: PostType
@@ -33,6 +39,7 @@ export type JournalPost = {
     id: string
     nickname: string
   }
+  tags?: PostTag[]
 }
 
 export type PostListResponse<TPost = JournalPost> = {

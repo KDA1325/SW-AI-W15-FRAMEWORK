@@ -14,6 +14,7 @@ import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
+import CreateTagDto from './dto/create-tag.dto';
 import UpdatePostDto from './dto/update-post.dto';
 import UpdateCommentDto from './dto/update-comment.dto';
 import PostsService from './posts.service';
@@ -92,6 +93,16 @@ export class PostsController {
             gameTitle,
             igdbGameId,
         );
+    }
+
+    @Get('tags')
+    listTags(@Query('q') q?: string) {
+        return this.postsService.listTags(q);
+    }
+
+    @Post('tags')
+    createTag(@Body() dto: CreateTagDto) {
+        return this.postsService.createTag(dto.name);
     }
 
     // GET /posts/:id

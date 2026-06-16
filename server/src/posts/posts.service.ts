@@ -17,6 +17,7 @@ import UpdatePostDto from './dto/update-post.dto';
 import UpdateCommentDto from './dto/update-comment.dto';
 import { ArchivePost, ArchivePostType } from './entities/archivePost.entity';
 import { Comment } from './entities/comment.entity';
+import { Tag } from './entities/tag.entity';
 import { Game } from '../auth/entities/game.entity';
 import { IgdbService } from '../ai/igdb.service';
 
@@ -53,6 +54,9 @@ export default class PostsService {
 
         @InjectRepository(Comment)
         private commentRepository: Repository<Comment>,
+
+        @InjectRepository(Tag)
+        private tagRepository: Repository<Tag>,
 
         @InjectRepository(Game)
         private gameRepository: Repository<Game>,
@@ -116,7 +120,8 @@ export default class PostsService {
         const postsQuery = this.postRepository
             .createQueryBuilder('post')
             .leftJoinAndSelect('post.game', 'game')
-            .leftJoinAndSelect('post.user', 'user');
+            .leftJoinAndSelect('post.user', 'user')
+            .leftJoinAndSelect('post.tags', 'postTag');
 
         // 오래된 순
         if (normalizedSort === 'oldest') {
@@ -153,6 +158,7 @@ export default class PostsService {
             //   post.title ILIKE '%검색어%'
             //   OR post.content ILIKE '%검색어%'
             //   OR game.title ILIKE '%검색어%'
+            //   OR postTag.name ILIKE '%검색어%'
             //   OR game.tags/genres/platforms 중 하나가 ILIKE '%검색어%'
             // )
             // ILIKE는 PostgreSQL에서 대소문자를 구분하지 않는 LIKE 검색입니다.
@@ -167,6 +173,12 @@ export default class PostsService {
                     });
                     qb.orWhere('game.title ILIKE :keyword', {
                         keyword: keywordPattern,
+                    });
+                    qb.orWhere('postTag.name ILIKE :keyword', {
+                        keyword: keywordPattern,
+                    });
+                    qb.orWhere('postTag.normalizedName ILIKE :normalizedTag', {
+                        normalizedTag: `%${this.normalizeTagName(keyword)}%`,
                     });
                     qb.orWhere(
                         'EXISTS (SELECT 1 FROM unnest(game.tags) AS game_tag(term) WHERE game_tag.term ILIKE :keyword)',
@@ -222,6 +234,26 @@ export default class PostsService {
         });
     }
 
+    async listTags(query?: string) {
+        const normalizedQuery = this.normalizeTagName(query ?? '');
+        const tagsQuery = this.tagRepository
+            .createQueryBuilder('tag')
+            .orderBy('tag.name', 'ASC')
+            .take(50);
+
+        if (normalizedQuery) {
+            tagsQuery.where('tag.normalizedName ILIKE :query', {
+                query: `%${normalizedQuery}%`,
+            });
+        }
+
+        return tagsQuery.getMany();
+    }
+
+    async createTag(name: string) {
+        return this.findOrCreateTag(name);
+    }
+
     async checkReviewDuplicate(
         userId: string,
         gameTitle?: string,
@@ -262,6 +294,7 @@ export default class PostsService {
                         user: true,
                     },
                 },
+                tags: true,
             },
             order: {
                 // 댓글은 오래된 댓글부터 아래로 쌓이는 형태가 자연스럽습니다.
@@ -549,6 +582,57 @@ export default class PostsService {
 
     private normalizeGameTitle(gameTitle: string) {
         return gameTitle.trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    private async findOrCreateTag(name: string) {
+        const normalizedName = this.normalizeTagName(name);
+
+        if (!normalizedName) {
+            throw new BadRequestException('tag name is required.');
+        }
+
+        if (normalizedName.length > 40) {
+            throw new BadRequestException('tag name must be 40 characters or less.');
+        }
+
+        const existingTag = await this.tagRepository.findOne({
+            where: { normalizedName },
+        });
+
+        if (existingTag) {
+            return existingTag;
+        }
+
+        const tag = this.tagRepository.create({
+            name: normalizedName,
+            normalizedName,
+        });
+
+        try {
+            return await this.tagRepository.save(tag);
+        } catch (error) {
+            if (this.isUniqueViolation(error)) {
+                const duplicateTag = await this.tagRepository.findOne({
+                    where: { normalizedName },
+                });
+
+                if (duplicateTag) {
+                    return duplicateTag;
+                }
+            }
+
+            throw error;
+        }
+    }
+
+    private normalizeTagName(name: string) {
+        return name
+            .trim()
+            .replace(/^#+/, '')
+            .replace(/[\s-]+/g, '_')
+            .replace(/_+/g, '_')
+            .replace(/^_+|_+$/g, '')
+            .toUpperCase();
     }
 
     private async savePostOrConflict(post: ArchivePost, type: ArchivePostType) {

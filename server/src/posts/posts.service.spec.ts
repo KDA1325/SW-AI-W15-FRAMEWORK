@@ -15,6 +15,12 @@ describe('PostsService IGDB game selection', () => {
     }
 
     function createService() {
+        const tagQuery = {
+            getMany: jest.fn().mockResolvedValue([]),
+            orderBy: jest.fn().mockReturnThis(),
+            take: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+        };
         const duplicateQuery = {
             andWhere: jest.fn().mockReturnThis(),
             getOne: jest.fn().mockResolvedValue(null),
@@ -35,6 +41,17 @@ describe('PostsService IGDB game selection', () => {
             ),
         };
         const commentRepository = {};
+        const tagRepository = {
+            create: jest.fn((value: Record<string, unknown>) => ({
+                ...value,
+                id: 'tag-created',
+            })),
+            createQueryBuilder: jest.fn().mockReturnValue(tagQuery),
+            findOne: jest.fn().mockResolvedValue(null),
+            save: jest.fn((value: Record<string, unknown>) =>
+                Promise.resolve({ ...value, id: 'tag-1' }),
+            ),
+        };
         const gameRepository = {
             create: jest.fn((value: Record<string, unknown>) => ({
                 ...value,
@@ -59,6 +76,7 @@ describe('PostsService IGDB game selection', () => {
         const service = new PostsService(
             postRepository as never,
             commentRepository as never,
+            tagRepository as never,
             gameRepository as never,
             igdbService as never,
         );
@@ -67,6 +85,8 @@ describe('PostsService IGDB game selection', () => {
             gameRepository,
             igdbService,
             postRepository,
+            tagQuery,
+            tagRepository,
             duplicateQuery,
             service,
         };
@@ -234,6 +254,54 @@ describe('PostsService IGDB game selection', () => {
             },
         );
         expect(listQuery.andWhere).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    it('normalizes and stores unique post tags', async () => {
+        const { service, tagRepository } = createService();
+
+        await expect(service.createTag('#tactical-rpg')).resolves.toMatchObject({
+            id: 'tag-1',
+            name: 'TACTICAL_RPG',
+            normalizedName: 'TACTICAL_RPG',
+        });
+        expect(tagRepository.findOne).toHaveBeenCalledWith({
+            where: { normalizedName: 'TACTICAL_RPG' },
+        });
+        expect(tagRepository.create).toHaveBeenCalledWith({
+            name: 'TACTICAL_RPG',
+            normalizedName: 'TACTICAL_RPG',
+        });
+    });
+
+    it('reuses an existing normalized tag instead of creating duplicates', async () => {
+        const { service, tagRepository } = createService();
+        const existingTag = {
+            id: 'tag-existing',
+            name: 'TACTICAL_RPG',
+            normalizedName: 'TACTICAL_RPG',
+        };
+
+        tagRepository.findOne.mockResolvedValueOnce(existingTag);
+
+        await expect(service.createTag('tactical rpg')).resolves.toBe(
+            existingTag,
+        );
+        expect(tagRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('lists tags by normalized search query', async () => {
+        const { service, tagQuery } = createService();
+
+        await service.listTags(' tactical-rpg ');
+
+        expect(tagQuery.orderBy).toHaveBeenCalledWith('tag.name', 'ASC');
+        expect(tagQuery.take).toHaveBeenCalledWith(50);
+        expect(tagQuery.where).toHaveBeenCalledWith(
+            'tag.normalizedName ILIKE :query',
+            {
+                query: '%TACTICAL_RPG%',
+            },
+        );
     });
 
     it('rejects unsupported list query parameters', async () => {
