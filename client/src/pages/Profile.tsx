@@ -304,20 +304,18 @@ function Profile() {
 
   const steamProfile = steamState?.profile
   const steamStats = steamStatsState?.stats
-  const steamStatsUnavailable =
-    steamStatsState?.error ??
-    (steamState?.steamId ? 'STEAM_STATS_PENDING' : 'LINK_STEAM_FIRST')
   const ownedGamesCount = formatStatNumber(steamStats?.ownedGamesCount)
+  const reviewedGamesCount = formatStatNumber(archiveTotal)
   const achievementsUnlocked = formatStatNumber(
     steamStats?.achievementsUnlocked,
   )
-  const achievementsTotal = formatStatNumber(steamStats?.achievementsTotal)
   const achievementGamesChecked = formatStatNumber(
     steamStats?.achievementGamesChecked,
   )
   const recentPlayHours = formatPlayHours(steamStats?.recentPlaytimeMinutes)
-  const recentTopGame =
-    steamStats?.recentGames[0]?.name ?? steamStatsUnavailable
+  const recentGameTitles = steamStats?.recentGames.length
+    ? steamStats.recentGames.map((game) => game.name).join(', ')
+    : '최근 플레이한 게임이 없습니다'
   // Steam's public recent-play endpoint exposes a two-week window, so the UI labels that fallback explicitly.
   const recentWindowLabel = steamStats
     ? steamStats.recentWindowDays === 14
@@ -501,8 +499,8 @@ function Profile() {
               {ownedGamesCount}
             </span>
             <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-[16px] text-center leading-tight">
-              OWNED GAMES: {ownedGamesCount} <br />
-              SOURCE: STEAM API
+              보유 게임: {ownedGamesCount} <br />
+              리뷰 남긴 게임: {reviewedGamesCount}
             </span>
           </div>
           <div className="p-6 flex flex-col items-center justify-center hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all step-transition group cursor-default relative hover:z-10 hover:scale-105 hover:ring-4 hover:ring-[var(--gjc-primary)]">
@@ -513,8 +511,8 @@ function Profile() {
               {achievementsUnlocked}
             </span>
             <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-[16px] text-center leading-tight">
-              {achievementsUnlocked} / {achievementsTotal} <br />
-              CHECKED {achievementGamesChecked} GAMES
+              달성 도전과제: {achievementsUnlocked} <br />
+              게임 {achievementGamesChecked}개의 도전과제 {achievementsUnlocked}개 달성
             </span>
           </div>
           <div className="p-6 flex flex-col items-center justify-center hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all step-transition group cursor-default relative hover:z-10 hover:scale-105 hover:ring-4 hover:ring-[var(--gjc-primary)]">
@@ -528,16 +526,16 @@ function Profile() {
               {recentPlayHours}
             </span>
             <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-center leading-tight uppercase text-[16px]">
-              {recentTopGame}
-              <br />
-              STEAM 2W FALLBACK
+              {recentGameTitles}
+              {/* <br />
+              {recentPlayHours} */}
             </span>
           </div>
           <div className="p-6 flex flex-col items-center justify-center gap-2 hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-colors group cursor-default">
             <span className="font-label-caps text-[var(--gjc-secondary)] group-hover:text-[var(--gjc-surface-dim)]">
-              GAMER ID
+              스팀 친구 코드
             </span>
-            <span className="font-headline-xl text-[clamp(14px,2vw,24px)] break-all text-center leading-tight">
+            <span className="font-headline-lg break-all text-center leading-tight">
               {friendCode}
             </span>
           </div>
