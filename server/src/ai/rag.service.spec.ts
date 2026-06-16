@@ -1,6 +1,45 @@
 import { RagService } from './rag.service';
 
 describe('RagService taste analysis fallback', () => {
+  it('delegates embedding generation to the FastAPI compute client first', async () => {
+    const aiComputeClient = {
+      createEmbedding: jest.fn().mockResolvedValue({
+        dimensions: 1536,
+        model: 'demo-hash-embedding-v1',
+        provider: 'demo',
+        values: [0.1, -0.2, 0.3],
+      }),
+    };
+    const service = new RagService(
+      { query: jest.fn(), getRepository: jest.fn() } as never,
+      { get: jest.fn() } as never,
+      aiComputeClient as never,
+    );
+
+    const embedding = await (
+      service as unknown as {
+        createEmbedding: (text: string) => Promise<{
+          dimensions: number;
+          model: string;
+          provider: string;
+          values: number[];
+        }>;
+      }
+    ).createEmbedding('hello gjc');
+
+    expect(aiComputeClient.createEmbedding).toHaveBeenCalledWith({
+      dimensions: 1536,
+      input: 'hello gjc',
+      model: 'text-embedding-3-small',
+    });
+    expect(embedding).toEqual({
+      dimensions: 1536,
+      model: 'demo-hash-embedding-v1',
+      provider: 'demo',
+      values: [0.1, -0.2, 0.3],
+    });
+  });
+
   it('separates play-style terms from enjoyed game element tags', () => {
     const service = new RagService(
       { query: jest.fn(), getRepository: jest.fn() } as never,

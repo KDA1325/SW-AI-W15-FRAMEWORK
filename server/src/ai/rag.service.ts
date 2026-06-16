@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
 import axios from 'axios';
 import { DataSource } from 'typeorm';
+import { AiComputeClient } from './ai-compute.client';
 import {
   AiPreferenceTag,
   AiRagAnalysisResponse,
@@ -102,6 +103,7 @@ export class RagService {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
     private readonly config: ConfigService,
+    @Optional() private readonly aiComputeClient?: AiComputeClient,
   ) {}
 
   async analyzeForUser(
@@ -305,13 +307,30 @@ export class RagService {
       this.config.get<string>('OPENAI_EMBEDDING_DIMENSIONS') ??
         DEMO_EMBEDDING_DIMENSIONS,
     );
+    const embeddingInput = this.truncateEmbeddingInput(text);
+
+    // GJC-183: NestJS는 인증, 데이터 조회, pgvector 저장을 계속 담당하고,
+    // 임베딩 벡터 계산만 FastAPI AI compute service의 /embed 경계로 위임합니다.
+    const fastApiEmbedding = await this.aiComputeClient?.createEmbedding({
+      dimensions,
+      input: embeddingInput,
+      model,
+    });
+
+    if (fastApiEmbedding) {
+      return {
+        dimensions: fastApiEmbedding.dimensions,
+        model: fastApiEmbedding.model,
+        provider: fastApiEmbedding.provider,
+        values: fastApiEmbedding.values,
+      };
+    }
 
     if (!apiKey) {
       return this.createDemoEmbedding(text);
     }
 
     try {
-      const embeddingInput = this.truncateEmbeddingInput(text);
       const payload: Record<string, unknown> = {
         encoding_format: 'float',
         input: embeddingInput,

@@ -38,6 +38,8 @@ Required values:
 | `OPENAI_CHAT_MODEL`           | Chat model for RAG JSON analysis                                   | `gpt-4o-mini`              |
 | `OPENAI_EMBEDDING_MODEL`      | Embedding model for pgvector documents                             | `text-embedding-3-small`   |
 | `OPENAI_EMBEDDING_DIMENSIONS` | Embedding vector size                                              | `1536`                     |
+| `FASTAPI_AI_COMPUTE_URL`      | FastAPI AI compute service base URL                                | `http://localhost:8000`    |
+| `FASTAPI_AI_COMPUTE_TIMEOUT_MS` | NestJS to FastAPI AI compute timeout                             | `5000`                     |
 | `IGDB_CLIENT_ID`              | Twitch/IGDB Client ID for game metadata search                     | empty                      |
 | `IGDB_CLIENT_SECRET`          | Twitch/IGDB Client Secret for game metadata search                 | empty                      |
 | `STEAM_WEB_API_KEY`           | Steam Web API key for profile and play-history linking             | empty                      |
@@ -64,7 +66,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 
 | Feature                                       | Variables                                           | Behavior when missing                                                                                  |
 | --------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| OpenAI RAG embeddings and structured analysis | `OPENAI_API_KEY`, optional model vars               | Uses deterministic demo embeddings and rule-based analysis                                             |
+| FastAPI/OpenAI RAG embeddings                 | `FASTAPI_AI_COMPUTE_URL`, `OPENAI_API_KEY`, optional model vars | Calls FastAPI `/embed`; falls back to NestJS OpenAI/demo embedding when unavailable                    |
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
 | Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
 | Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
@@ -326,7 +328,40 @@ Response shape:
 }
 ```
 
-When `OPENAI_API_KEY` is configured, RAG uses OpenAI embeddings and structured JSON analysis. Without a key, it uses deterministic demo embeddings and rule-based analysis so pgvector top-k search remains testable in local development.
+When FastAPI is running, RAG asks the stateless AI compute service to generate
+embeddings through `POST /embed`. If that service is unavailable, NestJS falls
+back to its existing OpenAI or deterministic demo embedding path so pgvector
+top-k search remains testable in local development. Structured JSON analysis is
+still performed inside NestJS.
+
+### FastAPI AI Compute Service
+
+GJC-183 adds the first FastAPI split:
+
+```text
+GET http://localhost:8000/health
+POST http://localhost:8000/embed
+```
+
+NestJS keeps authentication, data loading, pgvector persistence, and
+recommendation orchestration. FastAPI receives only the text/model/dimensions
+payload needed for embedding calculation and returns a vector response:
+
+```json
+{
+  "input": "Game journal text",
+  "model": "demo-hash-embedding-v1",
+  "dimensions": 1536
+}
+```
+
+The local FastAPI fallback uses the same deterministic demo vector shape as the
+previous NestJS-only path. Run a sample comparison with:
+
+```bash
+cd server
+npm run smoke:ai-compute
+```
 
 ## MCP Game Metadata Tool
 

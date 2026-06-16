@@ -9,16 +9,18 @@ Gaming Journal Club is a retro 8-bit styled game journal and recommendation MVP.
 | Frontend               | React, Vite, TypeScript                                          |
 | Backend API            | NestJS                                                           |
 | Database               | PostgreSQL with pgvector                                         |
-| RAG                    | NestJS RAG service, pgvector, optional OpenAI embeddings         |
+| RAG                    | NestJS RAG service, pgvector, FastAPI/OpenAI/demo embeddings     |
 | MCP                    | JSON-RPC MCP endpoint with `search_games` tool                   |
 | Agent                  | NestJS MVP Agent loop with max iterations, timeout, and fallback |
 | External game metadata | IGDB API through MCP                                             |
 
-FastAPI is reserved in the architecture and env contract for a later Agent service split. The current one-day MVP keeps the Agent loop inside NestJS so RAG, MCP, and React can be tested end to end.
+FastAPI is now attached as a stateless AI compute service for embedding
+generation. The current one-day MVP keeps the Agent loop inside NestJS so RAG,
+MCP, and React can be tested end to end.
 
 ## Quickstart
 
-### 1. Start Postgres
+### 1. Start Postgres And FastAPI AI Compute
 
 Run from the repository root:
 
@@ -26,7 +28,8 @@ Run from the repository root:
 docker compose up -d
 ```
 
-The database container uses `pgvector/pgvector:pg16` and exposes local port `5432`.
+The database container uses `pgvector/pgvector:pg16` and exposes local port
+`5432`. The FastAPI AI compute service exposes local port `8000`.
 
 ### 2. Configure the server
 
@@ -49,6 +52,8 @@ Optional AI/external keys:
 | Variable                               | Purpose                                     | Local fallback                                                  |
 | -------------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
 | `OPENAI_API_KEY`                       | Real embeddings and structured RAG analysis | deterministic demo embeddings and rule-based analysis           |
+| `FASTAPI_AI_COMPUTE_URL`               | FastAPI AI compute service URL              | `http://localhost:8000`                                         |
+| `FASTAPI_AI_COMPUTE_TIMEOUT_MS`        | NestJS to FastAPI AI compute timeout        | `5000`                                                          |
 | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Live IGDB MCP game metadata                 | MCP returns `missing_credentials`; Agent uses local DB fallback |
 | `STEAM_WEB_API_KEY`                    | Steam profile/play-history linking          | not required for current SYNC demo                              |
 | `AGENT_MAX_ITERATIONS`                 | Max MCP calls in one Agent loop             | `4`                                                             |
@@ -74,6 +79,14 @@ Backend:
 ```bash
 cd server
 npm run start:dev
+```
+
+FastAPI only:
+
+```bash
+cd ai-compute
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 Frontend:
@@ -145,6 +158,7 @@ Commands:
 docker compose ps
 
 cd server
+npm run smoke:ai-compute
 npm run build
 npm test -- --runInBand
 
@@ -216,7 +230,7 @@ Recorded live IGDB MCP result on `2026-06-16`:
 - IGDB live metadata requires `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`. Without them, recommendations still render through local fallback data.
 - Steam live profile display requires `STEAM_WEB_API_KEY`. Without it, the profile page shows a structured `missing_credentials` state.
 - The current Steam link MVP stores a SteamID64 after API lookup, but does not prove ownership of the Steam account. Add Steam OpenID before using this as account verification.
-- FastAPI is not yet a running service in this repo. The current MVP Agent loop is implemented in NestJS, with `FASTAPI_AGENT_URL` kept for the future split.
+- The current MVP Agent loop is still implemented in NestJS. FastAPI handles the first compute split through `/health` and `/embed`; broader Agent migration is still future work behind `FASTAPI_AGENT_URL`.
 - The local NestJS startup may print a pg deprecation warning about concurrent `client.query()` usage. The app still starts and the smoke test passes.
 - In-app browser automation failed in this Codex Windows sandbox with `CreateProcessAsUserW failed: 5`; use the Vite URL manually for visual review.
 
