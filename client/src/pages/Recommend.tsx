@@ -110,6 +110,15 @@ function analysisLabelKo(label: string) {
   return labels[normalized] ?? normalizeLabel(label)
 }
 
+function recommendationCardTags(card: AiRecommendationCard) {
+  const labels =
+    card.matchedTags.length > 0
+      ? card.matchedTags
+      : [...card.tags, ...card.genres]
+
+  return [...new Set(labels)].slice(0, 3)
+}
+
 function formatSyncTime(value: string | null) {
   if (!value) {
     return 'NOT_SYNCED'
@@ -603,12 +612,12 @@ function Recommend() {
                         </p>
 
                         <div className="mt-auto flex flex-wrap gap-2">
-                          {card.matchedTags.slice(0, 3).map((tag) => (
+                          {recommendationCardTags(card).map((tag) => (
                             <span
                               className="border border-[var(--gjc-primary)] px-2 py-1 font-label-caps text-[9px] text-[var(--gjc-primary)] uppercase"
                               key={`${card.title}-${tag}`}
                             >
-                              {tag}
+                              {analysisLabelKo(tag)}
                             </span>
                           ))}
                         </div>
