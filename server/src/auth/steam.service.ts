@@ -495,10 +495,14 @@ export class SteamService {
       const recentGames = recentSourceGames.map((game) =>
         this.toRecentGame(game),
       )
+      const achievementGames = this.achievementCandidates(
+        recentSourceGames,
+        ownedGames,
+      )
       const achievementSamples = await this.fetchAchievementSamples(
         steamId,
         apiKey,
-        this.achievementCandidates(recentSourceGames, ownedGames),
+        achievementGames,
       )
 
       return {
@@ -506,7 +510,7 @@ export class SteamService {
         error: null,
         errorCode: null,
         stats: {
-          achievementGamesChecked: achievementSamples.length,
+          achievementGamesChecked: achievementGames.length,
           achievementsTotal: achievementSamples.reduce(
             (sum, sample) => sum + sample.total,
             0,
@@ -549,7 +553,7 @@ export class SteamService {
       }
     }
 
-    // Achievement lookups require one AppID at a time, so cap the sample to keep the profile request responsive.
+    // Achievement lookups require one AppID at a time, so scan played games with bounded request concurrency.
     return [...byAppId.values()]
       .filter((game) => (game.playtime_forever ?? 0) > 0)
       .sort(
@@ -557,7 +561,6 @@ export class SteamService {
           (right.playtime_2weeks ?? 0) - (left.playtime_2weeks ?? 0) ||
           (right.playtime_forever ?? 0) - (left.playtime_forever ?? 0),
       )
-      .slice(0, 5)
   }
 
   private async fetchAchievementSamples(
@@ -565,8 +568,10 @@ export class SteamService {
     apiKey: string,
     games: SteamOwnedGame[],
   ) {
-    const samples = await Promise.all(
-      games.map((game) => this.fetchAchievementSample(steamId, apiKey, game)),
+    const samples = await this.mapWithConcurrency(
+      games,
+      8,
+      (game) => this.fetchAchievementSample(steamId, apiKey, game),
     )
 
     return samples.filter((sample): sample is SteamAchievementSample =>
@@ -608,6 +613,30 @@ export class SteamService {
     } catch {
       return null
     }
+  }
+
+  private async mapWithConcurrency<T, R>(
+    items: T[],
+    concurrency: number,
+    mapper: (item: T) => Promise<R>,
+  ) {
+    const results: R[] = []
+    let nextIndex = 0
+
+    const workers = Array.from(
+      { length: Math.min(concurrency, items.length) },
+      async () => {
+        while (nextIndex < items.length) {
+          const currentIndex = nextIndex
+          nextIndex += 1
+          results[currentIndex] = await mapper(items[currentIndex])
+        }
+      },
+    )
+
+    await Promise.all(workers)
+
+    return results
   }
 
   private toRecentGame(game: SteamOwnedGame): SteamRecentGame {

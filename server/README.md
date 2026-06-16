@@ -148,7 +148,7 @@ When the key is missing, the API returns `connected: false`, `errorCode: "missin
 
 `GET /auth/steam/openid` starts the ownership-verified Steam OpenID link flow. The callback posts Steam's signed OpenID payload back to Steam with `check_authentication`, stores the verified SteamID64 on success, and redirects back to `${CLIENT_URL}/profile` with the link result in query parameters.
 
-`GET /auth/steam/stats` returns the linked user's Steam stats for the profile stat grid. It combines `GetOwnedGames`, `GetRecentlyPlayedGames`, and sampled `GetPlayerAchievements` calls, then returns owned game count, sampled achievement totals, recent playtime, recent games, and the shorter Steam friend-code identifier. Steam's public recent-play API exposes a two-week playtime window instead of daily timestamps, so the response labels the current profile fallback as `recentWindowDays: 14`.
+`GET /auth/steam/stats` returns the linked user's Steam stats for the profile stat grid. It combines `GetOwnedGames`, `GetRecentlyPlayedGames`, and per-app `GetPlayerAchievements` calls across played games, then returns owned game count including played free games, achievement totals, recent playtime, recent games, and the shorter Steam friend-code identifier. Steam's public recent-play API exposes a two-week playtime window instead of daily timestamps, so the response labels the current profile fallback as `recentWindowDays: 14`.
 
 ### Live Steam Profile Smoke Test
 

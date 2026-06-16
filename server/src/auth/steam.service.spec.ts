@@ -137,6 +137,73 @@ describe('SteamService OpenID linking', () => {
       name: 'Recent Quest',
       playtimeMinutes: 90,
     })
+    expect(axiosGet).toHaveBeenNthCalledWith(
+      1,
+      'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          include_played_free_games: true,
+        }),
+      }),
+    )
+  })
+
+  it('scans achievements for all played games instead of a five game sample', async () => {
+    const repository = {
+      findOneBy: jest.fn().mockResolvedValue({
+        id: 'user-1',
+        steamId: '76561197960265729',
+      }),
+    }
+    const service = new SteamService(
+      {
+        get: jest.fn((key: string) =>
+          key === 'STEAM_WEB_API_KEY' ? 'steam-key' : undefined,
+        ),
+      } as never,
+      repository as never,
+    )
+    const axiosGet = jest.spyOn(axios, 'get')
+    const games = Array.from({ length: 6 }, (_, index) => ({
+      appid: index + 1,
+      name: `Game ${index + 1}`,
+      playtime_forever: 60,
+    }))
+
+    axiosGet
+      .mockResolvedValueOnce({
+        data: {
+          response: {
+            game_count: games.length,
+            games,
+          },
+        },
+      } as never)
+      .mockResolvedValueOnce({
+        data: {
+          response: {
+            games: [],
+          },
+        },
+      } as never)
+
+    for (let index = 0; index < games.length; index += 1) {
+      axiosGet.mockResolvedValueOnce({
+        data: {
+          playerstats: {
+            achievements: [{ achieved: 1 }, { achieved: 0 }],
+          },
+        },
+      } as never)
+    }
+
+    const result = await service.getLinkedStats('user-1')
+
+    expect(result.connected).toBe(true)
+    expect(result.stats?.achievementGamesChecked).toBe(6)
+    expect(result.stats?.achievementsUnlocked).toBe(6)
+    expect(result.stats?.achievementsTotal).toBe(12)
+    expect(axiosGet).toHaveBeenCalledTimes(8)
   })
 
   it('returns a private profile state when game details are unavailable', async () => {
