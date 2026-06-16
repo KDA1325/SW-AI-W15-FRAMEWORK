@@ -410,7 +410,7 @@ export class RagService {
           messages: [
             {
               content:
-                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context.',
+                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context. Write playStyleSummary in Korean.',
               role: 'system',
             },
             {
@@ -636,10 +636,10 @@ export class RagService {
       .map((tag) => tag.label.replaceAll('_', ' '));
 
     if (labels.length === 0) {
-      return 'Not enough archive data is available yet, so the player profile needs more journals or reviews.';
+      return '아직 분석할 기록이 부족하므로 더 많은 저널이나 리뷰가 쌓이면 추천 정확도가 높아집니다.';
     }
 
-    return `This player leans toward ${labels.join(', ').toLowerCase()} experiences, with recommendations best grounded in their own journal and review evidence.`;
+    return `이 플레이어는 ${labels.join(', ').toLowerCase()} 성향이 강하며, 추천은 본인의 저널, 리뷰, 플레이 기록 근거를 함께 볼 때 가장 안정적입니다.`;
   }
 
   private normalizeAnalysis(analysis: RagAnalysisDraft): RagAnalysisDraft {

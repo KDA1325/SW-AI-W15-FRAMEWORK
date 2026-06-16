@@ -14,7 +14,8 @@ import { RagService } from './rag.service';
 
 const DEFAULT_AGENT_MAX_ITERATIONS = 4;
 const DEFAULT_AGENT_TIMEOUT_MS = 30_000;
-const MIN_RECOMMENDATION_COUNT = 3;
+// GJC-178: persona QA needs at least six cards so users can compare more than a top-three list.
+const MIN_RECOMMENDATION_COUNT = 6;
 const MAX_RECOMMENDATIONS_PER_SERIES = 1;
 
 type AgentSyncOptions = {
@@ -227,7 +228,7 @@ export class AgentService {
       method: 'tools/call',
       params: {
         arguments: {
-          limit: 5,
+          limit: 8,
           preferenceTags: ragContext.preferenceTags.map((tag) => tag.label),
           query,
         },
@@ -334,7 +335,7 @@ export class AgentService {
         platforms: game.platforms,
         rank: state.recommendations.length + index + 1,
         reason:
-          `Fallback recommendation from this user's own journal, review, and Steam play signals. ` +
+          `이 추천은 현재 사용자의 저널, 리뷰, Steam 플레이 신호를 함께 본 fallback 결과입니다. ` +
           this.recommendationReason(game.title, candidateTags, game.title),
         sourceUrl: game.steamAppId
           ? `https://store.steampowered.com/app/${game.steamAppId}`
@@ -480,7 +481,7 @@ export class AgentService {
         ? matchedTags.join(', ')
         : 'the available RAG context';
 
-    return `${title} matches the search signal "${query}" and the player's RAG tags: ${tags}.`;
+    return `${title}은(는) 검색 신호 "${query}"와 사용자의 RAG 태그(${tags})가 함께 맞아 추천됩니다. 선호 태그와 기록된 플레이/리뷰 맥락을 같이 반영했습니다.`;
   }
 
   private uniqueRecommendations(

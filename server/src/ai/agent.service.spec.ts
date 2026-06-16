@@ -84,7 +84,7 @@ describe('AgentService user-scoped recommendations', () => {
     expect(query).toContain('played_post."userId" = $1');
     expect(query).toContain('played_game."userId" = $1');
     expect(result.recommendations[0].reason).toContain(
-      "this user's own journal, review, and Steam play signals",
+      '현재 사용자의 저널, 리뷰, Steam 플레이 신호',
     );
     expect(aiProfileRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
