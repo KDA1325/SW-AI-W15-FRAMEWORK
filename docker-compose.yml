@@ -1,4 +1,16 @@
 services:
+  ai-compute:
+    build:
+      context: ./ai-compute
+    container_name: game-archive-ai-compute
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      OPENAI_EMBEDDING_DIMENSIONS: ${OPENAI_EMBEDDING_DIMENSIONS:-1536}
+
   postgres:
     image: pgvector/pgvector:pg16
     container_name: game-archive-postgres
