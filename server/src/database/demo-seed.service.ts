@@ -4,6 +4,12 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { AI_RECOMMENDATION_DEMO_USER_ID } from '../ai/recommendation-contract';
+import {
+  buildDemoEmbedding,
+  DEMO_EMBEDDING_DIMENSIONS,
+  DEMO_EMBEDDING_MODEL,
+  toPgVectorLiteral,
+} from '../ai/demo-embedding';
 import { AiProfile } from '../auth/entities/aiProfile.entity';
 import {
   EmbeddingDocument,
@@ -20,7 +26,6 @@ import {
 import { PgvectorSetupService } from './pgvector-setup.service';
 
 const DEMO_NOW = new Date('2026-06-16T03:00:00.000Z');
-const DEMO_EMBEDDING_DIMENSIONS = 1536;
 
 const DEMO_IDS = {
   aiProfile: '00000000-0000-4000-8000-000000000101',
@@ -431,12 +436,12 @@ export class DemoSeedService implements OnApplicationBootstrap {
     document.metadata = {
       dimensions: DEMO_EMBEDDING_DIMENSIONS,
       gameTitle: seed.gameTitle,
-      model: 'demo-hash-embedding-v1',
+      model: DEMO_EMBEDDING_MODEL,
       title: seed.title,
     };
 
     const savedDocument = await repository.save(document);
-    const embedding = this.buildDemoEmbedding(seed.content);
+    const embedding = buildDemoEmbedding(seed.content);
 
     await this.dataSource.query(
       `
@@ -444,7 +449,7 @@ export class DemoSeedService implements OnApplicationBootstrap {
         SET "embedding" = $1::vector
         WHERE "id" = $2
       `,
-      [this.toVectorLiteral(embedding), savedDocument.id],
+      [toPgVectorLiteral(embedding), savedDocument.id],
     );
   }
 
@@ -469,27 +474,5 @@ export class DemoSeedService implements OnApplicationBootstrap {
       `Tags: ${game.tags.join(', ')}`,
       `Platforms: ${game.platforms.join(', ')}`,
     ].join('\n');
-  }
-
-  private buildDemoEmbedding(seedText: string): number[] {
-    // This deterministic vector is only for local seed data; GJC-80 will replace it with model embeddings.
-    let hash = 2166136261;
-
-    for (const char of seedText) {
-      hash ^= char.charCodeAt(0);
-      hash = Math.imul(hash, 16777619);
-    }
-
-    return Array.from({ length: DEMO_EMBEDDING_DIMENSIONS }, (_, index) => {
-      hash ^= index + 1;
-      hash = Math.imul(hash, 16777619);
-
-      const normalized = (hash >>> 0) / 4294967295;
-      return Number((normalized * 2 - 1).toFixed(6));
-    });
-  }
-
-  private toVectorLiteral(values: number[]): string {
-    return `[${values.join(',')}]`;
   }
 }

@@ -1,0 +1,598 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { InjectDataSource } from '@nestjs/typeorm';
+import axios from 'axios';
+import { DataSource } from 'typeorm';
+import {
+  AiPreferenceTag,
+  AiRagAnalysisResponse,
+  AiRagContextSource,
+  AiRagEmbeddingProvider,
+  AiWordCloudTerm,
+} from './recommendation-contract';
+import {
+  buildDemoEmbedding,
+  DEMO_EMBEDDING_DIMENSIONS,
+  DEMO_EMBEDDING_MODEL,
+  toPgVectorLiteral,
+} from './demo-embedding';
+import {
+  EmbeddingDocument,
+  EmbeddingSourceType,
+} from '../auth/entities/embeddingDocument.entity';
+
+const DEFAULT_TOP_K = 6;
+const MAX_TOP_K = 12;
+
+type RagOptions = {
+  refreshEmbeddings?: boolean;
+  topK?: number;
+};
+
+type ArchivePostRow = {
+  id: string;
+  type: 'REVIEW' | 'JOURNAL';
+  title: string;
+  content: string;
+  rating: number | null;
+  gameTitle: string;
+  gameGenres: string[];
+  gamePlatforms: string[];
+  gameTags: string[];
+  updatedAt: Date;
+};
+
+type RagSearchRow = {
+  sourceType: string;
+  sourceId: string;
+  content: string;
+  metadata: {
+    gameTitle?: string | null;
+    title?: string;
+  };
+  similarity: string | number;
+};
+
+type EmbeddingResult = {
+  dimensions: number;
+  model: string;
+  provider: AiRagEmbeddingProvider;
+  values: number[];
+};
+
+type RagAnalysisDraft = {
+  preferenceTags: AiPreferenceTag[];
+  playStyleSummary: string;
+  wordCloud: AiWordCloudTerm[];
+};
+
+type OpenAiEmbeddingResponse = {
+  data?: Array<{
+    embedding?: number[];
+  }>;
+  model?: string;
+};
+
+type OpenAiChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+    };
+  }>;
+};
+
+@Injectable()
+export class RagService {
+  private readonly logger = new Logger(RagService.name);
+
+  constructor(
+    @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly config: ConfigService,
+  ) {}
+
+  async analyzeForUser(
+    userId: string,
+    options: RagOptions = {},
+  ): Promise<AiRagAnalysisResponse> {
+    const topK = this.normalizeTopK(options.topK);
+    const posts = await this.loadUserArchivePosts(userId);
+    const refreshedDocuments =
+      options.refreshEmbeddings === false
+        ? 0
+        : await this.refreshArchiveEmbeddings(posts);
+
+    const queryText = this.buildPreferenceQuery(posts);
+    const queryEmbedding = await this.createEmbedding(queryText);
+    const searchRows = await this.searchContextRows(
+      userId,
+      queryEmbedding.values,
+      topK,
+    );
+    const analysis = await this.createAnalysis(searchRows);
+
+    return {
+      userId,
+      generatedAt: new Date().toISOString(),
+      ...analysis,
+      contextSources: searchRows.map((row) => this.toContextSource(row)),
+      embedding: {
+        provider: queryEmbedding.provider,
+        model: queryEmbedding.model,
+        dimensions: queryEmbedding.dimensions,
+        refreshedDocuments,
+      },
+    };
+  }
+
+  private normalizeTopK(value?: number): number {
+    if (!value || !Number.isInteger(value) || value < 1) {
+      return DEFAULT_TOP_K;
+    }
+
+    return Math.min(value, MAX_TOP_K);
+  }
+
+  private async loadUserArchivePosts(
+    userId: string,
+  ): Promise<ArchivePostRow[]> {
+    return this.dataSource.query<ArchivePostRow[]>(
+      `
+        SELECT
+          post.id,
+          post.type,
+          post.title,
+          post.content,
+          post.rating,
+          post."updatedAt",
+          game.title AS "gameTitle",
+          game.genres AS "gameGenres",
+          game.platforms AS "gamePlatforms",
+          game.tags AS "gameTags"
+        FROM "ArchivePost" post
+        INNER JOIN "Game" game ON game.id = post."gameId"
+        WHERE post."userId" = $1
+        ORDER BY post."updatedAt" DESC
+      `,
+      [userId],
+    );
+  }
+
+  private async refreshArchiveEmbeddings(
+    posts: ArchivePostRow[],
+  ): Promise<number> {
+    let refreshed = 0;
+
+    for (const post of posts) {
+      const content = this.buildArchiveEmbeddingContent(post);
+      const embedding = await this.createEmbedding(content);
+      const repository = this.dataSource.getRepository(EmbeddingDocument);
+
+      let document = await repository.findOne({
+        where: {
+          sourceType: EmbeddingSourceType.ARCHIVE_POST,
+          sourceId: post.id,
+        },
+      });
+
+      if (!document) {
+        document = repository.create();
+      }
+
+      document.sourceType = EmbeddingSourceType.ARCHIVE_POST;
+      document.sourceId = post.id;
+      document.content = content;
+      document.metadata = {
+        dimensions: embedding.dimensions,
+        gameTitle: post.gameTitle,
+        model: embedding.model,
+        provider: embedding.provider,
+        title: post.title,
+        updatedAt: post.updatedAt,
+      };
+
+      const savedDocument = await repository.save(document);
+
+      await this.dataSource.query(
+        `
+          UPDATE "EmbeddingDocument"
+          SET "embedding" = $1::vector
+          WHERE "id" = $2
+        `,
+        [toPgVectorLiteral(embedding.values), savedDocument.id],
+      );
+
+      refreshed += 1;
+    }
+
+    return refreshed;
+  }
+
+  private buildArchiveEmbeddingContent(post: ArchivePostRow): string {
+    return [
+      `Post type: ${post.type}`,
+      `Game: ${post.gameTitle}`,
+      `Title: ${post.title}`,
+      `Content: ${post.content}`,
+      `Rating: ${post.rating ?? 'none'}`,
+      `Genres: ${post.gameGenres.join(', ')}`,
+      `Tags: ${post.gameTags.join(', ')}`,
+      `Platforms: ${post.gamePlatforms.join(', ')}`,
+    ].join('\n');
+  }
+
+  private buildPreferenceQuery(posts: ArchivePostRow[]): string {
+    if (posts.length === 0) {
+      return 'Gaming Journal Club player taste profile with no archive posts yet.';
+    }
+
+    // The query embeds the user's own writing, so top-k search retrieves sources that best represent their taste.
+    return posts
+      .map((post) =>
+        [
+          post.gameTitle,
+          post.title,
+          post.content,
+          post.gameGenres.join(', '),
+          post.gameTags.join(', '),
+        ].join('\n'),
+      )
+      .join('\n\n');
+  }
+
+  private async createEmbedding(text: string): Promise<EmbeddingResult> {
+    const apiKey = this.config.get<string>('OPENAI_API_KEY');
+    const model =
+      this.config.get<string>('OPENAI_EMBEDDING_MODEL') ??
+      'text-embedding-3-small';
+    const dimensions = Number(
+      this.config.get<string>('OPENAI_EMBEDDING_DIMENSIONS') ??
+        DEMO_EMBEDDING_DIMENSIONS,
+    );
+
+    if (!apiKey) {
+      return this.createDemoEmbedding(text);
+    }
+
+    try {
+      const payload: Record<string, unknown> = {
+        encoding_format: 'float',
+        input: text,
+        model,
+      };
+
+      if (model.startsWith('text-embedding-3')) {
+        payload.dimensions = dimensions;
+      }
+
+      const response = await axios.post<OpenAiEmbeddingResponse>(
+        'https://api.openai.com/v1/embeddings',
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 15000,
+        },
+      );
+
+      const values = response.data.data?.[0]?.embedding;
+
+      if (!values?.length) {
+        throw new Error('OpenAI embedding response did not include a vector.');
+      }
+
+      return {
+        dimensions: values.length,
+        model: response.data.model ?? model,
+        provider: 'openai',
+        values,
+      };
+    } catch (error) {
+      this.logger.warn(
+        `OpenAI embedding failed; falling back to demo embedding. ${this.errorMessage(error)}`,
+      );
+      return this.createDemoEmbedding(text);
+    }
+  }
+
+  private createDemoEmbedding(text: string): EmbeddingResult {
+    return {
+      dimensions: DEMO_EMBEDDING_DIMENSIONS,
+      model: DEMO_EMBEDDING_MODEL,
+      provider: 'demo',
+      values: buildDemoEmbedding(text),
+    };
+  }
+
+  private async searchContextRows(
+    userId: string,
+    queryEmbedding: number[],
+    topK: number,
+  ): Promise<RagSearchRow[]> {
+    return this.dataSource.query<RagSearchRow[]>(
+      `
+        SELECT
+          ed."sourceType",
+          ed."sourceId",
+          ed.content,
+          ed.metadata,
+          1 - (ed.embedding <=> $1::vector) AS similarity
+        FROM "EmbeddingDocument" ed
+        INNER JOIN "ArchivePost" post
+          ON ed."sourceType" = 'ARCHIVE_POST'
+          AND ed."sourceId" = post.id
+        WHERE post."userId" = $2
+          AND ed.embedding IS NOT NULL
+        ORDER BY ed.embedding <=> $1::vector ASC
+        LIMIT $3
+      `,
+      [toPgVectorLiteral(queryEmbedding), userId, topK],
+    );
+  }
+
+  private async createAnalysis(
+    searchRows: RagSearchRow[],
+  ): Promise<RagAnalysisDraft> {
+    const openAiAnalysis = await this.createOpenAiAnalysis(searchRows);
+    return openAiAnalysis ?? this.createFallbackAnalysis(searchRows);
+  }
+
+  private async createOpenAiAnalysis(
+    searchRows: RagSearchRow[],
+  ): Promise<RagAnalysisDraft | null> {
+    const apiKey = this.config.get<string>('OPENAI_API_KEY');
+
+    if (!apiKey || searchRows.length === 0) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post<OpenAiChatCompletionResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          messages: [
+            {
+              content:
+                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context.',
+              role: 'system',
+            },
+            {
+              content: this.analysisPrompt(searchRows),
+              role: 'user',
+            },
+          ],
+          model: this.config.get<string>('OPENAI_CHAT_MODEL') ?? 'gpt-4o-mini',
+          response_format: this.analysisJsonSchema(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 20000,
+        },
+      );
+
+      const content = response.data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        return null;
+      }
+
+      return this.normalizeAnalysis(JSON.parse(content) as RagAnalysisDraft);
+    } catch (error) {
+      this.logger.warn(
+        `OpenAI analysis failed; falling back to deterministic analysis. ${this.errorMessage(error)}`,
+      );
+      return null;
+    }
+  }
+
+  private analysisPrompt(searchRows: RagSearchRow[]): string {
+    return searchRows
+      .map((row, index) =>
+        [
+          `SOURCE ${index + 1}`,
+          `Title: ${row.metadata.title ?? 'Untitled'}`,
+          `Game: ${row.metadata.gameTitle ?? 'Unknown'}`,
+          `Similarity: ${Number(row.similarity).toFixed(4)}`,
+          row.content,
+        ].join('\n'),
+      )
+      .join('\n\n---\n\n');
+  }
+
+  private analysisJsonSchema() {
+    return {
+      json_schema: {
+        name: 'gjc_rag_taste_analysis',
+        schema: {
+          additionalProperties: false,
+          properties: {
+            playStyleSummary: { type: 'string' },
+            preferenceTags: {
+              items: {
+                additionalProperties: false,
+                properties: {
+                  label: { type: 'string' },
+                  sourceCount: { type: 'number' },
+                  weight: { type: 'number' },
+                },
+                required: ['label', 'weight', 'sourceCount'],
+                type: 'object',
+              },
+              maxItems: 8,
+              type: 'array',
+            },
+            wordCloud: {
+              items: {
+                additionalProperties: false,
+                properties: {
+                  category: {
+                    enum: ['genre', 'mood', 'mechanic', 'pace', 'theme'],
+                    type: 'string',
+                  },
+                  label: { type: 'string' },
+                  sourceCount: { type: 'number' },
+                  weight: { type: 'number' },
+                },
+                required: ['label', 'weight', 'sourceCount', 'category'],
+                type: 'object',
+              },
+              maxItems: 12,
+              type: 'array',
+            },
+          },
+          required: ['preferenceTags', 'playStyleSummary', 'wordCloud'],
+          type: 'object',
+        },
+        strict: true,
+      },
+      type: 'json_schema',
+    };
+  }
+
+  private createFallbackAnalysis(searchRows: RagSearchRow[]): RagAnalysisDraft {
+    const candidates: Array<{
+      category: AiWordCloudTerm['category'];
+      label: string;
+      terms: string[];
+    }> = [
+      {
+        category: 'mechanic',
+        label: 'TACTICAL_RPG',
+        terms: ['tactical', 'turn-based', 'strategy', 'planning', 'board'],
+      },
+      {
+        category: 'theme',
+        label: 'STORY_DRIVEN',
+        terms: ['story', 'narrative', 'dialogue', 'worldbuilding', 'choices'],
+      },
+      {
+        category: 'mood',
+        label: 'RETRO_PIXEL',
+        terms: ['pixel', 'retro', 'screen language', 'readable'],
+      },
+      {
+        category: 'mechanic',
+        label: 'PUZZLE_SYSTEMS',
+        terms: ['puzzle', 'rules', 'systems', 'dungeon'],
+      },
+      {
+        category: 'pace',
+        label: 'DELIBERATE_PLAY',
+        terms: ['deliberate', 'focus', 'precise', 'timing'],
+      },
+      {
+        category: 'mood',
+        label: 'HIGH_DIFFICULTY',
+        terms: ['failure', 'difficult', 'loss', 'sacrifice'],
+      },
+    ];
+
+    const scored = candidates
+      .map((candidate) => {
+        const sourceCount = searchRows.filter((row) =>
+          candidate.terms.some((term) =>
+            `${row.content} ${row.metadata.title ?? ''} ${row.metadata.gameTitle ?? ''}`
+              .toLowerCase()
+              .includes(term),
+          ),
+        ).length;
+
+        return {
+          ...candidate,
+          sourceCount,
+          weight: Number(Math.min(0.98, 0.55 + sourceCount * 0.13).toFixed(2)),
+        };
+      })
+      .filter((candidate) => candidate.sourceCount > 0)
+      .sort((left, right) => right.weight - left.weight);
+
+    const fallback =
+      scored.length > 0
+        ? scored
+        : [
+            {
+              category: 'theme' as const,
+              label: 'PLAYER_ARCHIVE',
+              sourceCount: searchRows.length,
+              terms: ['archive'],
+              weight: 0.6,
+            },
+          ];
+
+    const preferenceTags = fallback.slice(0, 6).map((item) => ({
+      label: item.label,
+      sourceCount: item.sourceCount,
+      weight: item.weight,
+    }));
+
+    const wordCloud = fallback.slice(0, 10).map((item) => ({
+      category: item.category,
+      label: item.label.replaceAll('_', ' '),
+      sourceCount: item.sourceCount,
+      weight: item.weight,
+    }));
+
+    return {
+      playStyleSummary: this.fallbackSummary(preferenceTags),
+      preferenceTags,
+      wordCloud,
+    };
+  }
+
+  private fallbackSummary(tags: AiPreferenceTag[]): string {
+    const labels = tags
+      .slice(0, 3)
+      .map((tag) => tag.label.replaceAll('_', ' '));
+
+    if (labels.length === 0) {
+      return 'Not enough archive data is available yet, so the player profile needs more journals or reviews.';
+    }
+
+    return `This player leans toward ${labels.join(', ').toLowerCase()} experiences, with recommendations best grounded in their own journal and review evidence.`;
+  }
+
+  private normalizeAnalysis(analysis: RagAnalysisDraft): RagAnalysisDraft {
+    return {
+      playStyleSummary:
+        typeof analysis.playStyleSummary === 'string'
+          ? analysis.playStyleSummary
+          : 'The available sources describe a focused player profile.',
+      preferenceTags: Array.isArray(analysis.preferenceTags)
+        ? analysis.preferenceTags.slice(0, 8)
+        : [],
+      wordCloud: Array.isArray(analysis.wordCloud)
+        ? analysis.wordCloud.slice(0, 12)
+        : [],
+    };
+  }
+
+  private toContextSource(row: RagSearchRow): AiRagContextSource {
+    return {
+      excerpt: this.excerpt(row.content),
+      gameTitle: row.metadata.gameTitle ?? null,
+      similarity: Number(Number(row.similarity).toFixed(4)),
+      sourceId: row.sourceId,
+      sourceType: row.sourceType as AiRagContextSource['sourceType'],
+      title: row.metadata.title ?? 'Untitled source',
+    };
+  }
+
+  private excerpt(content: string): string {
+    const normalized = content.replace(/\s+/g, ' ').trim();
+    return normalized.length > 220
+      ? `${normalized.slice(0, 217).trim()}...`
+      : normalized;
+  }
+
+  private errorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    return 'Unknown error';
+  }
+}

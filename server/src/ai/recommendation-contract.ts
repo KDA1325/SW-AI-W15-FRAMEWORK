@@ -97,6 +97,23 @@ export type AiRecommendationErrorResponse = {
   fallbackAvailable: boolean;
 };
 
+export type AiRagEmbeddingProvider = 'openai' | 'demo';
+
+export type AiRagAnalysisResponse = {
+  userId: string;
+  generatedAt: string;
+  preferenceTags: AiPreferenceTag[];
+  playStyleSummary: string;
+  wordCloud: AiWordCloudTerm[];
+  contextSources: AiRagContextSource[];
+  embedding: {
+    provider: AiRagEmbeddingProvider;
+    model: string;
+    dimensions: number;
+    refreshedDocuments: number;
+  };
+};
+
 export const AI_RECOMMENDATION_SYNC_SAMPLE = {
   requestId: 'gjc-demo-sync-001',
   userId: AI_RECOMMENDATION_DEMO_USER_ID,

@@ -19,20 +19,24 @@ cp .env.example .env
 
 Required values:
 
-| Name                 | Description                                 | Local value                |
-| -------------------- | ------------------------------------------- | -------------------------- |
-| `DATABASE_HOST`      | PostgreSQL host                             | `localhost`                |
-| `DATABASE_PORT`      | PostgreSQL port                             | `5432`                     |
-| `DATABASE_USER`      | PostgreSQL user                             | `game_archive_user`        |
-| `DATABASE_PASSWORD`  | PostgreSQL password                         | `game_archive_password`    |
-| `DATABASE_NAME`      | PostgreSQL database name                    | `game_archive`             |
-| `JWT_SECRET`         | Secret key used to sign JWT tokens          | Use a long random string   |
-| `JWT_EXPIRES_IN`     | JWT expiration time                         | `1d`                       |
-| `CLIENT_URL`         | Frontend origin allowed by CORS             | `http://localhost:5173`    |
-| `DEMO_SEED_ENABLED`  | Enables local demo AI seed data             | `true`                     |
-| `DEMO_USER_EMAIL`    | Fixed demo login email                      | `demo@gaming-journal.club` |
-| `DEMO_USER_PASSWORD` | Fixed demo login password                   | `demo-password`            |
-| `DEMO_STEAM_ID`      | Optional SteamID64 for demo profile linking | empty                      |
+| Name                          | Description                                                        | Local value                |
+| ----------------------------- | ------------------------------------------------------------------ | -------------------------- |
+| `DATABASE_HOST`               | PostgreSQL host                                                    | `localhost`                |
+| `DATABASE_PORT`               | PostgreSQL port                                                    | `5432`                     |
+| `DATABASE_USER`               | PostgreSQL user                                                    | `game_archive_user`        |
+| `DATABASE_PASSWORD`           | PostgreSQL password                                                | `game_archive_password`    |
+| `DATABASE_NAME`               | PostgreSQL database name                                           | `game_archive`             |
+| `JWT_SECRET`                  | Secret key used to sign JWT tokens                                 | Use a long random string   |
+| `JWT_EXPIRES_IN`              | JWT expiration time                                                | `1d`                       |
+| `CLIENT_URL`                  | Frontend origin allowed by CORS                                    | `http://localhost:5173`    |
+| `DEMO_SEED_ENABLED`           | Enables local demo AI seed data                                    | `true`                     |
+| `DEMO_USER_EMAIL`             | Fixed demo login email                                             | `demo@gaming-journal.club` |
+| `DEMO_USER_PASSWORD`          | Fixed demo login password                                          | `demo-password`            |
+| `DEMO_STEAM_ID`               | Optional SteamID64 for demo profile linking                        | empty                      |
+| `OPENAI_API_KEY`              | Optional OpenAI API key for RAG embeddings and structured analysis | empty                      |
+| `OPENAI_CHAT_MODEL`           | Chat model for RAG JSON analysis                                   | `gpt-4o-mini`              |
+| `OPENAI_EMBEDDING_MODEL`      | Embedding model for pgvector documents                             | `text-embedding-3-small`   |
+| `OPENAI_EMBEDDING_DIMENSIONS` | Embedding vector size                                              | `1536`                     |
 
 Do not commit `server/.env`. It can contain secrets such as `JWT_SECRET`.
 
@@ -137,9 +141,58 @@ FROM "EmbeddingDocument" ed
 ORDER BY ed."sourceType", title;
 ```
 
-The local seed uses deterministic demo vectors named `demo-hash-embedding-v1`. Real model embeddings are wired in the later RAG issue so local DB setup can be verified without an LLM API key.
+The local seed uses deterministic demo vectors named `demo-hash-embedding-v1`. The RAG context API can refresh those rows with real OpenAI embeddings when `OPENAI_API_KEY` is configured.
 
 For later MCP/API-key work, game metadata should come from IGDB, while Steam API data should be used for Steam profile and play-history linking. GJC-164 only prepares the local DB rows and optional `DEMO_STEAM_ID`; it does not call external APIs.
+
+## RAG Context API
+
+GJC-80 adds a user-scoped RAG context endpoint:
+
+```text
+GET /ai/rag/context?topK=6&refreshEmbeddings=true
+```
+
+The endpoint requires the same `access_token` cookie used by the other authenticated APIs. Clients do not send `userId`; the server resolves it from the JWT.
+
+Response shape:
+
+```json
+{
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "generatedAt": "2026-06-16T12:00:00.000Z",
+  "preferenceTags": [
+    { "label": "TACTICAL_RPG", "weight": 0.94, "sourceCount": 3 }
+  ],
+  "playStyleSummary": "This player leans toward tactical rpg experiences...",
+  "wordCloud": [
+    {
+      "label": "TACTICAL RPG",
+      "weight": 0.94,
+      "sourceCount": 3,
+      "category": "mechanic"
+    }
+  ],
+  "contextSources": [
+    {
+      "sourceType": "ARCHIVE_POST",
+      "sourceId": "11111111-1111-4111-8111-111111111111",
+      "title": "Boss patterns feel fair when the rules are visible",
+      "gameTitle": "Into the Breach",
+      "excerpt": "Post type: REVIEW Game: Into the Breach...",
+      "similarity": 0.82
+    }
+  ],
+  "embedding": {
+    "provider": "demo",
+    "model": "demo-hash-embedding-v1",
+    "dimensions": 1536,
+    "refreshedDocuments": 3
+  }
+}
+```
+
+When `OPENAI_API_KEY` is configured, RAG uses OpenAI embeddings and structured JSON analysis. Without a key, it uses deterministic demo embeddings and rule-based analysis so pgvector top-k search remains testable in local development.
 
 ## Domain Data Model
 
