@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import type { JournalPost } from './Journals'
-import PostTagInput from './PostTagInput'
+import {
+  GAME_PLATFORM_OPTIONS,
+  normalizeGamePlatformOption,
+} from './gamePlatformOptions'
+// import PostTagInput from './PostTagInput'
 
 type EditJournalModalProps = {
   isOpen: boolean
@@ -13,9 +17,10 @@ type EditJournalModalProps = {
 
 function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalProps) {
   const [gameTitle, setGameTitle] = useState('')
+  const [gamePlatform, setGamePlatform] = useState('')
   const [logTitle, setLogTitle] = useState('')
   const [content, setContent] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  // const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -24,9 +29,10 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
     const timeoutId = window.setTimeout(() => {
       // The journal edit modal mirrors the current DB values before the user changes them.
       setGameTitle(post.game.title)
+      setGamePlatform(normalizeGamePlatformOption(post.game.platforms?.[0]))
       setLogTitle(post.title)
       setContent(post.content)
-      setTags(post.tags?.map((tag) => tag.name) ?? [])
+      // setTags(post.tags?.map((tag) => tag.name) ?? [])
       setMessage('')
     }, 0)
 
@@ -46,9 +52,10 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
       // Journals do not send rating; the backend rejects rating for JOURNAL posts.
       await api.patch(`/posts/${post.id}`, {
         gameTitle,
+        gamePlatform: gamePlatform.trim() || undefined,
         title: logTitle,
         content,
-        tags,
+        // tags,
       })
 
       await onSaved()
@@ -82,6 +89,22 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
               type="text"
               value={gameTitle}
             />
+          </label>
+
+          <label className="flex flex-col gap-2">
+            <span className="font-label-caps text-sm uppercase tracking-widest">PLATFORM</span>
+            <select
+              className="w-full border-2 border-primary bg-surface-container-low p-3 pr-12 font-label-caps uppercase tracking-wider focus:outline-none focus:ring-0"
+              onChange={(event) => setGamePlatform(event.target.value)}
+              value={gamePlatform}
+            >
+              <option value="">SELECT_PLATFORM</option>
+              {GAME_PLATFORM_OPTIONS.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="flex flex-col gap-2">
@@ -121,7 +144,7 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
             </div>
           </label>
 
-          <PostTagInput onChange={setTags} tags={tags} />
+          {/* <PostTagInput onChange={setTags} tags={tags} /> */}
 
           {message ? <p className="font-label-caps text-xs uppercase text-primary">{message}</p> : null}
 

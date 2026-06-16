@@ -4,7 +4,8 @@ import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
 import { api, getApiErrorMessage } from '../api'
 import GameSearchInput from './GameSearchInput'
-import PostTagInput from './PostTagInput'
+import { GAME_PLATFORM_OPTIONS } from './gamePlatformOptions'
+// import PostTagInput from './PostTagInput'
 
 type ReviewDuplicateResponse = {
   duplicate: boolean
@@ -18,10 +19,11 @@ function WriteReview() {
   const navigate = useNavigate()
   const [gameTitle, setGameTitle] = useState('')
   const [igdbGameId, setIgdbGameId] = useState<string | null>(null)
+  const [gamePlatform, setGamePlatform] = useState('')
   const [reviewTitle, setReviewTitle] = useState('')
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  // const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [duplicateReview, setDuplicateReview] = useState<{
     duplicate: boolean
@@ -108,10 +110,11 @@ function WriteReview() {
         type: 'REVIEW',
         gameTitle,
         igdbGameId: igdbGameId ?? undefined,
+        gamePlatform: gamePlatform.trim() || undefined,
         title: reviewTitle,
         content: review,
         rating: parseFloat(rating),
-        tags,
+        // tags,
       })
 
       navigate('/journals')
@@ -136,7 +139,7 @@ function WriteReview() {
           className="grid grid-cols-12 gap-x-gutter gap-y-10"
           onSubmit={handleSubmit}
         >
-          <label className="col-span-12 flex flex-col gap-2 md:col-span-8">
+          <label className="col-span-12 flex flex-col gap-2 md:col-span-6">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
               GAME_TITLE *
             </span>
@@ -168,7 +171,25 @@ function WriteReview() {
             ) : null}
           </label>
 
-          <label className="col-span-12 flex flex-col gap-2 md:col-span-4">
+          <label className="col-span-12 flex flex-col gap-2 md:col-span-3">
+            <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+              PLATFORM
+            </span>
+            <select
+              className="w-full border-2 border-primary bg-surface p-4 pr-12 font-body-lg text-body-lg"
+              onChange={(event) => setGamePlatform(event.target.value)}
+              value={gamePlatform}
+            >
+              <option value="">SELECT_PLATFORM</option>
+              {GAME_PLATFORM_OPTIONS.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="col-span-12 flex flex-col gap-2 md:col-span-3">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
               RATING *
             </span>
@@ -184,11 +205,11 @@ function WriteReview() {
             />
           </label>
 
-          <PostTagInput
+          {/* <PostTagInput
             className="col-span-12"
             onChange={setTags}
             tags={tags}
-          />
+          /> */}
 
           <label className="col-span-12 flex flex-col gap-2">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">

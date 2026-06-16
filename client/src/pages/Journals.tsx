@@ -58,6 +58,7 @@ export type JournalPost = {
     id: string
     title: string
     imageUrl?: string | null
+    platforms?: string[]
   }
   user: {
     id: string
@@ -340,7 +341,7 @@ function Journals() {
             ) : null}
             {reviews.map((post) => (
               <article className="group relative w-[320px] flex-shrink-0 cursor-crosshair" key={post.id}>
-                <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden border-2 border-[var(--gjc-primary)] bg-surface-container-high grayscale transition-all duration-300 hover:grayscale-0">
+                <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden border-2 border-[var(--gjc-primary)] bg-surface-container-high transition-all duration-300 hover:grayscale-0">
                   {post.game.imageUrl ? (
                     <img
                       alt={`${post.game.title} cover`}
@@ -464,7 +465,7 @@ function Journals() {
                 <div className="flex flex-grow flex-col bg-surface-container-lowest p-6">
                   <div className="mb-4 flex items-start justify-between">
                     <span className="border border-[var(--gjc-primary)] bg-surface-variant px-3 py-1 font-label-caps text-[10px] font-bold uppercase tracking-widest">
-                      {post.game.title}
+                      #{post.game.title}
                     </span>
                     {post.canEdit ? (
                       <div className="flex gap-2">
@@ -476,7 +477,7 @@ function Journals() {
                           EDIT
                         </button>
                         <button
-                          className="border border-[var(--gjc-primary)] bg-[var(--gjc-on-error-fixed)] px-4 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-on-primary)] transition-colors hover:bg-surface-variant"
+                          className="border border-[var(--gjc-primary)] bg-[var(--gjc-on-error-fixed)] px-4 py-1 text-[10px] font-bold uppercase text-[var(--gjc-on-primary)] transition-colors hover:bg-surface-variant"
                           onClick={() => openModal('delete-journal', post)}
                           type="button"
                         >

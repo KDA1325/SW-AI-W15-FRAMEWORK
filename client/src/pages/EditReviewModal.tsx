@@ -2,7 +2,11 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import type { JournalPost } from './Journals'
-import PostTagInput from './PostTagInput'
+import {
+  GAME_PLATFORM_OPTIONS,
+  normalizeGamePlatformOption,
+} from './gamePlatformOptions'
+// import PostTagInput from './PostTagInput'
 
 type EditReviewModalProps = {
   isOpen: boolean
@@ -13,10 +17,11 @@ type EditReviewModalProps = {
 
 function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProps) {
   const [gameTitle, setGameTitle] = useState('')
+  const [gamePlatform, setGamePlatform] = useState('')
   const [reviewTitle, setReviewTitle] = useState('')
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  // const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -25,10 +30,11 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
     const timeoutId = window.setTimeout(() => {
       // The edit form starts from the DB values that came from GET /posts.
       setGameTitle(post.game.title)
+      setGamePlatform(normalizeGamePlatformOption(post.game.platforms?.[0]))
       setReviewTitle(post.title)
       setRating(String(post.rating ?? 1))
       setReview(post.content)
-      setTags(post.tags?.map((tag) => tag.name) ?? [])
+      // setTags(post.tags?.map((tag) => tag.name) ?? [])
       setMessage('')
     }, 0)
 
@@ -48,10 +54,11 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
       // Review updates may change game title, title, body, and rating.
       await api.patch(`/posts/${post.id}`, {
         gameTitle,
+        gamePlatform: gamePlatform.trim() || undefined,
         title: reviewTitle,
         content: review,
         rating: parseFloat(rating),
-        tags,
+        // tags,
       })
 
       await onSaved()
@@ -88,6 +95,22 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
           </label>
 
           <label className="flex flex-col gap-2">
+            <span className="font-label-caps text-sm uppercase tracking-widest">PLATFORM</span>
+            <select
+              className="border-2 border-primary bg-surface-container-low p-3 pr-12 font-label-caps uppercase tracking-wider focus:outline-none focus:ring-0"
+              onChange={(event) => setGamePlatform(event.target.value)}
+              value={gamePlatform}
+            >
+              <option value="">SELECT_PLATFORM</option>
+              {GAME_PLATFORM_OPTIONS.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="flex flex-col gap-2 md:col-span-2">
             <span className="font-label-caps text-sm uppercase tracking-widest">RATING</span>
             <input
               className="border-2 border-primary bg-surface-container-low p-3 font-label-caps uppercase tracking-wider focus:outline-none focus:ring-0"
@@ -122,11 +145,11 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
             />
           </label>
 
-          <PostTagInput
+          {/* <PostTagInput
             className="md:col-span-2"
             onChange={setTags}
             tags={tags}
-          />
+          /> */}
 
           {message ? (
             <p className="font-label-caps text-xs uppercase text-primary md:col-span-2">{message}</p>

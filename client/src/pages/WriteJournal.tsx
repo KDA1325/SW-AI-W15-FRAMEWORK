@@ -4,15 +4,17 @@ import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
 import { api } from '../api'
 import GameSearchInput from './GameSearchInput'
-import PostTagInput from './PostTagInput'
+import { GAME_PLATFORM_OPTIONS } from './gamePlatformOptions'
+// import PostTagInput from './PostTagInput'
 
 function WriteJournal() {
   const navigate = useNavigate()
   const [gameTitle, setGameTitle] = useState('')
   const [igdbGameId, setIgdbGameId] = useState<string | null>(null)
+  const [gamePlatform, setGamePlatform] = useState('')
   const [logTitle, setLogTitle] = useState('')
   const [logContent, setContent] = useState('')
-  const [tags, setTags] = useState<string[]>([])
+  // const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -24,9 +26,10 @@ function WriteJournal() {
         type: 'JOURNAL',
         gameTitle,
         igdbGameId: igdbGameId ?? undefined,
+        gamePlatform: gamePlatform.trim() || undefined,
         title: logTitle,
         content: logContent,
-        tags,
+        // tags,
       })
 
       navigate('/journals')
@@ -48,7 +51,7 @@ function WriteJournal() {
           className="grid grid-cols-12 gap-x-gutter gap-y-12"
           onSubmit={handleSubmit}
         >
-          <label className="col-span-12 flex flex-col gap-2">
+          <label className="col-span-12 flex flex-col gap-2 md:col-span-8">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
               GAME_TITLE *
             </span>
@@ -68,11 +71,29 @@ function WriteJournal() {
             />
           </label>
 
-          <PostTagInput
+          <label className="col-span-12 flex flex-col gap-2 md:col-span-4">
+            <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+              PLATFORM
+            </span>
+            <select
+              className="w-full border-2 border-primary bg-surface p-4 pr-12 font-body-lg text-body-lg focus:bg-surface focus:text-on-background"
+              onChange={(event) => setGamePlatform(event.target.value)}
+              value={gamePlatform}
+            >
+              <option value="">SELECT_PLATFORM</option>
+              {GAME_PLATFORM_OPTIONS.map((platform) => (
+                <option key={platform} value={platform}>
+                  {platform}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* <PostTagInput
             className="col-span-12"
             onChange={setTags}
             tags={tags}
-          />
+          /> */}
 
           <label className="col-span-12 flex flex-col gap-2">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
