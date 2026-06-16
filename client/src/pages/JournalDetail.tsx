@@ -7,6 +7,7 @@ import DeleteJournalModal from './DeleteJournalModal'
 import EditJournalModal from './EditJournalModal'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
+import ProfileAvatar from './ProfileAvatar'
 import '../styles/JournalDetail.css'
 
 type DetailComment = {
@@ -18,6 +19,7 @@ type DetailComment = {
   createdAt: string
   user: {
     nickname: string
+    profileImageUrl?: string | null
   }
   replies?: DetailComment[]
 }
@@ -316,6 +318,9 @@ function JournalDetail() {
   const gameTitle = post?.game.title ?? 'UNKNOWN_GAME'
   const platform = post?.game.platforms?.[0] ?? 'UNKNOWN'
   const author = post?.user.nickname ?? 'PLAYER'
+  const authorProfileImageUrl = post?.user.profileImageUrl ?? null
+  const currentUserName = user?.nickname ?? 'PLAYER'
+  const currentUserProfileImageUrl = user?.profileImageUrl ?? null
   const loggedAt = post ? formatDate(post.createdAt) : '-'
   const statusMessage = postId ? message : 'POST ID NOT FOUND'
   // Timeline 카드에서 상세로 들어올 때는 Link state에 from: '/timeline'을 담아 보냅니다.
@@ -360,9 +365,11 @@ function JournalDetail() {
                 <div className="mb-4">
                   <p className="mb-1 font-label-caps text-label-caps text-secondary">AUTHOR</p>
                   <a className="group flex items-center gap-3" href="#profile">
-                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant">
-                      <span className="material-symbols-outlined text-primary">person</span>
-                    </div>
+                    <ProfileAvatar
+                      alt={`${author} profile`}
+                      className="flex h-10 w-10 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant"
+                      profileImageUrl={authorProfileImageUrl}
+                    />
                     <span className="font-ui-button text-ui-button group-hover:underline">{author}</span>
                   </a>
                 </div>
@@ -448,8 +455,12 @@ function JournalDetail() {
 
                   <form className="space-y-4 border-2 border-primary bg-white p-6" onSubmit={submitComment}>
                     <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-primary">person</span>
-                      <span className="font-label-caps text-label-caps uppercase">USER_ID: {author}</span>
+                      <ProfileAvatar
+                        alt={`${currentUserName} profile`}
+                        className="flex h-6 w-6 items-center justify-center overflow-hidden border border-primary bg-surface-variant"
+                        profileImageUrl={currentUserProfileImageUrl}
+                      />
+                      <span className="font-label-caps text-label-caps uppercase">USER_ID: {currentUserName}</span>
                     </div>
                     <textarea
                       className="h-32 w-full resize-none border border-primary bg-surface-container-lowest p-4 font-body-md focus:border-primary focus:outline-none focus:ring-0"
@@ -474,7 +485,11 @@ function JournalDetail() {
                         <div className="border border-primary bg-surface-container-lowest p-4" key={entry.id}>
                           <div className="mb-2 flex items-center justify-between gap-4">
                             <div className="flex items-center gap-2">
-                              <span className="material-symbols-outlined text-xs">person</span>
+                              <ProfileAvatar
+                                alt={`${entry.user.nickname} profile`}
+                                className="flex h-6 w-6 items-center justify-center overflow-hidden border border-primary bg-surface-variant"
+                                profileImageUrl={entry.user.profileImageUrl}
+                              />
                               <span className="font-label-caps text-label-caps font-bold">
                                 {entry.user.nickname}
                               </span>
@@ -507,7 +522,11 @@ function JournalDetail() {
                                   <div className="border border-primary bg-white p-4">
                                     <div className="mb-2 flex items-center justify-between gap-4">
                                       <div className="flex items-center gap-2">
-                                        <span className="material-symbols-outlined text-xs">person</span>
+                                        <ProfileAvatar
+                                          alt={`${reply.user.nickname} profile`}
+                                          className="flex h-6 w-6 items-center justify-center overflow-hidden border border-primary bg-surface-variant"
+                                          profileImageUrl={reply.user.profileImageUrl}
+                                        />
                                         <span className="font-label-caps text-label-caps font-bold">
                                           {reply.user.nickname}
                                         </span>

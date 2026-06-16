@@ -5,6 +5,7 @@ import DeleteReviewModal from './DeleteReviewModal'
 import EditReviewModal from './EditReviewModal'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
+import ProfileAvatar from './ProfileAvatar'
 import '../styles/JournalDetail.css'
 
 type ReviewDetailPost = JournalPost & {
@@ -109,6 +110,7 @@ function ReviewDetail() {
   const gameTitle = post?.game.title ?? 'UNKNOWN_GAME'
   const platform = post?.game.platforms?.[0] ?? 'UNKNOWN'
   const author = post?.user.nickname ?? 'PLAYER'
+  const authorProfileImageUrl = post?.user.profileImageUrl ?? null
   const loggedAt = post ? formatDate(post.createdAt) : '-'
   const rating = post?.rating ?? 0
   const statusMessage = postId ? message : 'POST ID NOT FOUND'
@@ -153,9 +155,11 @@ function ReviewDetail() {
                 <div className="mb-4">
                   <p className="mb-1 font-label-caps text-label-caps text-secondary">AUTHOR</p>
                   <a className="group flex items-center gap-3" href="#profile">
-                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant">
-                      <span className="material-symbols-outlined text-primary">person</span>
-                    </div>
+                    <ProfileAvatar
+                      alt={`${author} profile`}
+                      className="flex h-10 w-10 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant"
+                      profileImageUrl={authorProfileImageUrl}
+                    />
                     <span className="font-ui-button text-ui-button group-hover:underline">{author}</span>
                   </a>
                 </div>

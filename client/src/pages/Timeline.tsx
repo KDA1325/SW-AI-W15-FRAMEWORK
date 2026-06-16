@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import PageChrome from './PageChrome'
+import ProfileAvatar from './ProfileAvatar'
 import type { JournalPost, PostListResponse } from './Journals'
 
 type TimelineFilter = 'ALL' | 'REVIEW' | 'JOURNAL'
@@ -216,12 +217,19 @@ function Timeline() {
                         </>
                       )}
                     </div>
-                    <div>
-                      <div className="font-ui-button text-ui-button text-primary">
-                        {post.user.nickname}
-                      </div>
-                      <div className="font-label-caps text-label-caps text-secondary">
-                        #{post.game.title}
+                    <div className="flex min-w-0 items-center gap-3">
+                      <ProfileAvatar
+                        alt={`${post.user.nickname} profile`}
+                        className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant"
+                        profileImageUrl={post.user.profileImageUrl}
+                      />
+                      <div className="min-w-0">
+                        <div className="font-ui-button text-ui-button text-primary">
+                          {post.user.nickname}
+                        </div>
+                        <div className="font-label-caps text-label-caps text-secondary">
+                          #{post.game.title}
+                        </div>
                       </div>
                     </div>
                     <div className="ml-auto border border-primary bg-surface px-3 py-1 font-label-caps text-label-caps text-primary">

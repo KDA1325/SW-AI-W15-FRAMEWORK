@@ -63,6 +63,7 @@ export type JournalPost = {
   user: {
     id: string
     nickname: string
+    profileImageUrl?: string | null
   }
   tags?: PostTag[]
 }
