@@ -14,6 +14,7 @@ This document fixes the model, library, database, API, and data-flow choices nee
 | RAG runtime | NestJS `RagService` + PostgreSQL pgvector + FastAPI LangChain retriever | NestJS keeps auth and DB ownership while FastAPI can run Python-native retrieval when available. |
 | LangChain scope | Runtime dependency in the FastAPI AI compute service for OpenAI embedding calls and pgvector retrieval | Keeps Python AI integration inside the FastAPI split without adding LangChain to the NestJS runtime. |
 | FastAPI scope | AI compute service for embeddings, LangChain pgvector retrieval, and LangGraph Agent planning behind `FASTAPI_AI_COMPUTE_URL`/`FASTAPI_AGENT_URL` | FastAPI owns Python-native AI orchestration pieces while NestJS keeps auth, MCP execution, persistence, and public API boundaries. |
+| Function calling | OpenAI Chat Completions `tools`/`tool_calls` for first-pass Agent tool selection | Lets the LLM choose the MCP `search_games` tool while NestJS validates tool name and arguments before execution. |
 | Embedding sync | Refresh on RAG/SYNC request for MVP; background/outbox sync after MVP | Request-time refresh keeps edits visible in demos. Event-driven sync is better once write volume matters. |
 
 ## Environment Contract
@@ -76,8 +77,9 @@ Demo seed or user-authored ArchivePost rows
   -> FastAPI /rag/search LangChain retriever over pgvector
   -> fallback to NestJS pgvector top-k SQL with cosine distance if FastAPI is unavailable
   -> OpenAI structured JSON analysis or rule-based fallback
+  -> OpenAI native function calling selects MCP search_games tool calls when configured
   -> FastAPI /agent/recommendations/plan LangGraph planner chooses MCP search queries
-  -> fallback to NestJS local query planning if FastAPI Agent planning is unavailable
+  -> fallback to NestJS local query planning if OpenAI/FastAPI Agent planning is unavailable
   -> preferenceTags + playStyleSummary + wordCloud + contextSources
 ```
 
@@ -108,7 +110,8 @@ React /recommend SYNC_DATA
   -> JwtAuthGuard resolves userId from access_token
   -> AgentService calls RagService.analyzeForUser()
   -> RagService refreshes embeddings and prefers FastAPI /rag/search for context retrieval
-  -> AgentService asks FastAPI /agent/recommendations/plan for LangGraph tool planning
+  -> AgentService sends MCP search_games as an OpenAI tools schema and validates tool_calls
+  -> AgentService asks FastAPI /agent/recommendations/plan for LangGraph tool planning if needed
   -> AgentService calls MCP tools/call search_games
   -> McpService calls IGDB through IgdbService
   -> AgentService merges IGDB results or local DB fallback cards
@@ -150,6 +153,14 @@ FastAPI
   -> owns LangGraph state-machine planning
   -> returns planned `search_games` tool arguments and stop metadata
 ```
+
+OpenAI function calling runs before FastAPI planning when `OPENAI_API_KEY` is
+configured. The request includes the MCP `search_games` input schema as an
+OpenAI function tool. The response is treated as untrusted: NestJS accepts only
+`type: "function"`, `function.name: "search_games"`, valid JSON arguments, and
+a non-empty `query` that does not exactly match an already-recorded source game.
+Invalid tool calls are ignored and the Agent falls through to FastAPI LangGraph
+or local deterministic planning.
 
 The current LangGraph planner keeps the same state guard concepts as the NestJS
 loop: request id, user id, context titles, preference tags, tool results,
@@ -194,5 +205,6 @@ This keeps today's demo simple while documenting the production-safe direction.
 
 - OpenAI embeddings API: https://developers.openai.com/api/reference/resources/embeddings/methods/create
 - OpenAI `gpt-4o-mini` model page: https://platform.openai.com/docs/models/gpt-4o-mini
+- OpenAI function calling guide: https://developers.openai.com/api/docs/guides/function-calling
 - LangChain PGVector integration: https://docs.langchain.com/oss/python/integrations/vectorstores/pgvector
 - LangGraph overview: https://docs.langchain.com/oss/python/langgraph/overview

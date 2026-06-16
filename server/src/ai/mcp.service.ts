@@ -15,9 +15,20 @@ type ToolCallParams = {
   name?: unknown;
 };
 
+export type McpToolDefinition = {
+  description?: string;
+  inputSchema?: Record<string, unknown>;
+  name: string;
+  [key: string]: unknown;
+};
+
 @Injectable()
 export class McpService {
   constructor(private readonly igdbService: IgdbService) {}
+
+  listToolDefinitions(): McpToolDefinition[] {
+    return [this.searchGamesToolDefinition()];
+  }
 
   async handle(request: JsonRpcRequest) {
     if (request.jsonrpc !== '2.0' || !request.method) {
@@ -45,7 +56,7 @@ export class McpService {
 
     if (request.method === 'tools/list') {
       return this.result(request.id ?? null, {
-        tools: [this.searchGamesToolDefinition()],
+        tools: this.listToolDefinitions(),
       });
     }
 
@@ -144,7 +155,7 @@ export class McpService {
     };
   }
 
-  private searchGamesToolDefinition() {
+  private searchGamesToolDefinition(): McpToolDefinition {
     return {
       annotations: {
         readOnlyHint: true,

@@ -11,13 +11,14 @@ Gaming Journal Club is a retro 8-bit styled game journal and recommendation MVP.
 | Database               | PostgreSQL with pgvector                                         |
 | RAG                    | NestJS RAG service, pgvector, FastAPI LangChain embeddings and retrieval |
 | MCP                    | JSON-RPC MCP endpoint with `search_games` tool                   |
-| Agent                  | FastAPI LangGraph query planner + NestJS MCP execution loop       |
+| Agent                  | OpenAI function-calling planner + FastAPI LangGraph fallback + NestJS MCP execution loop |
 | External game metadata | IGDB API through MCP                                             |
 
 FastAPI is now attached as a stateless AI compute service for embedding
 generation, LangChain pgvector retrieval, and LangGraph Agent planning. NestJS
-keeps auth, MCP execution, recommendation merging, persistence, and local
-fallbacks so RAG, MCP, and React can be tested end to end.
+uses OpenAI native function calling for tool selection when `OPENAI_API_KEY` is
+available, then falls back to FastAPI LangGraph or local planning while keeping
+auth, MCP execution, recommendation merging, and persistence.
 
 ## Quickstart
 
@@ -145,7 +146,7 @@ The detailed RAG technology and data-pipeline decision is documented in [`docs/G
 | ------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | RAG feature        | `RagService` reads seeded journals/reviews/profile documents and searches pgvector, preferring FastAPI LangChain retrieval when available | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render |
 | MCP feature        | Protected `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; read-only `search_games` targets IGDB | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error |
-| AI Agent feature   | FastAPI LangGraph plans MCP `search_games` queries; `AgentService` executes MCP, merges/fallbacks recommendations | `pipeline.agent.iterations`, `maxIterations`, `stoppedReason`, and recommendation cards |
+| AI Agent feature   | OpenAI function calling plans MCP `search_games` queries; FastAPI LangGraph/local plans are fallbacks; `AgentService` executes MCP and merges recommendations | `pipeline.agent.planner`, `toolCallCount`, `queries`, `stoppedReason`, and recommendation cards |
 | Loop guard         | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`, fallback recommendations                         | local smoke shows `agentIterations = 4`, `stoppedReason = fallback`                       |
 | React integration  | `Recommend.tsx` calls `POST /ai/recommendations/sync`                                        | SYNC click renders API data instead of dummy arrays                                       |
 | Steam profile link | `Profile.tsx` calls `GET/POST/DELETE /auth/steam/*`; server calls Steam `GetPlayerSummaries` | Profile panel shows linked Steam profile or structured missing-credentials state          |

@@ -74,6 +74,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
 | MCP HTTP endpoint auth                        | `MCP_REQUIRE_AUTH`, `MCP_INTERNAL_TOKEN`, optional JWT cookie | `POST /mcp` returns a JSON-RPC auth error instead of executing tools |
 | Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
+| OpenAI native Agent tool calling              | `OPENAI_API_KEY`, `OPENAI_CHAT_MODEL`              | Uses Chat Completions `tools`/`tool_calls`; falls back to FastAPI/local planning when unavailable       |
 | Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
 | FastAPI Agent planner                         | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | Calls `/agent/recommendations/plan`; NestJS falls back to its local query builder when unavailable     |
 
@@ -507,8 +508,9 @@ Recorded live IGDB MCP result on `2026-06-16`:
 
 ## AI Recommendation Agent Loop
 
-GJC-88 implements the recommendation loop and GJC-185 adds a FastAPI LangGraph
-planner for the tool-selection step:
+GJC-88 implements the recommendation loop, GJC-185 adds a FastAPI LangGraph
+planner, and GJC-184 adds OpenAI native function calling for the first
+tool-selection path:
 
 ```text
 POST /ai/recommendations/sync
@@ -538,16 +540,20 @@ type AgentState = {
 Execution order:
 
 1. Read RAG context with `RagService.analyzeForUser`.
-2. Ask FastAPI `POST /agent/recommendations/plan` to run a LangGraph state graph over the RAG context and return MCP `search_games` queries.
-3. If FastAPI is unavailable or returns no queries, build local fallback queries from source game titles and top preference tags.
-4. Call the MCP `search_games` tool through JSON-RPC.
-5. Merge and de-duplicate IGDB results into recommendation cards.
-6. Stop after enough recommendations, `AGENT_MAX_ITERATIONS`, or `AGENT_TIMEOUT_MS`.
-7. If IGDB is unavailable, return local DB fallback recommendations so SYNC still produces a usable response.
+2. If `OPENAI_API_KEY` is configured, send the MCP `search_games` schema as an OpenAI Chat Completions `tools` payload and parse `tool_calls`.
+3. Reject unsupported tool names, invalid JSON arguments, empty queries, and already-recorded source game titles before any MCP execution.
+4. If function calling is unavailable or invalid, ask FastAPI `POST /agent/recommendations/plan` to run a LangGraph state graph over the RAG context.
+5. If FastAPI is unavailable or returns no queries, build local fallback queries from source game titles and top preference tags.
+6. Call the MCP `search_games` tool through JSON-RPC.
+7. Merge and de-duplicate IGDB results into recommendation cards.
+8. Stop after enough recommendations, `AGENT_MAX_ITERATIONS`, or `AGENT_TIMEOUT_MS`.
+9. If IGDB is unavailable, return local DB fallback recommendations so SYNC still produces a usable response.
 
-FastAPI currently owns the state-machine planning step through LangGraph. NestJS
-keeps the actual MCP call, fallback, and persistence path so the authenticated
-public API remains stable while the Agent orchestration moves incrementally.
+The response pipeline includes Agent trace fields for QA: `planner`,
+`selectedTool`, `toolCallCount`, `queries`, `iterations`, `maxIterations`, and
+`stoppedReason`. NestJS keeps the actual MCP call, fallback, and persistence
+path so the authenticated public API remains stable while Agent orchestration
+moves incrementally.
 
 ## Domain Data Model
 
@@ -611,8 +617,9 @@ React /recommend SYNC button
   -> POST /ai/recommendations/sync
   -> NestJS BFF validates JWT cookie and resolves userId
   -> NestJS AgentService runs the SYNC loop
-  -> FastAPI Agent planner receives { userId, requestId, contextSources, preferenceTags }
-  -> LangGraph chooses MCP search_games queries with max-iteration and timeout state
+  -> OpenAI native function calling selects search_games tool calls when configured
+  -> FastAPI Agent planner receives { userId, requestId, contextSources, preferenceTags } as fallback
+  -> LangGraph chooses MCP search_games queries with max-iteration and timeout state if OpenAI planning is unavailable
   -> RAG reads ArchivePost, Game, AiProfile, and EmbeddingDocument through Postgres pgvector
   -> MCP JSON-RPC server exposes tools/list and tools/call
   -> Agent calls search_games through MCP and normalizes tool/fallback results into final JSON

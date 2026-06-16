@@ -1,7 +1,34 @@
+import axios from 'axios';
 import { AgentService } from './agent.service';
 import type { AiRagAnalysisResponse } from './recommendation-contract';
 
+jest.mock('axios');
+
+const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+function searchGamesToolDefinition() {
+  return {
+    description:
+      'Search IGDB for video game metadata that can populate AI recommendation cards.',
+    inputSchema: {
+      additionalProperties: false,
+      properties: {
+        limit: { maximum: 10, minimum: 1, type: 'number' },
+        preferenceTags: { items: { type: 'string' }, type: 'array' },
+        query: { minLength: 1, type: 'string' },
+      },
+      required: ['query'],
+      type: 'object',
+    },
+    name: 'search_games',
+  };
+}
+
 describe('AgentService user-scoped recommendations', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('limits local fallback recommendations to the current user signals', async () => {
     const ragContext: AiRagAnalysisResponse = {
       contextSources: [],
@@ -196,6 +223,270 @@ describe('AgentService user-scoped recommendations', () => {
       }),
     );
     expect(result.recommendations[0].title).toBe('Baba Is You');
+  });
+
+  it('uses OpenAI native function calling to select the search_games tool', async () => {
+    const ragContext: AiRagAnalysisResponse = {
+      contextSources: [
+        {
+          excerpt: 'I like rule-bending puzzle logic.',
+          gameTitle: 'Opus Magnum',
+          similarity: 0.91,
+          sourceId: 'post-1',
+          sourceType: 'ARCHIVE_POST',
+          title: 'Optimization puzzle notes',
+        },
+      ],
+      embedding: {
+        dimensions: 1536,
+        model: 'demo-hash-embedding-v1',
+        provider: 'demo',
+        refreshedDocuments: 0,
+      },
+      generatedAt: '2026-06-16T00:00:00.000Z',
+      playStyleSummary: 'Current user likes systemic puzzles.',
+      preferenceTags: [{ label: 'PUZZLE_SYSTEMS', sourceCount: 3, weight: 0.9 }],
+      userId: 'current-user-id',
+      wordCloud: [],
+    };
+    const dataSource = {
+      getRepository: jest.fn(),
+      query: jest.fn().mockResolvedValueOnce([]).mockResolvedValueOnce([]),
+    };
+    const config = {
+      get: jest.fn((name: string) =>
+        name === 'OPENAI_API_KEY'
+          ? 'test-openai-key'
+          : name === 'OPENAI_CHAT_MODEL'
+            ? 'gpt-4o-mini'
+            : undefined,
+      ),
+    };
+    mockedAxios.post
+      .mockResolvedValueOnce({
+        data: {
+          choices: [
+            {
+              message: {
+                tool_calls: [
+                  {
+                    function: {
+                      arguments: JSON.stringify({
+                        limit: 4,
+                        query: 'logic puzzle',
+                      }),
+                      name: 'search_games',
+                    },
+                    id: 'call-1',
+                    type: 'function',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: { choices: [{ message: { content: '{"reasons":[]}' } }] },
+      });
+    const mcpService = {
+      handle: jest.fn().mockResolvedValue({
+        result: {
+          structuredContent: {
+            error: null,
+            errorCode: null,
+            games: [
+              {
+                aliases: [],
+                externalId: { id: '200', provider: 'igdb' },
+                genres: ['Puzzle'],
+                imageUrl: 'https://images.example/baba.jpg',
+                platforms: ['PC'],
+                releaseDate: '2019-03-13',
+                sourceUrl: 'https://www.igdb.com/games/baba-is-you',
+                summary:
+                  'A logic puzzle game where rules are objects and players solve spatial word puzzles.',
+                tags: ['Puzzle', 'Logic'],
+                title: 'Baba Is You',
+                totalRating: 90,
+              },
+            ],
+            provider: 'igdb',
+          },
+        },
+      }),
+      listToolDefinitions: jest.fn().mockReturnValue([searchGamesToolDefinition()]),
+    };
+    const ragService = {
+      analyzeForUser: jest.fn().mockResolvedValue(ragContext),
+    };
+    const aiProfileRepository = {
+      create: jest.fn((value) => ({ ...value })),
+      findOne: jest.fn().mockResolvedValue(null),
+      save: jest.fn().mockResolvedValue(undefined),
+    };
+    dataSource.getRepository.mockReturnValue(aiProfileRepository);
+    const service = new AgentService(
+      dataSource as never,
+      config as never,
+      mcpService as never,
+      ragService as never,
+    );
+
+    const result = await service.syncRecommendations('current-user-id', {
+      requestId: 'function-call-test',
+    });
+
+    expect(mockedAxios.post).toHaveBeenNthCalledWith(
+      1,
+      'https://api.openai.com/v1/chat/completions',
+      expect.objectContaining({
+        tool_choice: 'required',
+        tools: [
+          expect.objectContaining({
+            function: expect.objectContaining({ name: 'search_games' }),
+            type: 'function',
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: 'Bearer test-openai-key',
+        }),
+      }),
+    );
+    expect(mcpService.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'logic puzzle',
+        method: 'tools/call',
+      }),
+    );
+    expect(result.pipeline.agent.planner).toBe('openai_function_calling');
+    expect(result.pipeline.agent.selectedTool).toBe('search_games');
+    expect(result.pipeline.agent.toolCallCount).toBe(1);
+    expect(result.pipeline.agent.queries).toEqual(['logic puzzle']);
+    expect(result.recommendations[0].title).toBe('Baba Is You');
+  });
+
+  it('rejects invalid OpenAI tool calls and falls back to local planning', async () => {
+    const ragContext: AiRagAnalysisResponse = {
+      contextSources: [],
+      embedding: {
+        dimensions: 1536,
+        model: 'demo-hash-embedding-v1',
+        provider: 'demo',
+        refreshedDocuments: 0,
+      },
+      generatedAt: '2026-06-16T00:00:00.000Z',
+      playStyleSummary: 'Current user likes atmosphere.',
+      preferenceTags: [{ label: 'ATMOSPHERE', sourceCount: 2, weight: 0.9 }],
+      userId: 'current-user-id',
+      wordCloud: [],
+    };
+    const dataSource = {
+      getRepository: jest.fn(),
+      query: jest.fn().mockResolvedValueOnce([]).mockResolvedValueOnce([]),
+    };
+    const config = {
+      get: jest.fn((name: string) =>
+        name === 'OPENAI_API_KEY'
+          ? 'test-openai-key'
+          : name === 'OPENAI_CHAT_MODEL'
+            ? 'gpt-4o-mini'
+            : undefined,
+      ),
+    };
+    mockedAxios.post
+      .mockResolvedValueOnce({
+        data: {
+          choices: [
+            {
+              message: {
+                tool_calls: [
+                  {
+                    function: {
+                      arguments: '{"query":"delete saved data"}',
+                      name: 'delete_user',
+                    },
+                    id: 'call-1',
+                    type: 'function',
+                  },
+                  {
+                    function: {
+                      arguments: '{}',
+                      name: 'search_games',
+                    },
+                    id: 'call-2',
+                    type: 'function',
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: { choices: [{ message: { content: '{"reasons":[]}' } }] },
+      });
+    const mcpService = {
+      handle: jest.fn().mockResolvedValue({
+        result: {
+          structuredContent: {
+            error: null,
+            errorCode: null,
+            games: [
+              {
+                aliases: [],
+                externalId: { id: '500', provider: 'igdb' },
+                genres: ['Adventure'],
+                imageUrl: 'https://images.example/atmosphere.jpg',
+                platforms: ['PC'],
+                releaseDate: null,
+                sourceUrl: 'https://www.igdb.com/games/verified-atmosphere',
+                summary:
+                  'An atmospheric adventure game with exploration, careful pacing, and detailed world discovery.',
+                tags: ['Atmospheric', 'Adventure'],
+                title: 'Verified Atmosphere',
+                totalRating: 79,
+              },
+            ],
+            provider: 'igdb',
+          },
+        },
+      }),
+      listToolDefinitions: jest.fn().mockReturnValue([searchGamesToolDefinition()]),
+    };
+    const ragService = {
+      analyzeForUser: jest.fn().mockResolvedValue(ragContext),
+    };
+    const aiProfileRepository = {
+      create: jest.fn((value) => ({ ...value })),
+      findOne: jest.fn().mockResolvedValue(null),
+      save: jest.fn().mockResolvedValue(undefined),
+    };
+    dataSource.getRepository.mockReturnValue(aiProfileRepository);
+    const service = new AgentService(
+      dataSource as never,
+      config as never,
+      mcpService as never,
+      ragService as never,
+    );
+
+    const result = await service.syncRecommendations('current-user-id', {
+      requestId: 'invalid-function-call-test',
+    });
+
+    expect(mcpService.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'ATMOSPHERE',
+        method: 'tools/call',
+      }),
+    );
+    expect(mcpService.handle).not.toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'delete saved data' }),
+    );
+    expect(result.pipeline.agent.planner).toBe('local');
+    expect(result.recommendations[0].title).toBe('Verified Atmosphere');
   });
 
   it('filters already recorded games and low-confidence IGDB title matches', async () => {

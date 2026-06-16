@@ -12,7 +12,7 @@ import {
 import { AiProfile } from '../auth/entities/aiProfile.entity';
 import { User } from '../auth/entities/user.entity';
 import { AiComputeClient } from './ai-compute.client';
-import { McpService } from './mcp.service';
+import { McpService, McpToolDefinition } from './mcp.service';
 import { RagService } from './rag.service';
 
 const DEFAULT_AGENT_MAX_ITERATIONS = 4;
@@ -65,6 +65,14 @@ type AgentState = {
   userId: string;
 };
 
+type AgentPlanner = 'openai_function_calling' | 'fastapi_langgraph' | 'local';
+
+type AgentSearchPlan = {
+  planner: AgentPlanner;
+  queries: string[];
+  selectedTool: 'search_games' | null;
+};
+
 type LocalGameRow = {
   genres: string[];
   id: string;
@@ -93,8 +101,27 @@ type OpenAiChatCompletionResponse = {
   choices?: Array<{
     message?: {
       content?: string | null;
+      tool_calls?: OpenAiToolCall[];
     };
   }>;
+};
+
+type OpenAiToolCall = {
+  function?: {
+    arguments?: string;
+    name?: string;
+  };
+  id?: string;
+  type?: string;
+};
+
+type OpenAiToolDefinition = {
+  function: {
+    description: string;
+    name: string;
+    parameters: Record<string, unknown>;
+  };
+  type: 'function';
 };
 
 type RecommendationReasonDraft = {
@@ -136,15 +163,14 @@ export class AgentService {
     const nickname = await this.loadUserNickname(userId);
     let usedFallback = false;
 
-    const searchQueries =
-      (await this.planSearchQueriesWithFastApi(
-        userId,
-        requestId,
-        ragContext,
-        state,
-      )) ?? this.buildSearchQueries(ragContext);
+    const searchPlan = await this.planSearchQueries(
+      userId,
+      requestId,
+      ragContext,
+      state,
+    );
 
-    for (const query of searchQueries) {
+    for (const query of searchPlan.queries) {
       if (this.shouldStop(state)) {
         break;
       }
@@ -206,7 +232,12 @@ export class AgentService {
         agent: {
           iterations: state.toolResults.length,
           maxIterations: state.maxIterations,
+          planner: searchPlan.planner,
+          queries: state.toolResults.map((result) => result.query),
+          selectedTool:
+            state.toolResults.length > 0 ? 'search_games' : searchPlan.selectedTool,
           stoppedReason,
+          toolCallCount: state.toolResults.length,
         },
         mcp: {
           provider: 'igdb',
@@ -254,6 +285,121 @@ export class AgentService {
     return [...new Set([...sourceQueries, ...tagQueries, 'story rich RPG'])];
   }
 
+  private async planSearchQueries(
+    userId: string,
+    requestId: string,
+    ragContext: AiRagAnalysisResponse,
+    state: AgentState,
+  ): Promise<AgentSearchPlan> {
+    const openAiPlan = await this.planSearchQueriesWithOpenAiFunctionCalling(
+      requestId,
+      ragContext,
+      state,
+    );
+
+    if (openAiPlan) {
+      return openAiPlan;
+    }
+
+    const fastApiQueries = await this.planSearchQueriesWithFastApi(
+      userId,
+      requestId,
+      ragContext,
+      state,
+    );
+
+    if (fastApiQueries?.length) {
+      return {
+        planner: 'fastapi_langgraph',
+        queries: fastApiQueries,
+        selectedTool: 'search_games',
+      };
+    }
+
+    return {
+      planner: 'local',
+      queries: this.buildSearchQueries(ragContext),
+      selectedTool: 'search_games',
+    };
+  }
+
+  private async planSearchQueriesWithOpenAiFunctionCalling(
+    requestId: string,
+    ragContext: AiRagAnalysisResponse,
+    state: AgentState,
+  ): Promise<AgentSearchPlan | null> {
+    const apiKey = this.config.get<string>('OPENAI_API_KEY');
+
+    if (!apiKey) {
+      return null;
+    }
+
+    const tools = this.openAiToolsFromMcpTools(
+      this.mcpService.listToolDefinitions(),
+    );
+
+    if (tools.length === 0) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post<OpenAiChatCompletionResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          messages: [
+            {
+              content:
+                'You select read-only game recommendation tools. Use only the provided tools. Return tool calls only. Choose search queries that are not already recorded game titles, are concise, and can retrieve recommendation candidates.',
+              role: 'system',
+            },
+            {
+              content: JSON.stringify({
+                contextSources: ragContext.contextSources.map((source) => ({
+                  gameTitle: source.gameTitle,
+                  similarity: source.similarity,
+                  title: source.title,
+                })),
+                maxIterations: state.maxIterations,
+                preferenceTags: ragContext.preferenceTags,
+                requestId,
+                userId: ragContext.userId,
+              }),
+              role: 'user',
+            },
+          ],
+          model: this.config.get<string>('OPENAI_CHAT_MODEL') ?? 'gpt-4o-mini',
+          tool_choice: 'required',
+          tools,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: this.timeoutMs(),
+        },
+      );
+      const toolCalls = response.data.choices?.[0]?.message?.tool_calls ?? [];
+      const queries = this.searchQueriesFromOpenAiToolCalls(
+        toolCalls,
+        ragContext,
+        state.maxIterations,
+      );
+
+      if (queries.length === 0) {
+        return null;
+      }
+
+      return {
+        planner: 'openai_function_calling',
+        queries,
+        selectedTool: 'search_games',
+      };
+    } catch {
+      return null;
+    }
+  }
+
   private async planSearchQueriesWithFastApi(
     userId: string,
     requestId: string,
@@ -279,6 +425,64 @@ export class AgentService {
     }
 
     return plan.searchQueries;
+  }
+
+  private openAiToolsFromMcpTools(
+    tools: McpToolDefinition[],
+  ): OpenAiToolDefinition[] {
+    return tools
+      .filter((tool) => tool.name === 'search_games')
+      .map((tool) => ({
+        function: {
+          description:
+            tool.description ??
+            'Search for video games that match the player preference context.',
+          name: tool.name,
+          parameters:
+            tool.inputSchema && typeof tool.inputSchema === 'object'
+              ? tool.inputSchema
+              : { type: 'object', properties: {}, additionalProperties: false },
+        },
+        type: 'function',
+      }));
+  }
+
+  private searchQueriesFromOpenAiToolCalls(
+    toolCalls: OpenAiToolCall[],
+    ragContext: AiRagAnalysisResponse,
+    maxIterations: number,
+  ): string[] {
+    const excludedTitles = this.buildTitleExclusionSet(ragContext);
+    const queries = toolCalls
+      .map((toolCall) => this.parseSearchGamesToolCall(toolCall))
+      .filter((query): query is string => Boolean(query))
+      .filter((query) => !this.isExcludedTitle(query, excludedTitles));
+
+    return [...new Set(queries)].slice(0, maxIterations);
+  }
+
+  private parseSearchGamesToolCall(toolCall: OpenAiToolCall): string | null {
+    if (
+      toolCall.type !== 'function' ||
+      toolCall.function?.name !== 'search_games' ||
+      typeof toolCall.function.arguments !== 'string'
+    ) {
+      return null;
+    }
+
+    try {
+      const args = JSON.parse(toolCall.function.arguments) as unknown;
+
+      if (!args || typeof args !== 'object') {
+        return null;
+      }
+
+      const query = (args as Record<string, unknown>).query;
+
+      return typeof query === 'string' && query.trim() ? query.trim() : null;
+    } catch {
+      return null;
+    }
   }
 
   private async callSearchGamesTool(

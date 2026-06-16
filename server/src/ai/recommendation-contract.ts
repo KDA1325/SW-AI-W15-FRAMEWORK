@@ -74,7 +74,11 @@ export type AiPipelineTrace = {
   agent: {
     maxIterations: number;
     iterations: number;
+    planner?: 'openai_function_calling' | 'fastapi_langgraph' | 'local';
+    queries?: string[];
+    selectedTool?: 'search_games' | null;
     stoppedReason: AiAgentStoppedReason;
+    toolCallCount?: number;
   };
 };
 
@@ -198,7 +202,11 @@ export const AI_RECOMMENDATION_SYNC_SAMPLE = {
     agent: {
       maxIterations: 4,
       iterations: 3,
+      planner: 'openai_function_calling',
+      queries: ['tactical RPG', 'story rich RPG'],
+      selectedTool: 'search_games',
       stoppedReason: 'completed',
+      toolCallCount: 3,
     },
   },
 } as const satisfies AiRecommendationSyncResponse;
