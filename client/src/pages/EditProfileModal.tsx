@@ -191,7 +191,7 @@ function EditProfileModalContent({
                   <div className="w-20 h-20 border-2 border-primary bg-surface-dim overflow-hidden flex items-center justify-center p-1">
                     <img
                       alt="Current Profile Picture"
-                      className="w-full h-full object-cover filter grayscale contrast-125"
+                      className="w-full h-full object-cover filter contrast-125"
                       src={resolveProfileImageUrl(profileImagePreviewUrl)}
                     />
                   </div>
