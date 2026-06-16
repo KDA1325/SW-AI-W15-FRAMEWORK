@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import RecommendAnalyzingModal from './RecommendAnalyzingModal'
+import RecommendDataNoticeModal, {
+  type RecommendArchiveSignalCounts,
+} from './RecommendDataNoticeModal'
 import PageChrome from './PageChrome'
+import type { PostListResponse } from './Journals'
 import '../styles/Profile.css'
 import '../styles/Recommend.css'
 
@@ -277,7 +281,14 @@ function normalizeSyncResponse(
 
 function Recommend() {
   const [isAnalyzingOpen, setIsAnalyzingOpen] = useState(false)
+  const [isDataNoticeOpen, setIsDataNoticeOpen] = useState(true)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [archiveSignalCounts, setArchiveSignalCounts] =
+    useState<RecommendArchiveSignalCounts>({
+      isLoading: true,
+      journalCount: null,
+      reviewCount: null,
+    })
   const [syncData, setSyncData] = useState<AiRecommendationSyncResponse | null>(
     null,
   )
@@ -295,6 +306,45 @@ function Recommend() {
 
   useEffect(() => {
     let isMounted = true
+
+    async function loadArchiveSignalCounts() {
+      try {
+        const countParams = {
+          limit: '5',
+          mine: 'true',
+          page: '1',
+          sort: 'latest',
+        }
+        const reviewParams = new URLSearchParams({
+          ...countParams,
+          type: 'REVIEW',
+        })
+        const journalParams = new URLSearchParams({
+          ...countParams,
+          type: 'JOURNAL',
+        })
+        const [reviewResponse, journalResponse] = await Promise.all([
+          api.get<PostListResponse>(`/posts?${reviewParams.toString()}`),
+          api.get<PostListResponse>(`/posts?${journalParams.toString()}`),
+        ])
+
+        if (isMounted) {
+          setArchiveSignalCounts({
+            isLoading: false,
+            journalCount: journalResponse.data.total,
+            reviewCount: reviewResponse.data.total,
+          })
+        }
+      } catch {
+        if (isMounted) {
+          setArchiveSignalCounts({
+            isLoading: false,
+            journalCount: null,
+            reviewCount: null,
+          })
+        }
+      }
+    }
 
     async function loadLatestSync() {
       try {
@@ -316,6 +366,7 @@ function Recommend() {
       }
     }
 
+    void loadArchiveSignalCounts()
     void loadLatestSync()
 
     return () => {
@@ -328,6 +379,7 @@ function Recommend() {
     syncRequestIdRef.current = requestOrder
     setIsSyncing(true)
     setIsAnalyzingOpen(true)
+    setIsDataNoticeOpen(false)
     setSyncError(null)
 
     try {
@@ -378,6 +430,14 @@ function Recommend() {
               <span className="font-headline-lg text-headline-lg tracking-tighter">
                 {isSyncing ? 'SYNCING_DATA' : 'SYNC_DATA'}
               </span>
+            </button>
+
+            <button
+              className="border-2 border-[var(--gjc-primary)] bg-white px-4 py-2 font-label-caps text-[10px] uppercase tracking-widest text-primary shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-colors hover:bg-primary hover:text-on-primary"
+              onClick={() => setIsDataNoticeOpen(true)}
+              type="button"
+            >
+              AI_DATA_GUIDE
             </button>
 
             <p className="font-label-caps text-label-caps text-[var(--gjc-secondary)] text-center leading-relaxed recommend-nowrap">
@@ -567,6 +627,11 @@ function Recommend() {
       <RecommendAnalyzingModal
         isOpen={isAnalyzingOpen}
         onClose={() => setIsAnalyzingOpen(false)}
+      />
+      <RecommendDataNoticeModal
+        archiveSignalCounts={archiveSignalCounts}
+        isOpen={isDataNoticeOpen}
+        onClose={() => setIsDataNoticeOpen(false)}
       />
     </PageChrome>
   )

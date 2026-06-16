@@ -105,20 +105,43 @@ body {
 
 @keyframes analyzingBar {
   0% {
-    width: 0%;
+    transform: scaleX(0.08);
   }
 
   50% {
-    width: 100%;
+    transform: scaleX(1);
   }
 
   100% {
-    width: 0%;
+    transform: scaleX(0.08);
   }
 }
 
-.animate-analyzing {
-  animation: analyzingBar 2s ease-in-out infinite;
+.recommend-analyzing-progress {
+  animation: analyzingBar 1.8s steps(12, end) infinite;
+  background-color: var(--gjc-primary);
+  transform-origin: left;
+  width: 100%;
+}
+
+.recommend-data-notice-panel {
+  image-rendering: pixelated;
+}
+
+.recommend-data-notice-panel::before {
+  background-image: radial-gradient(var(--gjc-primary) 1px, transparent 1px);
+  background-size: 6px 6px;
+  content: '';
+  display: block;
+  height: 12px;
+  width: 100%;
+}
+
+.recommend-data-notice-meter {
+  background-image:
+    linear-gradient(to right, var(--gjc-surface-variant) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--gjc-surface-variant) 1px, transparent 1px);
+  background-size: 12px 12px;
 }
 
 @keyframes sync-rotate {

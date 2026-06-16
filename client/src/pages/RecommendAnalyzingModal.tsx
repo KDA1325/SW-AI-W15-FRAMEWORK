@@ -22,7 +22,7 @@ function RecommendAnalyzingModal({ isOpen, onClose }: RecommendAnalyzingModalPro
           ANALYZING...
         </span>
         <div className="h-4 w-64 border-2 border-primary p-1">
-          <div className="animate-analyzing h-full bg-primary" />
+          <div className="recommend-analyzing-progress h-full" />
         </div>
       </div>
     </div>
