@@ -42,6 +42,9 @@ Required values:
 | `FASTAPI_AI_COMPUTE_TIMEOUT_MS` | NestJS to FastAPI AI compute timeout                             | `5000`                     |
 | `IGDB_CLIENT_ID`              | Twitch/IGDB Client ID for game metadata search                     | empty                      |
 | `IGDB_CLIENT_SECRET`          | Twitch/IGDB Client Secret for game metadata search                 | empty                      |
+| `MCP_REQUIRE_AUTH`            | Requires JWT or internal-token auth for `POST /mcp`                | `true`                     |
+| `MCP_ALLOW_UNAUTHENTICATED`   | Explicit non-production escape hatch for local MCP smoke testing   | `false`                    |
+| `MCP_INTERNAL_TOKEN`          | Shared internal token accepted by `x-mcp-internal-token`           | empty                      |
 | `STEAM_WEB_API_KEY`           | Steam Web API key for profile and play-history linking             | empty                      |
 | `AGENT_MAX_ITERATIONS`        | Maximum MCP tool calls in one recommendation loop                  | `4`                        |
 | `AGENT_TIMEOUT_MS`            | Maximum local Agent loop duration                                  | `30000`                    |
@@ -68,6 +71,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 | --------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | FastAPI LangChain/OpenAI RAG embeddings       | `FASTAPI_AI_COMPUTE_URL`, `OPENAI_API_KEY`, optional model vars | Calls FastAPI `/embed`; FastAPI uses LangChain for OpenAI embeddings and NestJS falls back when unavailable |
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
+| MCP HTTP endpoint auth                        | `MCP_REQUIRE_AUTH`, `MCP_INTERNAL_TOKEN`, optional JWT cookie | `POST /mcp` returns a JSON-RPC auth error instead of executing tools |
 | Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
 | Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
 | FastAPI Agent loop                            | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | Reserved for a later service split; NestJS should still return a structured fallback response          |
@@ -83,6 +87,26 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 | Unexpected provider response     | `external_api_error`  | Return a generic provider failure message without stack traces |
 
 ### MCP Tool Error Shape
+
+`POST /mcp` is protected by default. Production always requires either a valid
+JWT (`access_token` cookie or bearer token) or a matching
+`x-mcp-internal-token` header. Local development can opt into unauthenticated
+MCP requests only by setting `MCP_ALLOW_UNAUTHENTICATED=true` or
+`MCP_REQUIRE_AUTH=false` outside production.
+
+When MCP auth fails, the endpoint returns a JSON-RPC error and does not execute
+the requested tool:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "error": {
+    "code": -32001,
+    "message": "MCP authentication required. Provide a valid JWT cookie or x-mcp-internal-token header."
+  }
+}
+```
 
 `search_games` reports tool execution failures through the MCP result, not as uncaught server exceptions:
 
@@ -404,6 +428,8 @@ Tool call:
 ```
 
 The `search_games` tool uses IGDB for video game metadata and returns recommendation-card fields: title, IGDB id, genres, platforms, release date, cover URL, source URL, summary, and tags.
+It is the only exposed MVP MCP tool and is marked read-only through
+`annotations.readOnlyHint`.
 
 When `IGDB_CLIENT_ID` or `IGDB_CLIENT_SECRET` is missing, the tool returns `isError: true` with structured content like:
 
@@ -426,11 +452,15 @@ npm run smoke:mcp:igdb
 ```
 
 By default, the script starts a temporary NestJS app on a random local port, calls the real `POST /mcp` JSON-RPC route, and then closes the app. To target a server that is already running, pass `MCP_SMOKE_BASE_URL`.
+For a temporary local app, the script explicitly enables the non-production MCP
+dev bypass if no token is configured. For an already-running server, pass
+`MCP_SMOKE_INTERNAL_TOKEN` or `MCP_SMOKE_BEARER_TOKEN`.
 
 Optional overrides:
 
 ```bash
 MCP_SMOKE_BASE_URL=http://127.0.0.1:3000 MCP_SMOKE_QUERY=CrossCode MCP_SMOKE_LIMIT=3 npm run smoke:mcp:igdb
+MCP_SMOKE_INTERNAL_TOKEN=<token> MCP_SMOKE_BASE_URL=http://127.0.0.1:3000 npm run smoke:mcp:igdb
 ```
 
 The script calls `POST /mcp` with a JSON-RPC `tools/call search_games` request and fails if `structuredContent.games` is empty. It never prints API keys.

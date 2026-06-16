@@ -56,6 +56,8 @@ Optional AI/external keys:
 | `FASTAPI_AI_COMPUTE_URL`               | FastAPI AI compute service URL              | `http://localhost:8000`                                         |
 | `FASTAPI_AI_COMPUTE_TIMEOUT_MS`        | NestJS to FastAPI AI compute timeout        | `5000`                                                          |
 | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Live IGDB MCP game metadata                 | MCP returns `missing_credentials`; Agent uses local DB fallback |
+| `MCP_REQUIRE_AUTH`                     | Protects the `POST /mcp` JSON-RPC endpoint  | `true`                                                          |
+| `MCP_INTERNAL_TOKEN`                   | Internal `x-mcp-internal-token` for MCP     | empty                                                           |
 | `STEAM_WEB_API_KEY`                    | Steam profile/play-history linking          | not required for current SYNC demo                              |
 | `AGENT_MAX_ITERATIONS`                 | Max MCP calls in one Agent loop             | `4`                                                             |
 | `AGENT_TIMEOUT_MS`                     | Max local Agent loop duration               | `30000`                                                         |
@@ -141,7 +143,7 @@ The detailed RAG technology and data-pipeline decision is documented in [`docs/G
 | Requirement        | MVP implementation                                                                           | Demo signal                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | RAG feature        | `RagService` reads seeded journals/reviews/profile documents and searches pgvector           | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render                     |
-| MCP feature        | `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; `search_games` targets IGDB   | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error         |
+| MCP feature        | Protected `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; read-only `search_games` targets IGDB | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error |
 | AI Agent feature   | `AgentService` reads RAG, calls MCP, merges/fallbacks recommendations                        | `pipeline.agent.iterations`, `maxIterations`, `stoppedReason`, and 3 recommendation cards |
 | Loop guard         | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`, fallback recommendations                         | local smoke shows `agentIterations = 4`, `stoppedReason = fallback`                       |
 | React integration  | `Recommend.tsx` calls `POST /ai/recommendations/sync`                                        | SYNC click renders API data instead of dummy arrays                                       |
@@ -213,6 +215,9 @@ npm run smoke:mcp:igdb
 ```
 
 This starts a temporary NestJS app, calls the real `POST /mcp` JSON-RPC endpoint, and fails unless IGDB returns at least one game. To test an already-running server, set `MCP_SMOKE_BASE_URL`.
+The temporary smoke path enables an explicit non-production MCP dev bypass when
+no token is configured. For an already-running protected server, provide
+`MCP_SMOKE_INTERNAL_TOKEN` or `MCP_SMOKE_BEARER_TOKEN`.
 
 Recorded live IGDB MCP result on `2026-06-16`:
 

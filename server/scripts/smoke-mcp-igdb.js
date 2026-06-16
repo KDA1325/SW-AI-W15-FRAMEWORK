@@ -9,6 +9,9 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
 const configuredBaseUrl = process.env.MCP_SMOKE_BASE_URL
   ? trimTrailingSlash(process.env.MCP_SMOKE_BASE_URL)
   : null;
+const configuredInternalToken =
+  process.env.MCP_SMOKE_INTERNAL_TOKEN ?? process.env.MCP_INTERNAL_TOKEN;
+const configuredBearerToken = process.env.MCP_SMOKE_BEARER_TOKEN;
 const query = process.env.MCP_SMOKE_QUERY ?? 'CrossCode';
 const limit = normalizeLimit(process.env.MCP_SMOKE_LIMIT);
 
@@ -39,6 +42,11 @@ async function main() {
     return;
   }
 
+  if (!configuredBaseUrl && !configuredInternalToken && !configuredBearerToken) {
+    process.env.MCP_ALLOW_UNAUTHENTICATED = 'true';
+    process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+  }
+
   const temporaryServer = configuredBaseUrl
     ? null
     : await startTemporaryNestServer();
@@ -62,7 +70,7 @@ async function main() {
 
   try {
     const response = await axios.post(`${baseUrl}/mcp`, payload, {
-      headers: { 'Content-Type': 'application/json' },
+      headers: mcpHeaders(),
       timeout: 20_000,
     });
     const structuredContent = response.data?.result?.structuredContent;
@@ -127,6 +135,20 @@ async function main() {
       await temporaryServer.close();
     }
   }
+}
+
+function mcpHeaders() {
+  const headers = { 'Content-Type': 'application/json' };
+
+  if (configuredInternalToken) {
+    headers['x-mcp-internal-token'] = configuredInternalToken;
+  }
+
+  if (configuredBearerToken) {
+    headers.Authorization = `Bearer ${configuredBearerToken}`;
+  }
+
+  return headers;
 }
 
 async function startTemporaryNestServer() {
