@@ -17,6 +17,15 @@ function formatTimelineTime(value: string) {
   return new Date(value).toLocaleTimeString('ko-KR')
 }
 
+function getGameInitials(title: string) {
+  return title
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
+}
+
 // 타임라인에는 저널과 리뷰가 한 목록에 섞여서 들어옵니다.
 // 상세 페이지 라우트는 타입별로 다르므로, 카드 클릭 전에 post.type을 보고
 // REVIEW는 /review-detail/:postId, JOURNAL은 /journal-detail/:postId로 나눠 보냅니다.
@@ -42,6 +51,15 @@ function Timeline() {
   // isLoading은 목록을 불러오는 동안 LOADING_TIMELINE 문구를 보여주기 위한 상태입니다.
   // 빈 목록 메시지와 동시에 보이지 않게 아래 JSX에서 함께 사용합니다.
   const [isLoading, setIsLoading] = useState(false)
+
+  // Image URLs may come from IGDB, Steam, or seeded DB data; track failures per post so one broken cover falls back safely.
+  const [failedImagePostIds, setFailedImagePostIds] = useState<Set<string>>(
+    () => new Set(),
+  )
+
+  const markImageFailed = useCallback((postId: string) => {
+    setFailedImagePostIds((current) => new Set(current).add(postId))
+  }, [])
 
   // 타임라인은 더 이상 화면 안의 목업 배열을 사용하지 않고 서버의 게시글 목록 API를 사용합니다.
   // 서버는 이미 GET /posts?type=REVIEW 또는 GET /posts?type=JOURNAL 형식의 타입 필터를 지원합니다.
@@ -153,59 +171,74 @@ function Timeline() {
             </p>
           ) : null}
 
-          {posts.map((post) => (
-            <article className="group relative flex flex-col gap-6 md:flex-row" key={post.id}>
-              <div className="relative flex flex-shrink-0 items-center gap-4 pt-1 md:w-32 md:flex-col md:items-end md:gap-1">
-                <div className="hidden font-label-caps text-label-caps text-secondary md:block">
-                  {formatTimelineDate(post.createdAt)}
-                </div>
-                <div className="hidden font-label-caps text-label-caps font-bold text-primary md:block">
-                  {formatTimelineTime(post.createdAt)}
-                </div>
-                <div className="z-20 h-4 w-4 border-2 border-primary bg-on-primary transition-colors duration-0 group-hover:bg-primary md:absolute md:-left-2 md:top-2" />
-                <div className="ml-4 font-label-caps text-label-caps text-secondary md:hidden">
-                  {formatTimelineDate(post.createdAt)} // {formatTimelineTime(post.createdAt)}
-                </div>
-              </div>
+          {posts.map((post) => {
+            const hasGameImage = Boolean(post.game.imageUrl && !failedImagePostIds.has(post.id))
 
-              <Link
-                className="flex-1 border-2 border-primary bg-surface p-6 transition-shadow duration-0 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
-                // 상세 페이지는 직접 URL로 들어올 수도 있고, 저널 목록에서 들어올 수도 있습니다.
-                // 타임라인에서 들어왔다는 정보를 Link state로 넘겨 두면
-                // 상세 페이지의 BACK_TO_LIST와 삭제 후 이동 경로를 /timeline으로 맞출 수 있습니다.
-                // 이 값은 URL에 노출되지 않고 React Router 내부 navigation state로만 전달됩니다.
-                state={{ from: '/timeline' }}
-                to={getDetailPath(post)}
-              >
-                <div className="mb-6 flex items-center gap-4 border-b border-dashed border-primary pb-4">
-                  <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden border-2 border-primary bg-surface">
-                    <div className="pixel-hatch absolute inset-0 bg-primary opacity-10" />
-                    <span className="material-symbols-outlined z-10 text-primary">
-                      {post.type === 'REVIEW' ? 'science' : 'videogame_asset'}
-                    </span>
+            return (
+              <article className="group relative flex flex-col gap-6 md:flex-row" key={post.id}>
+                <div className="relative flex flex-shrink-0 items-center gap-4 pt-1 md:w-32 md:flex-col md:items-end md:gap-1">
+                  <div className="hidden font-label-caps text-label-caps text-secondary md:block">
+                    {formatTimelineDate(post.createdAt)}
                   </div>
-                  <div>
-                    <div className="font-ui-button text-ui-button text-primary">
-                      {post.user.nickname}
-                    </div>
-                    <div className="font-label-caps text-label-caps text-secondary">
-                      #{post.game.title}
-                    </div>
+                  <div className="hidden font-label-caps text-label-caps font-bold text-primary md:block">
+                    {formatTimelineTime(post.createdAt)}
                   </div>
-                  <div className="ml-auto border border-primary bg-surface px-3 py-1 font-label-caps text-label-caps text-primary">
-                    {post.type}
+                  <div className="z-20 h-4 w-4 border-2 border-primary bg-on-primary transition-colors duration-0 group-hover:bg-primary md:absolute md:-left-2 md:top-2" />
+                  <div className="ml-4 font-label-caps text-label-caps text-secondary md:hidden">
+                    {formatTimelineDate(post.createdAt)} // {formatTimelineTime(post.createdAt)}
                   </div>
                 </div>
 
-                <h2 className="mb-2 font-headline-lg text-headline-lg uppercase text-primary">
-                  {post.title}
-                </h2>
-                <p className="font-body-md text-body-md text-on-surface">
-                  {post.content}
-                </p>
-              </Link>
-            </article>
-          ))}
+                <Link
+                  className="flex-1 border-2 border-primary bg-surface p-6 transition-shadow duration-0 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+                  // 상세 페이지는 직접 URL로 들어올 수도 있고, 저널 목록에서 들어올 수도 있습니다.
+                  // 타임라인에서 들어왔다는 정보를 Link state로 넘겨 두면
+                  // 상세 페이지의 BACK_TO_LIST와 삭제 후 이동 경로를 /timeline으로 맞출 수 있습니다.
+                  // 이 값은 URL에 노출되지 않고 React Router 내부 navigation state로만 전달됩니다.
+                  state={{ from: '/timeline' }}
+                  to={getDetailPath(post)}
+                >
+                  <div className="mb-6 flex items-center gap-4 border-b border-dashed border-primary pb-4">
+                    <div className="relative flex h-20 w-16 flex-shrink-0 items-center justify-center overflow-hidden border-2 border-primary bg-surface-container-low">
+                      {hasGameImage ? (
+                        <img
+                          alt={`${post.game.title} cover`}
+                          className="h-full w-full object-cover grayscale contrast-125 transition-all duration-200 group-hover:grayscale-0"
+                          onError={() => markImageFailed(post.id)}
+                          src={post.game.imageUrl ?? undefined}
+                        />
+                      ) : (
+                        <>
+                          <div className="pixel-hatch absolute inset-0 bg-primary opacity-10" />
+                          <span className="z-10 font-headline-lg text-xl text-primary">
+                            {getGameInitials(post.game.title) || '??'}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                    <div>
+                      <div className="font-ui-button text-ui-button text-primary">
+                        {post.user.nickname}
+                      </div>
+                      <div className="font-label-caps text-label-caps text-secondary">
+                        #{post.game.title}
+                      </div>
+                    </div>
+                    <div className="ml-auto border border-primary bg-surface px-3 py-1 font-label-caps text-label-caps text-primary">
+                      {post.type}
+                    </div>
+                  </div>
+
+                  <h2 className="mb-2 font-headline-lg text-headline-lg uppercase text-primary">
+                    {post.title}
+                  </h2>
+                  <p className="font-body-md text-body-md text-on-surface">
+                    {post.content}
+                  </p>
+                </Link>
+              </article>
+            )
+          })}
         </div>
       </main>
     </PageChrome>
