@@ -3,6 +3,7 @@ import { api, getApiErrorMessage } from '../api'
 import { useAuth } from '../auth/AuthContext'
 import EditProfileModal from './EditProfileModal'
 import PageChrome from './PageChrome'
+import ProfileSteamLoadingModal from './ProfileSteamLoadingModal'
 import type { PostListResponse } from './Journals'
 import { resolveProfileImageUrl } from './profileImage'
 
@@ -132,6 +133,7 @@ function gameInitials(title: string) {
 function Profile() {
   const { refreshUser, user } = useAuth()
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
+  const [isSteamInitialLoading, setIsSteamInitialLoading] = useState(true)
   const [isSteamLoading, setIsSteamLoading] = useState(false)
   const [steamMessage, setSteamMessage] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search)
@@ -161,41 +163,52 @@ function Profile() {
   useEffect(() => {
     let isMounted = true
 
-    const loadSteamProfile = async () => {
-      try {
-        const response = await api.get<SteamProfileResponse>(
-          '/auth/steam/profile',
-        )
+    const loadSteamData = async () => {
+      setIsSteamInitialLoading(true)
 
-        if (isMounted) {
-          setSteamState(response.data)
+      try {
+        const [profileResult, statsResult] = await Promise.allSettled([
+          api.get<SteamProfileResponse>('/auth/steam/profile'),
+          api.get<SteamStatsResponse>('/auth/steam/stats'),
+        ])
+
+        if (!isMounted) {
+          return
         }
-      } catch (error) {
-        if (isMounted) {
+
+        if (profileResult.status === 'fulfilled') {
+          setSteamState(profileResult.value.data)
+        } else {
           setSteamMessage(
-            getApiErrorMessage(error, 'STEAM PROFILE LOAD FAILED'),
+            getApiErrorMessage(
+              profileResult.reason,
+              'STEAM PROFILE LOAD FAILED',
+            ),
           )
         }
-      }
 
-      try {
-        const response = await api.get<SteamStatsResponse>('/auth/steam/stats')
-
-        if (isMounted) {
-          setSteamStatsState(response.data)
-        }
-      } catch (error) {
-        if (isMounted) {
+        if (statsResult.status === 'fulfilled') {
+          setSteamStatsState(statsResult.value.data)
+        } else {
           setSteamStatsState({
             connected: false,
-            error: getApiErrorMessage(error, 'STEAM STATS LOAD FAILED'),
+            error: getApiErrorMessage(
+              statsResult.reason,
+              'STEAM STATS LOAD FAILED',
+            ),
             errorCode: 'external_api_error',
             stats: null,
             steamId: user?.steamId ?? null,
           })
         }
+      } finally {
+        if (isMounted) {
+          setIsSteamInitialLoading(false)
+        }
       }
+    }
 
+    const loadArchiveReviews = async () => {
       try {
         const params = new URLSearchParams({
           limit: '10',
@@ -222,7 +235,8 @@ function Profile() {
       }
     }
 
-    void loadSteamProfile()
+    void loadSteamData()
+    void loadArchiveReviews()
 
     return () => {
       isMounted = false
@@ -549,6 +563,7 @@ function Profile() {
         onClose={() => setIsEditProfileOpen(false)}
         onSaved={refreshUser}
       />
+      <ProfileSteamLoadingModal isOpen={isSteamInitialLoading} />
     </PageChrome>
   )
 }

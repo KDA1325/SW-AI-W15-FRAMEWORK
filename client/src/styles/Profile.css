@@ -94,3 +94,50 @@ body {
 .profile-page .animate-pulse {
   animation: profilePulse 1s steps(2, end) infinite;
 }
+
+.profile-steam-loading-panel {
+  image-rendering: pixelated;
+}
+
+.profile-steam-loading-title::after {
+  animation: profilePulse 1s steps(2, end) infinite;
+  content: '_';
+}
+
+.profile-steam-loading-chip {
+  box-shadow: 3px 3px 0 var(--gjc-primary);
+}
+
+@keyframes profileSteamDotScan {
+  0%,
+  100% {
+    background-color: var(--gjc-surface-container-lowest);
+  }
+
+  45%,
+  55% {
+    background-color: var(--gjc-primary);
+  }
+}
+
+.profile-steam-loading-dot {
+  animation: profileSteamDotScan 1.2s steps(2, end) infinite;
+}
+
+@keyframes profileSteamBar {
+  0% {
+    width: 12%;
+  }
+
+  50% {
+    width: 100%;
+  }
+
+  100% {
+    width: 12%;
+  }
+}
+
+.profile-steam-loading-bar {
+  animation: profileSteamBar 1.6s steps(8, end) infinite;
+}
