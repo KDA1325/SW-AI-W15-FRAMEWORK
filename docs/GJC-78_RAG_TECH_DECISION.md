@@ -11,8 +11,8 @@ This document fixes the model, library, database, API, and data-flow choices nee
 | Chat model | OpenAI `gpt-4o-mini` via `OPENAI_CHAT_MODEL` | Commercial model, already wired in `RagService`, and replaceable by env when the team wants a newer model. |
 | Embedding model | OpenAI `text-embedding-3-small` via `OPENAI_EMBEDDING_MODEL` | Matches the current 1536-dimensional pgvector column and supports local fallback when the key is missing. |
 | Embedding dimensions | `1536` via `OPENAI_EMBEDDING_DIMENSIONS` | Keeps `EmbeddingDocument.embedding vector(1536)` and seed/demo vectors compatible. |
-| RAG runtime | NestJS `RagService` + PostgreSQL pgvector | Lowest-risk MVP path because auth, DB entities, seeding, and React API are already in the same app. |
-| LangChain scope | Runtime dependency in the FastAPI AI compute service for OpenAI embedding calls; still no NestJS runtime dependency | Keeps Python AI integration inside the FastAPI split while leaving a clear future path to a LangChain `PGVector` retriever. |
+| RAG runtime | NestJS `RagService` + PostgreSQL pgvector + FastAPI LangChain retriever | NestJS keeps auth and DB ownership while FastAPI can run Python-native retrieval when available. |
+| LangChain scope | Runtime dependency in the FastAPI AI compute service for OpenAI embedding calls and pgvector retrieval | Keeps Python AI integration inside the FastAPI split without adding LangChain to the NestJS runtime. |
 | FastAPI scope | Reserved agent service behind `FASTAPI_AGENT_URL`; not required for the one-day MVP | The MVP proves RAG, MCP, and Agent end to end through NestJS. FastAPI can later own LangGraph orchestration. |
 | Embedding sync | Refresh on RAG/SYNC request for MVP; background/outbox sync after MVP | Request-time refresh keeps edits visible in demos. Event-driven sync is better once write volume matters. |
 
@@ -23,6 +23,9 @@ OPENAI_API_KEY=
 OPENAI_CHAT_MODEL=gpt-4o-mini
 OPENAI_EMBEDDING_MODEL=text-embedding-3-small
 OPENAI_EMBEDDING_DIMENSIONS=1536
+FASTAPI_AI_COMPUTE_URL=http://localhost:8000
+FASTAPI_AI_COMPUTE_TIMEOUT_MS=5000
+PGVECTOR_CONNECTION_STRING=postgresql://game_archive_user:game_archive_password@postgres:5432/game_archive
 
 AGENT_MAX_ITERATIONS=4
 AGENT_TIMEOUT_MS=30000
@@ -70,7 +73,8 @@ Demo seed or user-authored ArchivePost rows
   -> upsert EmbeddingDocument metadata
   -> write vector(1536) with raw SQL
   -> build one user preference query from journals/reviews
-  -> pgvector top-k search with cosine distance
+  -> FastAPI /rag/search LangChain retriever over pgvector
+  -> fallback to NestJS pgvector top-k SQL with cosine distance if FastAPI is unavailable
   -> OpenAI structured JSON analysis or rule-based fallback
   -> preferenceTags + playStyleSummary + wordCloud + contextSources
 ```
@@ -101,7 +105,7 @@ React /recommend SYNC_DATA
   -> POST /ai/recommendations/sync
   -> JwtAuthGuard resolves userId from access_token
   -> AgentService calls RagService.analyzeForUser()
-  -> RagService refreshes/searches pgvector context
+  -> RagService refreshes embeddings and prefers FastAPI /rag/search for context retrieval
   -> AgentService calls MCP tools/call search_games
   -> McpService calls IGDB through IgdbService
   -> AgentService merges IGDB results or local DB fallback cards
@@ -113,12 +117,21 @@ Public MVP endpoints:
 | Endpoint | Purpose |
 | --- | --- |
 | `GET /ai/rag/context?topK=6&refreshEmbeddings=true` | Inspect user-scoped RAG analysis directly. |
+| `POST /embed` on FastAPI | Generate OpenAI/LangChain or deterministic demo embeddings. |
+| `POST /rag/search` on FastAPI | Retrieve user-scoped archive context with a LangChain retriever over pgvector. |
 | `POST /mcp` | JSON-RPC MCP server with `initialize`, `tools/list`, and `tools/call`. |
 | `POST /ai/recommendations/sync` | Full RAG + MCP + Agent recommendation sync used by React. |
 
 ## LangChain And FastAPI Split
 
-The current MVP intentionally does not add LangChain to the NestJS runtime. NestJS still performs the required loader, vector query, and fallback orchestration directly against PostgreSQL. LangChain is introduced in the FastAPI AI compute service for OpenAI embedding calls.
+The current MVP intentionally does not add LangChain to the NestJS runtime.
+NestJS still performs the required data loading, embedding refresh, and fallback
+orchestration directly against PostgreSQL. LangChain is introduced in the
+FastAPI AI compute service for OpenAI embedding calls and a `BaseRetriever`
+implementation that queries the existing `EmbeddingDocument` pgvector table.
+The dedicated LangChain `PGVector` vector store uses its own collection schema,
+so this project keeps the TypeORM-owned table and exposes a compatible
+LangChain retriever wrapper instead of migrating stored documents.
 
 FastAPI becomes useful when the team wants a Python-native agent service. At that point:
 

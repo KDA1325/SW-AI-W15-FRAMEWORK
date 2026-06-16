@@ -40,6 +40,7 @@ Required values:
 | `OPENAI_EMBEDDING_DIMENSIONS` | Embedding vector size                                              | `1536`                     |
 | `FASTAPI_AI_COMPUTE_URL`      | FastAPI AI compute service base URL                                | `http://localhost:8000`    |
 | `FASTAPI_AI_COMPUTE_TIMEOUT_MS` | NestJS to FastAPI AI compute timeout                             | `5000`                     |
+| `PGVECTOR_CONNECTION_STRING`  | FastAPI LangChain retriever database URL                           | Docker Compose default     |
 | `IGDB_CLIENT_ID`              | Twitch/IGDB Client ID for game metadata search                     | empty                      |
 | `IGDB_CLIENT_SECRET`          | Twitch/IGDB Client Secret for game metadata search                 | empty                      |
 | `MCP_REQUIRE_AUTH`            | Requires JWT or internal-token auth for `POST /mcp`                | `true`                     |
@@ -69,7 +70,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 
 | Feature                                       | Variables                                           | Behavior when missing                                                                                  |
 | --------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| FastAPI LangChain/OpenAI RAG embeddings       | `FASTAPI_AI_COMPUTE_URL`, `OPENAI_API_KEY`, optional model vars | Calls FastAPI `/embed`; FastAPI uses LangChain for OpenAI embeddings and NestJS falls back when unavailable |
+| FastAPI LangChain/OpenAI RAG embeddings and retrieval | `FASTAPI_AI_COMPUTE_URL`, `PGVECTOR_CONNECTION_STRING`, `OPENAI_API_KEY`, optional model vars | Calls FastAPI `/embed` and `/rag/search`; NestJS falls back when unavailable |
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
 | MCP HTTP endpoint auth                        | `MCP_REQUIRE_AUTH`, `MCP_INTERNAL_TOKEN`, optional JWT cookie | `POST /mcp` returns a JSON-RPC auth error instead of executing tools |
 | Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
@@ -352,13 +353,15 @@ Response shape:
 }
 ```
 
-When FastAPI is running, RAG asks the stateless AI compute service to generate
-embeddings through `POST /embed`. If `OPENAI_API_KEY` is set and a non-demo
-model is requested, FastAPI uses LangChain `OpenAIEmbeddings`; otherwise it
-returns the deterministic demo embedding. If that service is unavailable, NestJS
-falls back to its existing OpenAI or deterministic demo embedding path so
-pgvector top-k search remains testable in local development. Structured JSON
-analysis is still performed inside NestJS.
+When FastAPI is running, RAG asks the AI compute service to generate embeddings
+through `POST /embed` and to retrieve user-scoped pgvector context through
+`POST /rag/search`. If `OPENAI_API_KEY` is set and a non-demo model is requested,
+FastAPI uses LangChain `OpenAIEmbeddings`; otherwise it returns the deterministic
+demo embedding. The retrieval endpoint uses a LangChain retriever over the
+existing `EmbeddingDocument` table. If either FastAPI path is unavailable, NestJS
+falls back to its existing OpenAI/demo embedding and local pgvector SQL paths so
+RAG remains testable in local development. Structured JSON analysis is still
+performed inside NestJS.
 
 ### FastAPI AI Compute Service
 
@@ -367,11 +370,13 @@ GJC-183 adds the first FastAPI split:
 ```text
 GET http://localhost:8000/health
 POST http://localhost:8000/embed
+POST http://localhost:8000/rag/search
 ```
 
 NestJS keeps authentication, data loading, pgvector persistence, and
 recommendation orchestration. FastAPI receives only the text/model/dimensions
-payload needed for embedding calculation and returns a vector response:
+payload needed for embedding calculation or the userId/queryEmbedding/topK
+payload needed for user-scoped context retrieval:
 
 ```json
 {
@@ -381,8 +386,17 @@ payload needed for embedding calculation and returns a vector response:
 }
 ```
 
+```json
+{
+  "userId": "user-id",
+  "queryEmbedding": [0.1, -0.2, 0.3],
+  "topK": 6
+}
+```
+
 The local FastAPI fallback uses the same deterministic demo vector shape as the
-previous NestJS-only path. OpenAI embeddings use LangChain's provider package.
+previous NestJS-only path. OpenAI embeddings use LangChain's provider package,
+and retrieval uses a LangChain `BaseRetriever` wrapper for PostgreSQL pgvector.
 Run a sample comparison with:
 
 ```bash

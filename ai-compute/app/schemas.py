@@ -22,3 +22,22 @@ class EmbedResponse(BaseModel):
     model: str
     provider: Literal["demo", "openai"]
     usage: dict[str, int]
+
+
+class RagSearchRequest(BaseModel):
+    userId: str = Field(..., min_length=1)
+    queryEmbedding: list[float] = Field(..., min_length=1)
+    topK: int = Field(6, ge=1, le=12)
+
+
+class RagSearchRow(BaseModel):
+    sourceType: str
+    sourceId: str
+    content: str
+    metadata: dict[str, object] = Field(default_factory=dict)
+    similarity: float
+
+
+class RagSearchResponse(BaseModel):
+    provider: Literal["langchain-pgvector"]
+    rows: list[RagSearchRow]

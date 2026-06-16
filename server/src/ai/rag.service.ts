@@ -394,6 +394,16 @@ export class RagService {
     queryEmbedding: number[],
     topK: number,
   ): Promise<RagSearchRow[]> {
+    const fastApiRows = await this.aiComputeClient?.searchRagContext({
+      queryEmbedding,
+      topK,
+      userId,
+    });
+
+    if (fastApiRows) {
+      return fastApiRows;
+    }
+
     return this.dataSource.query<RagSearchRow[]>(
       `
         SELECT

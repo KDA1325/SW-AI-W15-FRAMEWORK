@@ -1,7 +1,14 @@
 from fastapi import FastAPI
 
 from .embedding import create_embedding
-from .schemas import EmbedRequest, EmbedResponse, HealthResponse
+from .retrieval import search_archive_context
+from .schemas import (
+    EmbedRequest,
+    EmbedResponse,
+    HealthResponse,
+    RagSearchRequest,
+    RagSearchResponse,
+)
 
 app = FastAPI(
     title="GJC AI Compute Service",
@@ -27,4 +34,16 @@ async def embed(request: EmbedRequest) -> EmbedResponse:
         model=result.model,
         provider=result.provider,
         usage={"inputCharacters": len(request.input)},
+    )
+
+
+@app.post("/rag/search", response_model=RagSearchResponse)
+async def rag_search(request: RagSearchRequest) -> RagSearchResponse:
+    return RagSearchResponse(
+        provider="langchain-pgvector",
+        rows=search_archive_context(
+            request.userId,
+            request.queryEmbedding,
+            request.topK,
+        ),
     )

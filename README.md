@@ -9,7 +9,7 @@ Gaming Journal Club is a retro 8-bit styled game journal and recommendation MVP.
 | Frontend               | React, Vite, TypeScript                                          |
 | Backend API            | NestJS                                                           |
 | Database               | PostgreSQL with pgvector                                         |
-| RAG                    | NestJS RAG service, pgvector, FastAPI LangChain/OpenAI/demo embeddings |
+| RAG                    | NestJS RAG service, pgvector, FastAPI LangChain embeddings and retrieval |
 | MCP                    | JSON-RPC MCP endpoint with `search_games` tool                   |
 | Agent                  | NestJS MVP Agent loop with max iterations, timeout, and fallback |
 | External game metadata | IGDB API through MCP                                             |
@@ -55,6 +55,7 @@ Optional AI/external keys:
 | `OPENAI_API_KEY`                       | Real embeddings and structured RAG analysis | deterministic demo embeddings and rule-based analysis           |
 | `FASTAPI_AI_COMPUTE_URL`               | FastAPI AI compute service URL              | `http://localhost:8000`                                         |
 | `FASTAPI_AI_COMPUTE_TIMEOUT_MS`        | NestJS to FastAPI AI compute timeout        | `5000`                                                          |
+| `PGVECTOR_CONNECTION_STRING`           | FastAPI LangChain RAG retriever DB URL      | Docker Compose points it at the `postgres` service              |
 | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Live IGDB MCP game metadata                 | MCP returns `missing_credentials`; Agent uses local DB fallback |
 | `MCP_REQUIRE_AUTH`                     | Protects the `POST /mcp` JSON-RPC endpoint  | `true`                                                          |
 | `MCP_INTERNAL_TOKEN`                   | Internal `x-mcp-internal-token` for MCP     | empty                                                           |
@@ -142,7 +143,7 @@ The detailed RAG technology and data-pipeline decision is documented in [`docs/G
 
 | Requirement        | MVP implementation                                                                           | Demo signal                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| RAG feature        | `RagService` reads seeded journals/reviews/profile documents and searches pgvector           | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render                     |
+| RAG feature        | `RagService` reads seeded journals/reviews/profile documents and searches pgvector, preferring FastAPI LangChain retrieval when available | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render |
 | MCP feature        | Protected `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; read-only `search_games` targets IGDB | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error |
 | AI Agent feature   | `AgentService` reads RAG, calls MCP, merges/fallbacks recommendations                        | `pipeline.agent.iterations`, `maxIterations`, `stoppedReason`, and 3 recommendation cards |
 | Loop guard         | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`, fallback recommendations                         | local smoke shows `agentIterations = 4`, `stoppedReason = fallback`                       |
@@ -236,7 +237,7 @@ Recorded live IGDB MCP result on `2026-06-16`:
 - IGDB live metadata requires `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`. Without them, recommendations still render through local fallback data.
 - Steam live profile display requires `STEAM_WEB_API_KEY`. Without it, the profile page shows a structured `missing_credentials` state.
 - The current Steam link MVP stores a SteamID64 after API lookup, but does not prove ownership of the Steam account. Add Steam OpenID before using this as account verification.
-- The current MVP Agent loop is still implemented in NestJS. FastAPI handles the first compute split through `/health` and `/embed`; broader Agent migration is still future work behind `FASTAPI_AGENT_URL`.
+- The current MVP Agent loop is still implemented in NestJS. FastAPI handles AI compute/retrieval through `/health`, `/embed`, and `/rag/search`; broader Agent migration is still future work behind `FASTAPI_AGENT_URL`.
 - The local NestJS startup may print a pg deprecation warning about concurrent `client.query()` usage. The app still starts and the smoke test passes.
 - In-app browser automation failed in this Codex Windows sandbox with `CreateProcessAsUserW failed: 5`; use the Vite URL manually for visual review.
 

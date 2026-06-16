@@ -6,10 +6,13 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    depends_on:
+      - postgres
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
       OPENAI_EMBEDDING_DIMENSIONS: ${OPENAI_EMBEDDING_DIMENSIONS:-1536}
+      PGVECTOR_CONNECTION_STRING: ${PGVECTOR_CONNECTION_STRING:-postgresql://game_archive_user:game_archive_password@postgres:5432/game_archive}
 
   postgres:
     image: pgvector/pgvector:pg16

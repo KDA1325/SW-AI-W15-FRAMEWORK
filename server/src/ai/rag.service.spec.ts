@@ -40,6 +40,74 @@ describe('RagService taste analysis fallback', () => {
     });
   });
 
+  it('delegates pgvector retrieval to the FastAPI LangChain retriever first', async () => {
+    const dataSource = { query: jest.fn(), getRepository: jest.fn() };
+    const aiComputeClient = {
+      searchRagContext: jest.fn().mockResolvedValue([
+        {
+          content: 'Post type: REVIEW\nGame: CrossCode',
+          metadata: { gameTitle: 'CrossCode', title: 'Puzzle combat' },
+          similarity: 0.91,
+          sourceId: 'post-1',
+          sourceType: 'ARCHIVE_POST',
+        },
+      ]),
+    };
+    const service = new RagService(
+      dataSource as never,
+      { get: jest.fn() } as never,
+      aiComputeClient as never,
+    );
+
+    const rows = await (
+      service as unknown as {
+        searchContextRows: (
+          userId: string,
+          queryEmbedding: number[],
+          topK: number,
+        ) => Promise<unknown[]>;
+      }
+    ).searchContextRows('user-1', [0.1, -0.2, 0.3], 6);
+
+    expect(aiComputeClient.searchRagContext).toHaveBeenCalledWith({
+      queryEmbedding: [0.1, -0.2, 0.3],
+      topK: 6,
+      userId: 'user-1',
+    });
+    expect(dataSource.query).not.toHaveBeenCalled();
+    expect(rows).toHaveLength(1);
+  });
+
+  it('falls back to local pgvector SQL when FastAPI retrieval is unavailable', async () => {
+    const dataSource = {
+      getRepository: jest.fn(),
+      query: jest.fn().mockResolvedValue([]),
+    };
+    const aiComputeClient = {
+      searchRagContext: jest.fn().mockResolvedValue(null),
+    };
+    const service = new RagService(
+      dataSource as never,
+      { get: jest.fn() } as never,
+      aiComputeClient as never,
+    );
+
+    await (
+      service as unknown as {
+        searchContextRows: (
+          userId: string,
+          queryEmbedding: number[],
+          topK: number,
+        ) => Promise<unknown[]>;
+      }
+    ).searchContextRows('user-1', [0.1, -0.2, 0.3], 6);
+
+    expect(dataSource.query).toHaveBeenCalledWith(
+      expect.stringContaining('WHERE post."userId" = $2'),
+      [expect.stringContaining('['), 'user-1', 6],
+    );
+  });
+
   it('separates play-style terms from enjoyed game element tags', () => {
     const service = new RagService(
       { query: jest.fn(), getRepository: jest.fn() } as never,

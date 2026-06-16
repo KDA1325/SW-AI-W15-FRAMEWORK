@@ -16,11 +16,33 @@ export type AiComputeEmbeddingResult = {
   values: number[];
 };
 
+export type AiComputeRagSearchRequest = {
+  queryEmbedding: number[];
+  topK: number;
+  userId: string;
+};
+
+export type AiComputeRagSearchRow = {
+  content: string;
+  metadata: {
+    gameTitle?: string | null;
+    title?: string;
+  };
+  similarity: number;
+  sourceId: string;
+  sourceType: string;
+};
+
 type AiComputeEmbedResponse = {
   dimensions?: number;
   embedding?: number[];
   model?: string;
   provider?: AiRagEmbeddingProvider;
+};
+
+type AiComputeRagSearchResponse = {
+  provider?: 'langchain-pgvector';
+  rows?: AiComputeRagSearchRow[];
 };
 
 @Injectable()
@@ -66,6 +88,42 @@ export class AiComputeClient {
     } catch (error) {
       this.logger.warn(
         `FastAPI embedding failed; falling back inside NestJS. ${this.errorMessage(error)}`,
+      );
+      return null;
+    }
+  }
+
+  async searchRagContext(
+    request: AiComputeRagSearchRequest,
+  ): Promise<AiComputeRagSearchRow[] | null> {
+    const baseUrl = this.baseUrl();
+
+    if (!baseUrl) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post<AiComputeRagSearchResponse>(
+        `${baseUrl}/rag/search`,
+        {
+          queryEmbedding: request.queryEmbedding,
+          topK: request.topK,
+          userId: request.userId,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: this.timeoutMs(),
+        },
+      );
+
+      if (!Array.isArray(response.data.rows)) {
+        throw new Error('FastAPI RAG search response did not include rows.');
+      }
+
+      return response.data.rows;
+    } catch (error) {
+      this.logger.warn(
+        `FastAPI RAG search failed; falling back inside NestJS. ${this.errorMessage(error)}`,
       );
       return null;
     }
