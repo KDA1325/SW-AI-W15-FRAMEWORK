@@ -137,6 +137,8 @@ The detailed RAG technology and data-pipeline decision is documented in [`docs/G
 
 Last recorded smoke test: `2026-06-16` local development environment.
 
+Latest active-sprint regression memo: [`GJC-93_P2_QA_DEMO_MEMO.md`](GJC-93_P2_QA_DEMO_MEMO.md).
+
 Commands:
 
 ```bash
