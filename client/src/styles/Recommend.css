@@ -176,11 +176,20 @@ body {
   white-space: nowrap;
 }
 
+.recommend-card-grid {
+  align-items: stretch;
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.recommend-card {
+  min-height: 460px;
+}
+
 .recommend-card-reason {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
+  /* Recommendation reasons are AI-generated, so cards must grow instead of clipping long text. */
+  overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {

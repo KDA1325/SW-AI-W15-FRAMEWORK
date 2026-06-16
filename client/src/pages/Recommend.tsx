@@ -132,7 +132,6 @@ function Recommend() {
     null,
   )
   const [syncError, setSyncError] = useState<string | null>(null)
-  const scrollRef = useRef<HTMLDivElement | null>(null)
   const syncRequestIdRef = useRef(0)
 
   const visibleWords = useMemo(
@@ -202,13 +201,6 @@ function Recommend() {
         setIsAnalyzingOpen(false)
       }
     }
-  }
-
-  const scrollRecommendations = (direction: 'left' | 'right') => {
-    scrollRef.current?.scrollBy({
-      behavior: 'smooth',
-      left: direction === 'left' ? -340 : 340,
-    })
   }
 
   return (
@@ -325,24 +317,14 @@ function Recommend() {
           <h2 className="font-headline-lg text-headline-lg mb-12 text-[var(--gjc-primary)] uppercase">
             RECOMMENDED GAMES
           </h2>
-          <div className="flex items-center gap-6">
-            <button
-              className="p-2 text-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] border-2 border-[var(--gjc-primary)] hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-colors focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={!syncData?.recommendations.length}
-              onClick={() => scrollRecommendations('left')}
-              type="button"
-            >
-              <span className="material-symbols-outlined text-4xl">
-                chevron_left
-              </span>
-            </button>
-
-            <div className="flex-1 overflow-x-auto pb-4" ref={scrollRef}>
+          <div>
+            <div>
               {syncData?.recommendations.length ? (
-                <div className="flex gap-6 min-w-max">
+                /* Cards flow into the page so long AI reasons expand vertically without a section scrollbar. */
+                <div className="recommend-card-grid">
                   {syncData.recommendations.map((card) => (
                     <article
-                      className="w-[300px] h-[460px] bg-[var(--gjc-surface-container-lowest)] flex-shrink-0 flex flex-col border-2 border-[var(--gjc-primary)] transition-all group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px]"
+                      className="recommend-card bg-[var(--gjc-surface-container-lowest)] flex flex-col border-2 border-[var(--gjc-primary)] transition-all group shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-y-[-4px]"
                       key={`${card.externalId.provider}-${card.externalId.id}-${card.rank}`}
                     >
                       <div className="relative h-[250px] p-2">
@@ -426,17 +408,6 @@ function Recommend() {
                 </div>
               )}
             </div>
-
-            <button
-              className="p-2 text-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] border-2 border-[var(--gjc-primary)] hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-colors focus:outline-none shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[2px] active:translate-x-[2px] active:shadow-none disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={!syncData?.recommendations.length}
-              onClick={() => scrollRecommendations('right')}
-              type="button"
-            >
-              <span className="material-symbols-outlined text-4xl">
-                chevron_right
-              </span>
-            </button>
           </div>
         </section>
       </main>
