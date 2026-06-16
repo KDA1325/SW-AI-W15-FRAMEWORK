@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
+export type ExternalApiErrorCode =
+  | 'missing_credentials'
+  | 'unauthorized'
+  | 'rate_limited'
+  | 'network_error'
+  | 'external_api_error';
+
 type IgdbToken = {
   accessToken: string;
   expiresAt: number;
@@ -37,6 +44,7 @@ export type SearchGamesInput = {
 
 export type SearchGamesResult = {
   error: string | null;
+  errorCode: ExternalApiErrorCode | null;
   games: Array<{
     externalId: {
       id: string;
@@ -68,30 +76,40 @@ export class IgdbService {
       return {
         error:
           'IGDB credentials are missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET.',
+        errorCode: 'missing_credentials',
         games: [],
         provider: 'igdb',
       };
     }
 
-    const token = await this.getAccessToken(clientId, clientSecret);
-    const response = await axios.post<IgdbGameRow[]>(
-      'https://api.igdb.com/v4/games',
-      this.buildGamesQuery(input),
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Client-ID': clientId,
-          'Content-Type': 'text/plain',
+    try {
+      const token = await this.getAccessToken(clientId, clientSecret);
+      const response = await axios.post<IgdbGameRow[]>(
+        'https://api.igdb.com/v4/games',
+        this.buildGamesQuery(input),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Client-ID': clientId,
+            'Content-Type': 'text/plain',
+          },
+          timeout: 15000,
         },
-        timeout: 15000,
-      },
-    );
+      );
 
-    return {
-      error: null,
-      games: response.data.map((game) => this.toGameResult(game)),
-      provider: 'igdb',
-    };
+      return {
+        error: null,
+        errorCode: null,
+        games: response.data.map((game) => this.toGameResult(game)),
+        provider: 'igdb',
+      };
+    } catch (error) {
+      return {
+        ...this.toSafeExternalApiError(error),
+        games: [],
+        provider: 'igdb',
+      };
+    }
   }
 
   private async getAccessToken(
@@ -186,5 +204,46 @@ export class IgdbService {
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '');
+  }
+
+  private toSafeExternalApiError(error: unknown): {
+    error: string;
+    errorCode: ExternalApiErrorCode;
+  } {
+    if (!axios.isAxiosError(error)) {
+      return {
+        error: 'IGDB request failed before a response was returned.',
+        errorCode: 'external_api_error',
+      };
+    }
+
+    const status = error.response?.status;
+
+    if (status === 401 || status === 403) {
+      return {
+        error:
+          'IGDB authorization failed. Check IGDB_CLIENT_ID and IGDB_CLIENT_SECRET.',
+        errorCode: 'unauthorized',
+      };
+    }
+
+    if (status === 429) {
+      return {
+        error: 'IGDB rate limit was exceeded. Retry later or reduce requests.',
+        errorCode: 'rate_limited',
+      };
+    }
+
+    if (!error.response) {
+      return {
+        error: 'IGDB network request failed or timed out.',
+        errorCode: 'network_error',
+      };
+    }
+
+    return {
+      error: `IGDB returned HTTP ${status ?? 'unknown'} while searching games.`,
+      errorCode: 'external_api_error',
+    };
   }
 }

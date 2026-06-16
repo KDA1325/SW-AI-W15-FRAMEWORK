@@ -101,6 +101,7 @@ export class McpService {
         error instanceof Error ? error.message : 'Unknown IGDB search error.';
       const result = {
         error: message,
+        errorCode: 'external_api_error',
         games: [],
         provider: 'igdb' as const,
       };
@@ -180,10 +181,20 @@ export class McpService {
         additionalProperties: false,
         properties: {
           error: { type: ['string', 'null'] },
+          errorCode: {
+            enum: [
+              'missing_credentials',
+              'unauthorized',
+              'rate_limited',
+              'network_error',
+              'external_api_error',
+              null,
+            ],
+          },
           games: { type: 'array' },
           provider: { const: 'igdb', type: 'string' },
         },
-        required: ['provider', 'games', 'error'],
+        required: ['provider', 'games', 'error', 'errorCode'],
         type: 'object',
       },
       title: 'Search IGDB Games',

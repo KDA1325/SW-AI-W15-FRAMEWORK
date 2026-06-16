@@ -39,8 +39,70 @@ Required values:
 | `OPENAI_EMBEDDING_DIMENSIONS` | Embedding vector size                                              | `1536`                     |
 | `IGDB_CLIENT_ID`              | Twitch/IGDB Client ID for game metadata search                     | empty                      |
 | `IGDB_CLIENT_SECRET`          | Twitch/IGDB Client Secret for game metadata search                 | empty                      |
+| `STEAM_WEB_API_KEY`           | Steam Web API key for profile and play-history linking             | empty                      |
+| `FASTAPI_AGENT_URL`           | FastAPI Agent base URL                                             | `http://localhost:8000`    |
+| `FASTAPI_AGENT_TIMEOUT_MS`    | NestJS to FastAPI Agent timeout                                    | `30000`                    |
 
 Do not commit `server/.env`. It can contain secrets such as `JWT_SECRET`.
+
+## External API Key And Error Strategy
+
+GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Agent integration.
+
+### Secret Storage Rules
+
+- Never hardcode API keys, access tokens, client secrets, JWT secrets, or database passwords in source code.
+- Keep local secrets only in `server/.env`, which must stay untracked.
+- Commit only variable names and safe defaults in `server/.env.example`.
+- Production secrets must be configured in the deployment platform or a secrets manager, not in git.
+- Do not log full request headers, `Authorization` values, `client_secret`, access tokens, or `.env` contents.
+
+### Required Keys By Feature
+
+| Feature                                       | Variables                                           | Behavior when missing                                                                                  |
+| --------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| OpenAI RAG embeddings and structured analysis | `OPENAI_API_KEY`, optional model vars               | Uses deterministic demo embeddings and rule-based analysis                                             |
+| IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
+| Steam profile and play history                | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam sync should return a structured missing-credentials or missing-profile error                     |
+| FastAPI Agent loop                            | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | NestJS should return a structured fallback response instead of hanging                                 |
+
+### External Failure Mapping
+
+| Failure                          | Error code            | Required behavior                                              |
+| -------------------------------- | --------------------- | -------------------------------------------------------------- |
+| Missing key/secret               | `missing_credentials` | Return a clear setup message and empty result                  |
+| Invalid key or permission denied | `unauthorized`        | Return a credential/permission message without echoing the key |
+| Quota or rate limit              | `rate_limited`        | Return an empty result and tell the Agent it can retry later   |
+| Timeout, DNS, connection reset   | `network_error`       | Return an empty result and keep the recommendation flow alive  |
+| Unexpected provider response     | `external_api_error`  | Return a generic provider failure message without stack traces |
+
+### MCP Tool Error Shape
+
+`search_games` reports tool execution failures through the MCP result, not as uncaught server exceptions:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{ \"provider\": \"igdb\", \"games\": [], \"errorCode\": \"missing_credentials\" }"
+      }
+    ],
+    "isError": true,
+    "structuredContent": {
+      "provider": "igdb",
+      "games": [],
+      "error": "IGDB credentials are missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET.",
+      "errorCode": "missing_credentials"
+    }
+  }
+}
+```
+
+This lets the Agent continue with a fallback plan instead of crashing the full SYNC flow.
 
 ## Start PostgreSQL
 
@@ -241,7 +303,8 @@ When `IGDB_CLIENT_ID` or `IGDB_CLIENT_SECRET` is missing, the tool returns `isEr
 {
   "provider": "igdb",
   "games": [],
-  "error": "IGDB credentials are missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET."
+  "error": "IGDB credentials are missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET.",
+  "errorCode": "missing_credentials"
 }
 ```
 
