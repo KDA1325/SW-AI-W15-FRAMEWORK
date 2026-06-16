@@ -37,6 +37,8 @@ Required values:
 | `OPENAI_CHAT_MODEL`           | Chat model for RAG JSON analysis                                   | `gpt-4o-mini`              |
 | `OPENAI_EMBEDDING_MODEL`      | Embedding model for pgvector documents                             | `text-embedding-3-small`   |
 | `OPENAI_EMBEDDING_DIMENSIONS` | Embedding vector size                                              | `1536`                     |
+| `IGDB_CLIENT_ID`              | Twitch/IGDB Client ID for game metadata search                     | empty                      |
+| `IGDB_CLIENT_SECRET`          | Twitch/IGDB Client Secret for game metadata search                 | empty                      |
 
 Do not commit `server/.env`. It can contain secrets such as `JWT_SECRET`.
 
@@ -193,6 +195,55 @@ Response shape:
 ```
 
 When `OPENAI_API_KEY` is configured, RAG uses OpenAI embeddings and structured JSON analysis. Without a key, it uses deterministic demo embeddings and rule-based analysis so pgvector top-k search remains testable in local development.
+
+## MCP Game Metadata Tool
+
+GJC-83 adds a minimal JSON-RPC MCP endpoint:
+
+```text
+POST /mcp
+```
+
+Tool discovery:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/list",
+  "params": {}
+}
+```
+
+Tool call:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "search_games",
+    "arguments": {
+      "query": "CrossCode",
+      "limit": 3,
+      "preferenceTags": ["RETRO_PIXEL", "STORY_DRIVEN"]
+    }
+  }
+}
+```
+
+The `search_games` tool uses IGDB for video game metadata and returns recommendation-card fields: title, IGDB id, genres, platforms, release date, cover URL, source URL, summary, and tags.
+
+When `IGDB_CLIENT_ID` or `IGDB_CLIENT_SECRET` is missing, the tool returns `isError: true` with structured content like:
+
+```json
+{
+  "provider": "igdb",
+  "games": [],
+  "error": "IGDB credentials are missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET."
+}
+```
 
 ## Domain Data Model
 

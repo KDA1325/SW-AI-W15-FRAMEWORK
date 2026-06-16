@@ -1,0 +1,190 @@
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
+
+type IgdbToken = {
+  accessToken: string;
+  expiresAt: number;
+};
+
+type TwitchTokenResponse = {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+};
+
+type IgdbGameRow = {
+  cover?: {
+    image_id?: string;
+    url?: string;
+  };
+  first_release_date?: number;
+  genres?: Array<{ name?: string }>;
+  id: number;
+  name: string;
+  platforms?: Array<{ name?: string }>;
+  slug?: string;
+  summary?: string;
+  themes?: Array<{ name?: string }>;
+  total_rating?: number;
+};
+
+export type SearchGamesInput = {
+  limit?: number;
+  preferenceTags?: string[];
+  query: string;
+};
+
+export type SearchGamesResult = {
+  error: string | null;
+  games: Array<{
+    externalId: {
+      id: string;
+      provider: 'igdb';
+    };
+    genres: string[];
+    imageUrl: string | null;
+    platforms: string[];
+    releaseDate: string | null;
+    sourceUrl: string | null;
+    summary: string | null;
+    tags: string[];
+    title: string;
+  }>;
+  provider: 'igdb';
+};
+
+@Injectable()
+export class IgdbService {
+  private token: IgdbToken | null = null;
+
+  constructor(private readonly config: ConfigService) {}
+
+  async searchGames(input: SearchGamesInput): Promise<SearchGamesResult> {
+    const clientId = this.config.get<string>('IGDB_CLIENT_ID');
+    const clientSecret = this.config.get<string>('IGDB_CLIENT_SECRET');
+
+    if (!clientId || !clientSecret) {
+      return {
+        error:
+          'IGDB credentials are missing. Set IGDB_CLIENT_ID and IGDB_CLIENT_SECRET.',
+        games: [],
+        provider: 'igdb',
+      };
+    }
+
+    const token = await this.getAccessToken(clientId, clientSecret);
+    const response = await axios.post<IgdbGameRow[]>(
+      'https://api.igdb.com/v4/games',
+      this.buildGamesQuery(input),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Client-ID': clientId,
+          'Content-Type': 'text/plain',
+        },
+        timeout: 15000,
+      },
+    );
+
+    return {
+      error: null,
+      games: response.data.map((game) => this.toGameResult(game)),
+      provider: 'igdb',
+    };
+  }
+
+  private async getAccessToken(
+    clientId: string,
+    clientSecret: string,
+  ): Promise<string> {
+    const now = Date.now();
+
+    if (this.token && this.token.expiresAt > now + 60_000) {
+      return this.token.accessToken;
+    }
+
+    const response = await axios.post<TwitchTokenResponse>(
+      'https://id.twitch.tv/oauth2/token',
+      null,
+      {
+        params: {
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: 'client_credentials',
+        },
+        timeout: 15000,
+      },
+    );
+
+    this.token = {
+      accessToken: response.data.access_token,
+      expiresAt: now + response.data.expires_in * 1000,
+    };
+
+    return this.token.accessToken;
+  }
+
+  private buildGamesQuery(input: SearchGamesInput): string {
+    const limit = this.normalizeLimit(input.limit);
+    const search = this.escapeSearch(input.query);
+
+    // IGDB uses APICalypse syntax: a plain-text query body with fields/search/where/limit clauses.
+    return [
+      'fields name,slug,summary,first_release_date,total_rating,cover.image_id,genres.name,platforms.name,themes.name;',
+      `search "${search}";`,
+      'where version_parent = null;',
+      `limit ${limit};`,
+    ].join('\n');
+  }
+
+  private normalizeLimit(limit?: number): number {
+    if (!limit || !Number.isInteger(limit)) {
+      return 5;
+    }
+
+    return Math.min(Math.max(limit, 1), 10);
+  }
+
+  private escapeSearch(value: string): string {
+    return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"').trim();
+  }
+
+  private toGameResult(game: IgdbGameRow): SearchGamesResult['games'][number] {
+    const slug = game.slug ?? this.slugify(game.name);
+
+    return {
+      externalId: {
+        id: String(game.id),
+        provider: 'igdb',
+      },
+      genres: this.names(game.genres),
+      imageUrl: game.cover?.image_id
+        ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
+        : null,
+      platforms: this.names(game.platforms),
+      releaseDate: game.first_release_date
+        ? new Date(game.first_release_date * 1000).toISOString().slice(0, 10)
+        : null,
+      sourceUrl: slug ? `https://www.igdb.com/games/${slug}` : null,
+      summary: game.summary ?? null,
+      tags: this.names(game.themes),
+      title: game.name,
+    };
+  }
+
+  private names(values?: Array<{ name?: string }>): string[] {
+    return (
+      values
+        ?.map((value) => value.name)
+        .filter((value): value is string => Boolean(value)) ?? []
+    );
+  }
+
+  private slugify(value: string): string {
+    return value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+}
