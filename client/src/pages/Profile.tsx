@@ -12,96 +12,6 @@ const profileImage =
 const fallbackBio =
   'Retro games, slow criticism, and difficult endings. Recently analyzing logged play data.'
 
-const coverImages = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuAspADwKDJ6DvPCJ3GhUPZadfHCjAIhcYp_cYZeQEhNQbSDN5XM24GdRqMY_7hPbAKQArEi5g_237tI41rLd8MJ9rihg7TTlEPqTOw6XY03gyTysuoC7Lp_t3kgpwZF7pj869dqx_DLY6q5c6mQzMXIEevrmAMKm78e2uPTV9vdrcgdAIImWbI6dxYmfLwDXoTEp9dO1wREBf9wsAuy8NXQPuQ681-5pnCwG1PZq-ifmx-oFfOGfgsiYby-4U3CnmToYHCH3-X7BR4a',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuBMee8GX1cJ9AMOLeE5wuaKs2Zh172HOZC8vY0da2LdPE4lTwkgkQgcqBdGkAe4tSSSSsuVlr19IXgk5O4k8r2LgWLoUsgg1gExLWdAfP82kD5wfDXwwl1PO923FVxyZqsXw4hVfHqhoQFqESIITuoPPBo4u8Mk-FTvWbR0Ye0cl1V5IamuC0hkgTDr4TbpZmbz00ZhXKOHJ2fiHdpdxpWFzxqPM0c-Jtz58Fpr1QvYO6cNBJ2vJHLpYPUws_VgqdVPM22UQyquQkVa',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuAgBwSMvTQ_FIAKj_u5llK5db8h6X0PEBNhbW67rd566l3mZfdvVXioIbAiUZqeToCSGqUmag4xaRjr4voyklEtIMKk5OEcfP_qetSzKBEA-wahlAyHW315NBxRk1kUkxQpVKdkSz4TpKKuY5Udxsex-Bj0S_Znct0RZiyaTjCVAmavtI-C-oXCszFPdsdIP-Mr9opEa7QQZzz-vYkx27187qf63foS2wDAe0Oju5dpa6xP_lJY9DL1_GWCyRjLMXMxnLhhgpPsIK6J',
-] as const
-
-const archiveGames = [
-  {
-    cover: coverImages[0],
-    date: '24. 10. 12',
-    genre: 'Classic RPG Experience',
-    platform: 'PC',
-    rating: '4.5',
-    title: 'SHADOWS OF AETERNA',
-  },
-  {
-    cover: coverImages[1],
-    date: '24. 10. 12',
-    genre: 'Action Platformer',
-    platform: 'PC',
-    rating: '4.2',
-    title: 'RUIN QUEST',
-  },
-  {
-    cover: coverImages[2],
-    date: '24. 10. 12',
-    genre: 'Sci-fi Adventure',
-    platform: 'PC',
-    rating: '4.8',
-    title: 'STARFALL: THE VOID',
-    variant: 'dim',
-  },
-  {
-    cover: coverImages[0],
-    date: '24. 10. 12',
-    genre: 'Classic RPG Experience',
-    platform: 'PC',
-    rating: '4.5',
-    title: 'SHADOWS OF AETERNA',
-  },
-  {
-    cover: coverImages[1],
-    date: '24. 10. 12',
-    genre: 'Action Platformer',
-    platform: 'PC',
-    rating: '4.2',
-    title: 'RUIN QUEST',
-  },
-  {
-    cover: coverImages[2],
-    date: '24. 10. 12',
-    genre: 'Sci-fi Adventure',
-    platform: 'PC',
-    rating: '4.8',
-    title: 'STARFALL: THE VOID',
-  },
-  {
-    cover: coverImages[0],
-    date: '24. 10. 12',
-    genre: 'Classic RPG Experience',
-    platform: 'PC',
-    rating: '4.5',
-    title: 'SHADOWS OF AETERNA',
-  },
-  {
-    cover: coverImages[1],
-    date: '24. 10. 12',
-    genre: 'Action Platformer',
-    platform: 'PC',
-    rating: '4.2',
-    title: 'RUIN QUEST',
-  },
-  {
-    cover: coverImages[2],
-    date: '24. 10. 12',
-    genre: 'Sci-fi Adventure',
-    platform: 'PC',
-    rating: '4.8',
-    title: 'STARFALL: THE VOID',
-  },
-  {
-    cover: coverImages[0],
-    date: '24. 10. 12',
-    genre: 'Classic RPG Experience',
-    platform: 'PC',
-    rating: '4.5',
-    title: 'SHADOWS OF AETERNA',
-  },
-]
-
 type SteamProfileResponse = {
   connected: boolean
   error: string | null
@@ -158,6 +68,19 @@ type SteamStatsResponse = {
   steamId: string | null
 }
 
+type ProfileArchiveReview = {
+  content: string
+  createdAt: string
+  game: {
+    id: string
+    imageUrl?: string | null
+    platforms?: string[]
+    title: string
+  }
+  id: string
+  rating: number | null
+}
+
 function apiUrl(path: string) {
   return new URL(
     path,
@@ -175,6 +98,36 @@ function formatPlayHours(minutes: number | null | undefined) {
   }
 
   return `${Math.round(minutes / 60)}H`
+}
+
+function formatArchiveDate(value: string) {
+  return new Date(value).toLocaleDateString('ko-KR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  })
+}
+
+function formatRating(value: number | null) {
+  if (typeof value !== 'number') {
+    return '-'
+  }
+
+  return Number.isInteger(value) ? String(value) : value.toFixed(1)
+}
+
+function reviewExcerpt(content: string) {
+  const firstLine = content.split(/\r?\n/).find((line) => line.trim())
+  return firstLine?.trim().slice(0, 96) || 'NO_REVIEW_TEXT'
+}
+
+function gameInitials(title: string) {
+  return title
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join('')
 }
 
 function Profile() {
@@ -201,6 +154,10 @@ function Profile() {
   )
   const [steamStatsState, setSteamStatsState] =
     useState<SteamStatsResponse | null>(null)
+  const [archiveReviews, setArchiveReviews] = useState<ProfileArchiveReview[]>(
+    [],
+  )
+  const [archiveMessage, setArchiveMessage] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -238,6 +195,30 @@ function Profile() {
             stats: null,
             steamId: user?.steamId ?? null,
           })
+        }
+      }
+
+      try {
+        const params = new URLSearchParams({
+          limit: '10',
+          mine: 'true',
+          sort: 'latest',
+          type: 'REVIEW',
+        })
+        // Profile archive mirrors persisted review records, so no dummy cards stay in the render path.
+        const response = await api.get<ProfileArchiveReview[]>(
+          `/posts?${params.toString()}`,
+        )
+
+        if (isMounted) {
+          setArchiveReviews(response.data)
+          setArchiveMessage(null)
+        }
+      } catch (error) {
+        if (isMounted) {
+          setArchiveMessage(
+            getApiErrorMessage(error, 'ARCHIVE LOG LOAD FAILED'),
+          )
         }
       }
     }
@@ -344,6 +325,9 @@ function Profile() {
     ? `#${steamStats.friendCode}`
     : '----'
   const gamerTags = user?.gamerTags?.length ? user.gamerTags : ['NO_TAGS']
+  const archiveRecordLabel = `DISPLAYING ${archiveReviews.length} RECORD${
+    archiveReviews.length === 1 ? '' : 'S'
+  }`
 
   return (
     <PageChrome active="profile">
@@ -562,53 +546,67 @@ function Profile() {
               ARCHIVE_LOG
             </h2>
             <span className="font-label-caps text-[var(--gjc-secondary)]">
-              DISPLAYING 10 RECORDS
+              {archiveRecordLabel}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {archiveGames.map((game, index) => (
-              <div
-                className="flex flex-col gap-2"
-                key={`${game.title}-${index}`}
-              >
-                <article
-                  className={`aspect-[3/4] border-2 border-[var(--gjc-primary)] ${
-                    game.variant === 'dim'
-                      ? 'bg-[var(--gjc-surface-dim)]'
-                      : 'bg-[var(--gjc-surface-container-lowest)]'
-                  } flex flex-col justify-between hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all duration-200 cursor-pointer group relative overflow-hidden p-0`}
-                >
-                  <div className="flex-grow flex flex-col overflow-hidden">
-                    <img
-                      alt="Game Cover"
-                      className="w-full object-cover filter grayscale contrast-125 border-b-2 border-[var(--gjc-primary)] h-full"
-                      src={game.cover}
-                    />
-                  </div>
-                  <div className="absolute top-2 left-2 z-10">
-                    <span className="font-label-caps text-[10px] border border-current px-1 bg-[var(--gjc-surface-container-lowest)] text-[var(--gjc-primary)]">
-                      {game.platform}
+          {archiveMessage ? (
+            <p className="font-label-caps text-[10px] uppercase text-[var(--gjc-secondary)]">
+              {archiveMessage}
+            </p>
+          ) : null}
+
+          {archiveReviews.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+              {archiveReviews.map((post) => {
+                const game = post.game
+                const platform = game.platforms?.[0] ?? 'DB'
+
+                return (
+                  <div className="flex flex-col gap-2" key={post.id}>
+                    <article className="aspect-[3/4] border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] flex flex-col justify-between hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all duration-200 cursor-pointer group relative overflow-hidden p-0">
+                      <div className="flex-grow flex flex-col overflow-hidden">
+                        {game.imageUrl ? (
+                          <img
+                            alt={`${game.title} cover`}
+                            className="w-full object-cover filter grayscale contrast-125 border-b-2 border-[var(--gjc-primary)] h-full"
+                            src={game.imageUrl}
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center bg-[var(--gjc-surface-dim)] font-headline-xl text-5xl text-[var(--gjc-primary)]">
+                            {gameInitials(game.title) || '??'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="absolute top-2 left-2 z-10">
+                        <span className="font-label-caps text-[10px] border border-current px-1 bg-[var(--gjc-surface-container-lowest)] text-[var(--gjc-primary)]">
+                          {platform}
+                        </span>
+                      </div>
+                      <div className="hidden group-hover:flex absolute inset-0 z-20 flex-col items-center justify-center p-4 text-center bg-[var(--gjc-primary)] text-[var(--gjc-on-primary)]">
+                        <h3 className="font-headline-lg-mobile text-[18px] mb-2">
+                          {game.title}
+                        </h3>
+                        <p className="font-label-caps text-[14px] mb-1">
+                          RATING: {formatRating(post.rating)}
+                        </p>
+                        <p className="font-body-md text-[12px] leading-tight">
+                          {reviewExcerpt(post.content)}
+                        </p>
+                      </div>
+                    </article>
+                    <span className="font-label-caps text-[10px] text-[var(--gjc-secondary)] uppercase">
+                      LOGGED: {formatArchiveDate(post.createdAt)}
                     </span>
                   </div>
-                  <div className="hidden group-hover:flex absolute inset-0 z-20 flex-col items-center justify-center p-4 text-center bg-[var(--gjc-primary)] text-[var(--gjc-on-primary)]">
-                    <h3 className="font-headline-lg-mobile text-[18px] mb-2">
-                      {game.title}
-                    </h3>
-                    <p className="font-label-caps text-[14px] mb-1">
-                      RATING: {game.rating}
-                    </p>
-                    <p className="font-body-md text-[12px] leading-tight">
-                      {game.genre}
-                    </p>
-                  </div>
-                </article>
-                <span className="font-label-caps text-[10px] text-[var(--gjc-secondary)] uppercase">
-                  LOGGED: {game.date}
-                </span>
-              </div>
-            ))}
-          </div>
+                )
+              })}
+            </div>
+          ) : (
+            <div className="border-2 border-dashed border-[var(--gjc-primary)] p-8 text-center font-label-caps text-[10px] uppercase text-[var(--gjc-secondary)]">
+              NO_REVIEW_LOGS
+            </div>
+          )}
         </section>
       </main>
 
