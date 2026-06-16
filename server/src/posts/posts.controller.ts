@@ -16,7 +16,6 @@ import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
 import UpdateCommentDto from './dto/update-comment.dto';
-import { ArchivePostType } from './entities/archivePost.entity';
 import PostsService from './posts.service';
 
 // JwtStrategy가 JWT 검증 후 req.user에 넣어주는 값의 모양입니다.
@@ -51,7 +50,7 @@ export class PostsController {
     @Get()
     findAll(
         @Req() req: AuthedRequest,
-        @Query('type') type?: ArchivePostType,
+        @Query('type') type?: string,
         @Query('mine') mine?: string,
         // q는 Journals 검색창에서 넘어오는 검색어입니다.
         // 예: /posts?type=JOURNAL&mine=true&q=zelda

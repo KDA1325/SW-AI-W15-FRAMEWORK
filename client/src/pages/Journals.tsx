@@ -11,7 +11,7 @@ import '../styles/Journals.css'
 type JournalsModal = 'delete-journal' | 'delete-review' | 'edit-journal' | 'edit-review' | null
 
 export type PostType = 'REVIEW' | 'JOURNAL'
-type PostSort = 'latest' | 'oldest' | 'rating'
+export type PostSort = 'latest' | 'oldest' | 'rating'
 type JournalLimit = 5 | 10 | 15
 
 export type JournalPost = {
@@ -33,6 +33,17 @@ export type JournalPost = {
     id: string
     nickname: string
   }
+}
+
+export type PostListResponse<TPost = JournalPost> = {
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+  items: TPost[]
+  limit: number
+  page: number
+  sort: PostSort
+  total: number
+  totalPages: number
 }
 
 function formatDate(value: string) {
@@ -59,6 +70,12 @@ function Journals() {
   const [journalSort, setJournalSort] = useState<PostSort>('latest')
   const [journalLimit, setJournalLimit] = useState<JournalLimit>(5)
   const [journalPage, setJournalPage] = useState(1)
+  const [journalPageInfo, setJournalPageInfo] = useState({
+    hasNextPage: false,
+    hasPreviousPage: false,
+    total: 0,
+    totalPages: 0,
+  })
 
   // Journals is a personal archive, so it requests only the signed-in user's posts.
   // Timeline should use /posts without mine=true when it needs every user's posts.
@@ -90,12 +107,20 @@ function Journals() {
       }
 
       const [reviewResponse, journalResponse] = await Promise.all([
-        api.get<JournalPost[]>(`/posts?${reviewParams.toString()}`),
-        api.get<JournalPost[]>(`/posts?${journalParams.toString()}`),
+        api.get<PostListResponse>(`/posts?${reviewParams.toString()}`),
+        api.get<PostListResponse>(`/posts?${journalParams.toString()}`),
       ])
+      const journalPageData = journalResponse.data
 
-      setReviews(reviewResponse.data)
-      setJournals(journalResponse.data)
+      setReviews(reviewResponse.data.items)
+      setJournals(journalPageData.items)
+      // The API owns pagination truth, so NEXT/PREV and TOTAL labels do not guess from array length.
+      setJournalPageInfo({
+        hasNextPage: journalPageData.hasNextPage,
+        hasPreviousPage: journalPageData.hasPreviousPage,
+        total: journalPageData.total,
+        totalPages: journalPageData.totalPages,
+      })
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
     }
@@ -128,10 +153,6 @@ function Journals() {
     setJournalPage(1)
     setSearchQuery(searchInput.trim())
   }
-
-  // The API currently returns an array without total count.
-  // If a page is full, there may be another page; otherwise NEXT is disabled.
-  const hasNextJournalPage = journals.length === journalLimit
 
   return (
     <PageChrome active="journals">
@@ -339,11 +360,14 @@ function Journals() {
           aria-label="Journal pagination"
           className="flex flex-col items-center justify-between gap-4 border-t-2 border-[var(--gjc-primary)] pt-8 font-label-caps text-xs uppercase tracking-widest md:flex-row"
         >
-          <span className="text-secondary">JOURNAL_PAGE: {journalPage}</span>
+          <span className="text-secondary">
+            JOURNAL_PAGE: {journalPage} / {Math.max(1, journalPageInfo.totalPages)} // TOTAL:{' '}
+            {journalPageInfo.total}
+          </span>
           <div className="flex items-center gap-3">
             <button
               className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={journalPage === 1}
+              disabled={!journalPageInfo.hasPreviousPage}
               onClick={() => setJournalPage((page) => Math.max(1, page - 1))}
               type="button"
             >
@@ -354,7 +378,7 @@ function Journals() {
             </span>
             <button
               className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
-              disabled={!hasNextJournalPage}
+              disabled={!journalPageInfo.hasNextPage}
               onClick={() => setJournalPage((page) => page + 1)}
               type="button"
             >

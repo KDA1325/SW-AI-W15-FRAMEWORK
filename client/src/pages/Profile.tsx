@@ -3,6 +3,7 @@ import { api, getApiErrorMessage } from '../api'
 import { useAuth } from '../auth/AuthContext'
 import EditProfileModal from './EditProfileModal'
 import PageChrome from './PageChrome'
+import type { PostListResponse } from './Journals'
 
 import '../styles/Profile.css'
 
@@ -157,6 +158,7 @@ function Profile() {
   const [archiveReviews, setArchiveReviews] = useState<ProfileArchiveReview[]>(
     [],
   )
+  const [archiveTotal, setArchiveTotal] = useState(0)
   const [archiveMessage, setArchiveMessage] = useState<string | null>(null)
 
   useEffect(() => {
@@ -206,12 +208,13 @@ function Profile() {
           type: 'REVIEW',
         })
         // Profile archive mirrors persisted review records, so no dummy cards stay in the render path.
-        const response = await api.get<ProfileArchiveReview[]>(
+        const response = await api.get<PostListResponse<ProfileArchiveReview>>(
           `/posts?${params.toString()}`,
         )
 
         if (isMounted) {
-          setArchiveReviews(response.data)
+          setArchiveReviews(response.data.items)
+          setArchiveTotal(response.data.total)
           setArchiveMessage(null)
         }
       } catch (error) {
@@ -327,7 +330,7 @@ function Profile() {
   const gamerTags = user?.gamerTags?.length ? user.gamerTags : ['NO_TAGS']
   const archiveRecordLabel = `DISPLAYING ${archiveReviews.length} RECORD${
     archiveReviews.length === 1 ? '' : 'S'
-  }`
+  } OF ${archiveTotal}`
 
   return (
     <PageChrome active="profile">

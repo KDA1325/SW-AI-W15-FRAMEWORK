@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import PageChrome from './PageChrome'
-import type { JournalPost } from './Journals'
+import type { JournalPost, PostListResponse } from './Journals'
 
 type TimelineFilter = 'ALL' | 'REVIEW' | 'JOURNAL'
 
@@ -70,8 +70,8 @@ function Timeline() {
         params.set('type', filter)
       }
 
-      const response = await api.get<JournalPost[]>(`/posts?${params.toString()}`)
-      setPosts(response.data)
+      const response = await api.get<PostListResponse>(`/posts?${params.toString()}`)
+      setPosts(response.data.items)
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'TIMELINE LOAD FAILED'))
     } finally {

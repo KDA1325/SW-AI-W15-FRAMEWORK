@@ -22,6 +22,26 @@ import { IgdbService } from '../ai/igdb.service';
 
 type PostListSort = 'latest' | 'oldest' | 'rating';
 
+const POST_LIST_TYPES = new Set<string>([
+    ArchivePostType.REVIEW,
+    ArchivePostType.JOURNAL,
+]);
+
+type PostListItem = ArchivePost & {
+    canEdit: boolean;
+};
+
+type PostListResponse = {
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    items: PostListItem[];
+    limit: number;
+    page: number;
+    sort: PostListSort;
+    total: number;
+    totalPages: number;
+};
+
 // 요청 DTO를 DB 엔티티로 바꾸고 권한 규칙을 보장하기
 // PostsService는 컨트롤러에서 받은 DTO를 DB 엔티티로 바꾸고,
 // 게시글 생성/조회/수정/삭제에 필요한 비즈니스 규칙을 보장합니다.
@@ -69,22 +89,23 @@ export default class PostsService {
         return this.findOne(userId, savedPost.id);
     }
 
-    // 게시글 목록을 최신순으로 조회합니다.
+    // 게시글 목록을 조회하고, 프론트가 추가 계산 없이 페이지 UI를 그릴 수 있는 메타 정보를 함께 반환합니다.
     // type이 들어오면 REVIEW 또는 JOURNAL만 필터링하고, 없으면 전체를 반환합니다.
     async findAll(
         userId: string,
-        type?: ArchivePostType,
+        type?: string,
         mineOnly = false,
         query?: string,
         sort?: string,
         limit?: string,
         page?: string,
-    ) {
+    ): Promise<PostListResponse> {
         const keyword = query?.trim();
         const normalizedSort = this.parseListSort(sort);
         // 기본값 설정?
         const normalizedLimit = this.parseListLimit(limit);
         const normalizedPage = this.parsePositiveNumber(page, 1, 'page');
+        const normalizedType = type ? this.parseListType(type) : null;
         // 목록 조회는 조건이 여러 개 조합됩니다.
         // - type: REVIEW 목록인지 JOURNAL 목록인지 구분
         // - mineOnly: 내 글만 볼지, 전체 글을 볼지 구분
@@ -114,8 +135,8 @@ export default class PostsService {
             .take(normalizedLimit)
             .skip((normalizedPage - 1) * normalizedLimit);
 
-        if (type) {
-            postsQuery.andWhere('post.type = :type', { type });
+        if (normalizedType) {
+            postsQuery.andWhere('post.type = :type', { type: normalizedType });
         }
 
         if (mineOnly) {
@@ -123,6 +144,8 @@ export default class PostsService {
         }
 
         if (keyword) {
+            const keywordPattern = `%${keyword}%`;
+
             // 검색어가 있을 때만 검색 조건을 추가합니다.
             // Brackets는 괄호 역할을 합니다.
             // 즉 아래 조건은 SQL로 보면 대략 이런 의미입니다.
@@ -130,32 +153,55 @@ export default class PostsService {
             //   post.title ILIKE '%검색어%'
             //   OR post.content ILIKE '%검색어%'
             //   OR game.title ILIKE '%검색어%'
+            //   OR game.tags/genres/platforms 중 하나가 ILIKE '%검색어%'
             // )
             // ILIKE는 PostgreSQL에서 대소문자를 구분하지 않는 LIKE 검색입니다.
-            // 그래서 사용자가 게임 제목 일부나 글 본문 키워드를 입력해도 결과를 찾을 수 있습니다.
+            // 그래서 사용자가 게임 제목 일부, 글 본문 키워드, 게임 태그를 입력해도 결과를 찾을 수 있습니다.
             postsQuery.andWhere(
                 new Brackets((qb) => {
                     qb.where('post.title ILIKE :keyword', {
-                        keyword: `%${keyword}%`,
-                    })
-                        .orWhere('post.content ILIKE :keyword', {
-                            keyword: `%${keyword}%`,
-                        })
-                        .orWhere('game.title ILIKE :keyword', {
-                            keyword: `%${keyword}%`,
-                        });
+                        keyword: keywordPattern,
+                    });
+                    qb.orWhere('post.content ILIKE :keyword', {
+                        keyword: keywordPattern,
+                    });
+                    qb.orWhere('game.title ILIKE :keyword', {
+                        keyword: keywordPattern,
+                    });
+                    qb.orWhere(
+                        'EXISTS (SELECT 1 FROM unnest(game.tags) AS game_tag(term) WHERE game_tag.term ILIKE :keyword)',
+                        { keyword: keywordPattern },
+                    );
+                    qb.orWhere(
+                        'EXISTS (SELECT 1 FROM unnest(game.genres) AS game_genre(term) WHERE game_genre.term ILIKE :keyword)',
+                        { keyword: keywordPattern },
+                    );
+                    qb.orWhere(
+                        'EXISTS (SELECT 1 FROM unnest(game.platforms) AS game_platform(term) WHERE game_platform.term ILIKE :keyword)',
+                        { keyword: keywordPattern },
+                    );
                 }),
             );
         }
 
-        const posts = await postsQuery.getMany();
+        const [posts, total] = await postsQuery.getManyAndCount();
+        const totalPages = Math.ceil(total / normalizedLimit);
 
         // Timeline still receives all posts, while journals can request mineOnly for just my posts.
         // canEdit remains useful for shared list UIs that need to hide edit/delete controls.
-        return posts.map((post) => ({
-            ...post,
-            canEdit: post.userId === userId,
-        }));
+        return {
+            hasNextPage: normalizedPage * normalizedLimit < total,
+            hasPreviousPage: normalizedPage > 1,
+            items: posts.map((post) => ({
+                ...post,
+                canEdit: post.userId === userId,
+            })),
+            limit: normalizedLimit,
+            page: normalizedPage,
+            sort: normalizedSort,
+            total,
+            totalPages,
+        };
     }
 
     async searchGames(query?: string) {
@@ -592,6 +638,16 @@ export default class PostsService {
 
         throw new BadRequestException(
             'sort는 latest, oldest, rating 중 하나여야 합니다.',
+        );
+    }
+
+    private parseListType(type: string) {
+        if (POST_LIST_TYPES.has(type)) {
+            return type as ArchivePostType;
+        }
+
+        throw new BadRequestException(
+            'type은 REVIEW 또는 JOURNAL 중 하나여야 합니다.',
         );
     }
 

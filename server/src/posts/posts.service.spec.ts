@@ -3,6 +3,17 @@ import { ArchivePostType } from './entities/archivePost.entity';
 import PostsService from './posts.service';
 
 describe('PostsService IGDB game selection', () => {
+    function createListQuery(posts: unknown[] = [], total = posts.length) {
+        return {
+            andWhere: jest.fn().mockReturnThis(),
+            getManyAndCount: jest.fn().mockResolvedValue([posts, total]),
+            leftJoinAndSelect: jest.fn().mockReturnThis(),
+            orderBy: jest.fn().mockReturnThis(),
+            skip: jest.fn().mockReturnThis(),
+            take: jest.fn().mockReturnThis(),
+        };
+    }
+
     function createService() {
         const duplicateQuery = {
             andWhere: jest.fn().mockReturnThis(),
@@ -11,26 +22,31 @@ describe('PostsService IGDB game selection', () => {
             where: jest.fn().mockReturnThis(),
         };
         const postRepository = {
-            create: jest.fn((value) => value),
-            createQueryBuilder: jest.fn(() => duplicateQuery),
+            create: jest.fn((value: Record<string, unknown>) => value),
+            createQueryBuilder: jest.fn().mockReturnValue(duplicateQuery),
             findOne: jest.fn().mockResolvedValue({
                 canEdit: true,
                 game: { id: 'game-1', igdbId: '114795', title: 'Hades' },
                 id: 'post-1',
                 userId: 'user-1',
             }),
-            save: jest.fn((value) =>
+            save: jest.fn((value: Record<string, unknown>) =>
                 Promise.resolve({ ...value, id: 'post-1' }),
             ),
         };
         const commentRepository = {};
         const gameRepository = {
-            create: jest.fn((value) => ({ ...value, id: 'game-1' })),
+            create: jest.fn((value: Record<string, unknown>) => ({
+                ...value,
+                id: 'game-1',
+            })),
             findOne: jest
                 .fn()
                 .mockResolvedValueOnce(null)
                 .mockResolvedValueOnce(null),
-            save: jest.fn((value) => Promise.resolve(value)),
+            save: jest.fn((value: Record<string, unknown>) =>
+                Promise.resolve(value),
+            ),
         };
         const igdbService = {
             searchGames: jest.fn().mockResolvedValue({
@@ -154,5 +170,115 @@ describe('PostsService IGDB game selection', () => {
             limit: 8,
             query: 'hades',
         });
+    });
+
+    it('returns paginated list metadata with canEdit on each item', async () => {
+        const { postRepository, service } = createService();
+        const listQuery = createListQuery(
+            [
+                {
+                    game: {
+                        id: 'game-2',
+                        tags: ['Tactical'],
+                        title: 'Into the Breach',
+                    },
+                    id: 'post-2',
+                    title: 'A clean tactics loop',
+                    type: ArchivePostType.JOURNAL,
+                    userId: 'other-user',
+                },
+            ],
+            12,
+        );
+
+        postRepository.createQueryBuilder.mockReturnValueOnce(listQuery);
+
+        await expect(
+            service.findAll(
+                'user-1',
+                ArchivePostType.JOURNAL,
+                true,
+                'tactical',
+                'oldest',
+                '5',
+                '2',
+            ),
+        ).resolves.toMatchObject({
+            hasNextPage: true,
+            hasPreviousPage: true,
+            items: [
+                {
+                    canEdit: false,
+                    id: 'post-2',
+                },
+            ],
+            limit: 5,
+            page: 2,
+            sort: 'oldest',
+            total: 12,
+            totalPages: 3,
+        });
+        expect(listQuery.orderBy).toHaveBeenCalledWith(
+            'post.createdAt',
+            'ASC',
+        );
+        expect(listQuery.take).toHaveBeenCalledWith(5);
+        expect(listQuery.skip).toHaveBeenCalledWith(5);
+        expect(listQuery.andWhere).toHaveBeenCalledWith('post.type = :type', {
+            type: ArchivePostType.JOURNAL,
+        });
+        expect(listQuery.andWhere).toHaveBeenCalledWith(
+            'post.userId = :userId',
+            {
+                userId: 'user-1',
+            },
+        );
+        expect(listQuery.andWhere).toHaveBeenCalledWith(expect.any(Object));
+    });
+
+    it('rejects unsupported list query parameters', async () => {
+        const { service } = createService();
+
+        await expect(
+            service.findAll(
+                'user-1',
+                'ALL',
+                false,
+                undefined,
+                'latest',
+                '10',
+                '1',
+            ),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        await expect(
+            service.findAll(
+                'user-1',
+                undefined,
+                false,
+                undefined,
+                'popular',
+            ),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        await expect(
+            service.findAll(
+                'user-1',
+                undefined,
+                false,
+                undefined,
+                'latest',
+                '20',
+            ),
+        ).rejects.toBeInstanceOf(BadRequestException);
+        await expect(
+            service.findAll(
+                'user-1',
+                undefined,
+                false,
+                undefined,
+                'latest',
+                '10',
+                '0',
+            ),
+        ).rejects.toBeInstanceOf(BadRequestException);
     });
 });
