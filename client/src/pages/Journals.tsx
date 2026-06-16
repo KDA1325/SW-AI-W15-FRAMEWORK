@@ -39,6 +39,15 @@ function parseJournalPage(value: string | null) {
   return Number.isInteger(parsed) && parsed >= 1 ? parsed : 1
 }
 
+function paginationWindow(currentPage: number, totalPages: number) {
+  const lastPage = Math.max(1, totalPages)
+  const start = Math.max(1, currentPage - 2)
+  const end = Math.min(lastPage, currentPage + 2)
+
+  // GJC-174: keep a small page-number window so mobile pagination stays readable.
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+}
+
 export type PostTag = {
   id: string
   name: string
@@ -294,6 +303,7 @@ function Journals() {
     setJournalLimit(DEFAULT_JOURNAL_LIMIT)
     setJournalPage(1)
   }
+  const journalPageNumbers = paginationWindow(journalPage, journalPageInfo.totalPages)
 
   return (
     <PageChrome active="journals">
@@ -414,9 +424,11 @@ function Journals() {
                     </div>
                     <span className="font-ui-button">GAME: {post.game.title}</span>
                     <span className="font-ui-button">RATING: {post.rating ?? '-'}/5</span>
-                    <p className="mt-4 font-body-md text-sm leading-relaxed">{post.content}</p>
+                    <p className="mt-4 max-h-32 overflow-hidden font-body-md text-sm leading-relaxed">
+                      {post.content}
+                    </p>
                     <Link
-                      className="absolute bottom-4 right-4 flex items-center gap-2 border-b-2 border-on-primary pb-0.5 font-ui-button text-xs uppercase tracking-widest text-on-primary transition-colors hover:bg-on-primary hover:text-primary"
+                      className="mt-auto self-end flex items-center gap-2 border-b-2 border-on-primary pb-0.5 font-ui-button text-xs uppercase tracking-widest text-on-primary transition-colors hover:bg-on-primary hover:text-primary"
                       to={`/review-detail/${post.id}`}
                     >
                       VIEW_LOG
@@ -574,7 +586,15 @@ function Journals() {
             JOURNAL_PAGE: {journalPage} / {Math.max(1, journalPageInfo.totalPages)} // TOTAL:{' '}
             {journalPageInfo.total}
           </span>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={!journalPageInfo.hasPreviousPage}
+              onClick={() => setJournalPage(1)}
+              type="button"
+            >
+              FIRST
+            </button>
             <button
               className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
               disabled={!journalPageInfo.hasPreviousPage}
@@ -583,9 +603,21 @@ function Journals() {
             >
               PREV
             </button>
-            <span className="border-2 border-[var(--gjc-primary)] bg-surface-container-low px-4 py-2 text-primary">
-              {journalPage}
-            </span>
+            {journalPageNumbers.map((pageNumber) => (
+              <button
+                aria-current={pageNumber === journalPage ? 'page' : undefined}
+                className={`border-2 border-[var(--gjc-primary)] px-4 py-2 transition-colors ${
+                  pageNumber === journalPage
+                    ? 'bg-surface-container-low text-primary'
+                    : 'bg-surface-container-lowest enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)]'
+                }`}
+                key={pageNumber}
+                onClick={() => setJournalPage(pageNumber)}
+                type="button"
+              >
+                {pageNumber}
+              </button>
+            ))}
             <button
               className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
               disabled={!journalPageInfo.hasNextPage}
@@ -593,6 +625,14 @@ function Journals() {
               type="button"
             >
               NEXT
+            </button>
+            <button
+              className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={!journalPageInfo.hasNextPage}
+              onClick={() => setJournalPage(Math.max(1, journalPageInfo.totalPages))}
+              type="button"
+            >
+              LAST
             </button>
           </div>
         </nav>
