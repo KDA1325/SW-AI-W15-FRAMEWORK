@@ -1,9 +1,17 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
-import { api } from '../api'
+import { api, getApiErrorMessage } from '../api'
 import GameSearchInput from './GameSearchInput'
+
+type ReviewDuplicateResponse = {
+  duplicate: boolean
+  gameId: string | null
+  matchedBy: 'game_id' | 'igdb' | 'title' | null
+  message: string | null
+  postId: string | null
+}
 
 function WriteReview() {
   const navigate = useNavigate()
@@ -13,13 +21,87 @@ function WriteReview() {
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
   const [message, setMessage] = useState('')
+  const [duplicateReview, setDuplicateReview] = useState<{
+    duplicate: boolean
+    message: string | null
+    status: 'idle' | 'checking' | 'ready'
+  }>({
+    duplicate: false,
+    message: null,
+    status: 'idle',
+  })
+
+  useEffect(() => {
+    const title = gameTitle.trim()
+
+    if (title.length < 2) {
+      return
+    }
+
+    let isCancelled = false
+    const timeoutId = window.setTimeout(async () => {
+      setDuplicateReview((current) => ({
+        ...current,
+        status: 'checking',
+      }))
+
+      try {
+        const params = new URLSearchParams({ gameTitle: title })
+
+        if (igdbGameId) {
+          params.set('igdbGameId', igdbGameId)
+        }
+
+        const response = await api.get<ReviewDuplicateResponse>(
+          `/posts/reviews/duplicate?${params.toString()}`,
+        )
+
+        if (isCancelled) {
+          return
+        }
+
+        setDuplicateReview({
+          duplicate: response.data.duplicate,
+          message: response.data.message,
+          status: 'ready',
+        })
+      } catch (error) {
+        if (isCancelled) {
+          return
+        }
+
+        setDuplicateReview({
+          duplicate: false,
+          message: getApiErrorMessage(error, 'DUPLICATE CHECK FAILED'),
+          status: 'ready',
+        })
+      }
+    }, 300)
+
+    return () => {
+      isCancelled = true
+      window.clearTimeout(timeoutId)
+    }
+  }, [gameTitle, igdbGameId])
+
+  const resetDuplicateReview = () => {
+    setDuplicateReview({
+      duplicate: false,
+      message: null,
+      status: 'idle',
+    })
+  }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     // 정적 HTML form의 required/value 속성을 React state 기반 제출 흐름으로 변환했습니다.
     event.preventDefault()
 
+    if (duplicateReview.duplicate) {
+      setMessage(duplicateReview.message ?? '이미 리뷰가 존재합니다.')
+      return
+    }
+
     try {
-      // TODO: 실제 POST 요청을 보내야 함
       await api.post('/posts', {
         type: 'REVIEW',
         gameTitle,
@@ -30,10 +112,13 @@ function WriteReview() {
       })
 
       navigate('/journals')
-    } catch {
-      setMessage('POST FAILED')
+    } catch (error) {
+      setMessage(getApiErrorMessage(error, 'POST FAILED'))
     }
   }
+
+  const isSubmitBlocked =
+    duplicateReview.status === 'checking' || duplicateReview.duplicate
 
   return (
     <PageChrome active="journals">
@@ -57,15 +142,27 @@ function WriteReview() {
               onChange={(value) => {
                 setGameTitle(value)
                 setIgdbGameId(null)
+                resetDuplicateReview()
               }}
               onSelect={(game) => {
                 setGameTitle(game.title)
                 setIgdbGameId(game.externalId.id)
+                resetDuplicateReview()
               }}
               placeholder="ENTER_GAME_TITLE"
               selectedIgdbGameId={igdbGameId}
               value={gameTitle}
             />
+            {duplicateReview.status === 'checking' ? (
+              <span className="font-label-caps text-[10px] uppercase text-on-surface-variant">
+                CHECKING_REVIEW_DUPLICATE
+              </span>
+            ) : null}
+            {duplicateReview.duplicate ? (
+              <span className="font-label-caps text-[10px] text-primary">
+                {duplicateReview.message ?? '이미 리뷰가 존재합니다.'}
+              </span>
+            ) : null}
           </label>
 
           <label className="col-span-12 flex flex-col gap-2 md:col-span-4">
@@ -114,10 +211,11 @@ function WriteReview() {
 
           <div className="col-span-12 flex flex-col gap-gutter pt-8 md:flex-row">
             <button
-              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-on-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface)] hover:text-[var(--gjc-primary)] md:min-w-[240px] md:flex-grow-0"
+              className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-on-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface)] hover:text-[var(--gjc-primary)] disabled:cursor-not-allowed disabled:opacity-50 md:min-w-[240px] md:flex-grow-0"
+              disabled={isSubmitBlocked}
               type="submit"
             >
-              POST
+              {duplicateReview.status === 'checking' ? 'CHECKING' : 'POST'}
             </button>
             <button
               className="flex-grow border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface)] py-6 font-ui-button text-ui-button uppercase text-[var(--gjc-primary)] transition-all duration-75 hover:bg-[var(--gjc-surface-container)] md:min-w-[240px] md:flex-grow-0"

@@ -2,6 +2,7 @@
 // Body는 요청 body를 꺼낼 때, Req/Res는 요청/응답 객체를 직접 다룰 때 사용합니다.
 import {
     BadRequestException,
+    ConflictException,
     ForbiddenException,
     Injectable,
     NotFoundException,
@@ -49,6 +50,10 @@ export default class PostsService {
         // IGDB 선택값이 있으면 자유 입력 제목보다 canonical id를 우선해 Game을 연결합니다.
         const game = await this.findOrCreateGame(dto.gameTitle, dto.igdbGameId);
 
+        if (dto.type === ArchivePostType.REVIEW) {
+            await this.assertReviewNotDuplicated(userId, game);
+        }
+
         const post = this.postRepository.create({
             userId,
             gameId: game.id,
@@ -58,7 +63,7 @@ export default class PostsService {
             rating: dto.type === ArchivePostType.REVIEW ? dto.rating! : null,
         });
 
-        const savedPost = await this.postRepository.save(post);
+        const savedPost = await this.savePostOrConflict(post, dto.type);
 
         // 저장 직후 relation(game, user)과 canEdit까지 포함한 상세 응답을 재사용합니다.
         return this.findOne(userId, savedPost.id);
@@ -169,6 +174,29 @@ export default class PostsService {
             limit: 8,
             query: normalizedQuery,
         });
+    }
+
+    async checkReviewDuplicate(
+        userId: string,
+        gameTitle?: string,
+        igdbGameId?: string,
+    ) {
+        const normalizedTitle = this.normalizeGameTitle(gameTitle ?? '');
+        const igdbId = this.normalizeIgdbGameId(igdbGameId);
+        const duplicate = await this.findDuplicateReview(userId, {
+            igdbId,
+            normalizedTitle,
+        });
+
+        return {
+            duplicate: Boolean(duplicate),
+            gameId: duplicate?.gameId ?? null,
+            matchedBy: duplicate
+                ? this.duplicateMatchedBy(duplicate, igdbId, normalizedTitle)
+                : null,
+            message: duplicate ? '이미 리뷰가 존재합니다.' : null,
+            postId: duplicate?.id ?? null,
+        };
     }
 
     // 게시글 상세를 조회합니다.
@@ -380,6 +408,125 @@ export default class PostsService {
         }
 
         return trimmed;
+    }
+
+    private async assertReviewNotDuplicated(userId: string, game: Game) {
+        const duplicate = await this.findDuplicateReview(userId, {
+            gameId: game.id,
+            igdbId: game.igdbId,
+            normalizedTitle: this.normalizeGameTitle(game.title),
+        });
+
+        if (duplicate) {
+            throw new ConflictException('이미 리뷰가 존재합니다.');
+        }
+    }
+
+    private async findDuplicateReview(
+        userId: string,
+        candidates: {
+            gameId?: string | null;
+            igdbId?: string | null;
+            normalizedTitle?: string | null;
+        },
+    ) {
+        if (
+            !candidates.gameId &&
+            !candidates.igdbId &&
+            !candidates.normalizedTitle
+        ) {
+            return null;
+        }
+
+        return this.postRepository
+            .createQueryBuilder('post')
+            .innerJoinAndSelect('post.game', 'game')
+            .where('post.userId = :userId', { userId })
+            .andWhere('post.type = :type', { type: ArchivePostType.REVIEW })
+            .andWhere(
+                new Brackets((qb) => {
+                    let hasCondition = false;
+                    const addCondition = (
+                        condition: string,
+                        params: Record<string, string>,
+                    ) => {
+                        if (hasCondition) {
+                            qb.orWhere(condition, params);
+                        } else {
+                            qb.where(condition, params);
+                            hasCondition = true;
+                        }
+                    };
+
+                    if (candidates.gameId) {
+                        addCondition('post.gameId = :gameId', {
+                            gameId: candidates.gameId,
+                        });
+                    }
+
+                    if (candidates.igdbId) {
+                        addCondition('game.igdbId = :igdbId', {
+                            igdbId: candidates.igdbId,
+                        });
+                    }
+
+                    if (candidates.normalizedTitle) {
+                        addCondition(
+                            "REGEXP_REPLACE(LOWER(TRIM(game.title)), '\\s+', ' ', 'g') = :normalizedTitle",
+                            { normalizedTitle: candidates.normalizedTitle },
+                        );
+                    }
+                }),
+            )
+            .getOne();
+    }
+
+    private duplicateMatchedBy(
+        duplicate: ArchivePost,
+        igdbId: string | null,
+        normalizedTitle: string | null,
+    ) {
+        if (igdbId && duplicate.game?.igdbId === igdbId) {
+            return 'igdb';
+        }
+
+        if (
+            normalizedTitle &&
+            this.normalizeGameTitle(duplicate.game?.title ?? '') ===
+                normalizedTitle
+        ) {
+            return 'title';
+        }
+
+        return 'game_id';
+    }
+
+    private normalizeGameTitle(gameTitle: string) {
+        return gameTitle.trim().replace(/\s+/g, ' ').toLowerCase();
+    }
+
+    private async savePostOrConflict(post: ArchivePost, type: ArchivePostType) {
+        try {
+            return await this.postRepository.save(post);
+        } catch (error) {
+            if (
+                type === ArchivePostType.REVIEW &&
+                this.isUniqueViolation(error)
+            ) {
+                throw new ConflictException('이미 리뷰가 존재합니다.');
+            }
+
+            throw error;
+        }
+    }
+
+    private isUniqueViolation(error: unknown) {
+        return (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            (error as { code?: unknown }).code === '23505'
+        );
     }
 
     // id로 게시글을 찾고, 없으면 404 예외를 던집니다.

@@ -2,6 +2,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -21,6 +22,10 @@ export enum ArchivePostType {
 
 // ArchivePost는 리뷰와 저널을 합친 게시글 테이블입니다.
 // rating은 REVIEW일 때만 사용하고 JOURNAL일 때는 null로 둡니다.
+@Index('IDX_archive_post_unique_review_per_user_game', ['userId', 'gameId'], {
+  unique: true,
+  where: `"type" = 'REVIEW'`,
+})
 @Entity('ArchivePost')
 export class ArchivePost {
   // 게시글 기본키입니다.

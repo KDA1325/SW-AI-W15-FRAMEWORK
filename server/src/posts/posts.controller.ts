@@ -82,6 +82,19 @@ export class PostsController {
         return this.postsService.searchGames(q);
     }
 
+    @Get('reviews/duplicate')
+    checkReviewDuplicate(
+        @Req() req: AuthedRequest,
+        @Query('gameTitle') gameTitle?: string,
+        @Query('igdbGameId') igdbGameId?: string,
+    ) {
+        return this.postsService.checkReviewDuplicate(
+            req.user.userId,
+            gameTitle,
+            igdbGameId,
+        );
+    }
+
     // GET /posts/:id
     // Returns one post with canEdit calculated for the current user.
     @Get(':id')

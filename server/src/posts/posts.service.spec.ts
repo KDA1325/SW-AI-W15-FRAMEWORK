@@ -1,11 +1,18 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { ArchivePostType } from './entities/archivePost.entity';
 import PostsService from './posts.service';
 
 describe('PostsService IGDB game selection', () => {
     function createService() {
+        const duplicateQuery = {
+            andWhere: jest.fn().mockReturnThis(),
+            getOne: jest.fn().mockResolvedValue(null),
+            innerJoinAndSelect: jest.fn().mockReturnThis(),
+            where: jest.fn().mockReturnThis(),
+        };
         const postRepository = {
             create: jest.fn((value) => value),
+            createQueryBuilder: jest.fn(() => duplicateQuery),
             findOne: jest.fn().mockResolvedValue({
                 canEdit: true,
                 game: { id: 'game-1', igdbId: '114795', title: 'Hades' },
@@ -44,6 +51,7 @@ describe('PostsService IGDB game selection', () => {
             gameRepository,
             igdbService,
             postRepository,
+            duplicateQuery,
             service,
         };
     }
@@ -88,6 +96,47 @@ describe('PostsService IGDB game selection', () => {
                 type: ArchivePostType.REVIEW,
             }),
         ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('blocks duplicate reviews for the same user and game', async () => {
+        const { duplicateQuery, postRepository, service } = createService();
+
+        duplicateQuery.getOne.mockResolvedValueOnce({
+            game: { id: 'game-1', igdbId: '114795', title: 'Hades' },
+            gameId: 'game-1',
+            id: 'existing-post',
+        });
+
+        await expect(
+            service.create('user-1', {
+                content: 'Second review should be rejected.',
+                gameTitle: 'Hades',
+                igdbGameId: '114795',
+                rating: 4,
+                title: 'Duplicate review',
+                type: ArchivePostType.REVIEW,
+            }),
+        ).rejects.toBeInstanceOf(ConflictException);
+        expect(postRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('reports duplicate review status for inline form blocking', async () => {
+        const { duplicateQuery, service } = createService();
+
+        duplicateQuery.getOne.mockResolvedValueOnce({
+            game: { id: 'game-1', igdbId: '114795', title: 'Hades' },
+            gameId: 'game-1',
+            id: 'existing-post',
+        });
+
+        await expect(
+            service.checkReviewDuplicate('user-1', '  Hades  ', '114795'),
+        ).resolves.toMatchObject({
+            duplicate: true,
+            matchedBy: 'igdb',
+            message: '이미 리뷰가 존재합니다.',
+            postId: 'existing-post',
+        });
     });
 
     it('debounces server-side IGDB calls by ignoring too-short queries', async () => {
