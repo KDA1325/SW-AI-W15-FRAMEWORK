@@ -179,6 +179,15 @@ Recorded result summary:
 
 `mcpResults` is `0` in this local smoke test because IGDB credentials are not configured. The MCP tool is still called, reports a structured missing-credentials result, and the Agent returns local fallback recommendations.
 
+Optional live IGDB MCP smoke test after configuring `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`:
+
+```bash
+cd server
+npm run smoke:mcp:igdb
+```
+
+This calls the real `POST /mcp` JSON-RPC endpoint and fails unless IGDB returns at least one game.
+
 ## Known Issues
 
 - IGDB live metadata requires `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`. Without them, recommendations still render through local fallback data.

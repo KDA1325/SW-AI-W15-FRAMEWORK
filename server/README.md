@@ -353,6 +353,23 @@ When `IGDB_CLIENT_ID` or `IGDB_CLIENT_SECRET` is missing, the tool returns `isEr
 }
 ```
 
+### Live IGDB Smoke Test
+
+After adding `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` to `server/.env`, start the NestJS server and run:
+
+```bash
+cd server
+npm run smoke:mcp:igdb
+```
+
+Optional overrides:
+
+```bash
+MCP_SMOKE_BASE_URL=http://127.0.0.1:3000 MCP_SMOKE_QUERY=CrossCode MCP_SMOKE_LIMIT=3 npm run smoke:mcp:igdb
+```
+
+The script calls `POST /mcp` with a JSON-RPC `tools/call search_games` request and fails if `structuredContent.games` is empty. It never prints API keys.
+
 ## AI Recommendation Agent Loop
 
 GJC-88 implements the current MVP recommendation loop inside NestJS:
