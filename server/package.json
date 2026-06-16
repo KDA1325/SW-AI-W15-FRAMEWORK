@@ -13,6 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "smoke:mcp:igdb": "node scripts/smoke-mcp-igdb.js",
+    "smoke:steam": "node scripts/smoke-steam-profile.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",

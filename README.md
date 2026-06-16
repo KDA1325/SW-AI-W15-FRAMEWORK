@@ -111,6 +111,15 @@ Optional Steam profile check:
 4. With `STEAM_WEB_API_KEY` configured, confirm the Steam avatar, persona name, and profile link render.
 5. Without `STEAM_WEB_API_KEY`, confirm the panel shows `missing_credentials` instead of breaking the page.
 
+Live Steam API smoke test:
+
+```bash
+cd server
+npm run smoke:steam
+```
+
+Recorded live result on `2026-06-16`: Steam profile `76561197960435530` returned persona name `Robin` through the authenticated `/auth/steam/link` and `/auth/steam/profile` flow.
+
 ## AI Requirement Checklist
 
 The detailed RAG technology and data-pipeline decision is documented in [`docs/GJC-78_RAG_TECH_DECISION.md`](docs/GJC-78_RAG_TECH_DECISION.md).

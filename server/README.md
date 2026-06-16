@@ -147,6 +147,28 @@ When the key is missing, the API returns `connected: false`, `errorCode: "missin
 
 This is an MVP profile-link feature. It displays and stores a Steam profile identifier, but it does not prove account ownership. Use Steam OpenID in a later auth flow if the app must verify that the logged-in user controls that Steam account.
 
+### Live Steam Profile Smoke Test
+
+After adding `STEAM_WEB_API_KEY` to `server/.env`, run:
+
+```bash
+cd server
+npm run smoke:steam
+```
+
+By default, the script starts a temporary NestJS app, logs in as the demo user, links a public Steam profile through `POST /auth/steam/link`, verifies `GET /auth/steam/profile`, and then restores the demo user's previous Steam link. Override the target profile with `STEAM_SMOKE_PROFILE=<steamid-or-url>`.
+
+Recorded live Steam result on `2026-06-16`:
+
+```json
+{
+  "ok": true,
+  "mode": "temporary-nest-app",
+  "steamId": "76561197960435530",
+  "personaName": "Robin"
+}
+```
+
 ## Start PostgreSQL
 
 Run this command from the repository root:
