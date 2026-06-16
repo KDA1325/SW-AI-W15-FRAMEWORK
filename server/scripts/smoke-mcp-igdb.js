@@ -6,9 +6,9 @@ const dotenv = require('dotenv');
 
 dotenv.config({ path: path.resolve(__dirname, '..', '.env'), quiet: true });
 
-const baseUrl = trimTrailingSlash(
-  process.env.MCP_SMOKE_BASE_URL ?? 'http://127.0.0.1:3000',
-);
+const configuredBaseUrl = process.env.MCP_SMOKE_BASE_URL
+  ? trimTrailingSlash(process.env.MCP_SMOKE_BASE_URL)
+  : null;
 const query = process.env.MCP_SMOKE_QUERY ?? 'CrossCode';
 const limit = normalizeLimit(process.env.MCP_SMOKE_LIMIT);
 
@@ -38,6 +38,11 @@ async function main() {
     process.exitCode = 1;
     return;
   }
+
+  const temporaryServer = configuredBaseUrl
+    ? null
+    : await startTemporaryNestServer();
+  const baseUrl = configuredBaseUrl ?? temporaryServer.baseUrl;
 
   // This intentionally calls the public MCP endpoint instead of IgdbService directly,
   // so it verifies JSON-RPC routing, tool execution, and IGDB response normalization together.
@@ -82,6 +87,7 @@ async function main() {
       JSON.stringify(
         {
           ok: true,
+          mode: configuredBaseUrl ? 'external-server' : 'temporary-nest-app',
           provider: structuredContent.provider,
           query,
           resultCount: games.length,
@@ -116,7 +122,39 @@ async function main() {
     }
 
     process.exitCode = 1;
+  } finally {
+    if (temporaryServer) {
+      await temporaryServer.close();
+    }
   }
+}
+
+async function startTemporaryNestServer() {
+  require('reflect-metadata');
+  require('ts-node/register');
+  require('tsconfig-paths/register');
+
+  const { NestFactory } = require('@nestjs/core');
+  const { AppModule } = require('../src/app.module');
+
+  // Port 0 asks the OS for an unused local port, keeping the smoke test independent
+  // from a manually running dev server on :3000.
+  const app = await NestFactory.create(AppModule, {
+    logger: ['error', 'warn'],
+  });
+  await app.listen(0, '127.0.0.1');
+
+  const address = app.getHttpServer().address();
+
+  if (!address || typeof address === 'string') {
+    await app.close();
+    throw new Error('Temporary Nest app did not expose a TCP port.');
+  }
+
+  return {
+    baseUrl: `http://127.0.0.1:${address.port}`,
+    close: () => app.close(),
+  };
 }
 
 void main();

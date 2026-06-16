@@ -186,7 +186,19 @@ cd server
 npm run smoke:mcp:igdb
 ```
 
-This calls the real `POST /mcp` JSON-RPC endpoint and fails unless IGDB returns at least one game.
+This starts a temporary NestJS app, calls the real `POST /mcp` JSON-RPC endpoint, and fails unless IGDB returns at least one game. To test an already-running server, set `MCP_SMOKE_BASE_URL`.
+
+Recorded live IGDB MCP result on `2026-06-16`:
+
+```json
+{
+  "ok": true,
+  "provider": "igdb",
+  "query": "CrossCode",
+  "resultCount": 2,
+  "first": "CrossCode"
+}
+```
 
 ## Known Issues
 

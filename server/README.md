@@ -355,12 +355,14 @@ When `IGDB_CLIENT_ID` or `IGDB_CLIENT_SECRET` is missing, the tool returns `isEr
 
 ### Live IGDB Smoke Test
 
-After adding `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` to `server/.env`, start the NestJS server and run:
+After adding `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET` to `server/.env`, run:
 
 ```bash
 cd server
 npm run smoke:mcp:igdb
 ```
+
+By default, the script starts a temporary NestJS app on a random local port, calls the real `POST /mcp` JSON-RPC route, and then closes the app. To target a server that is already running, pass `MCP_SMOKE_BASE_URL`.
 
 Optional overrides:
 
@@ -369,6 +371,19 @@ MCP_SMOKE_BASE_URL=http://127.0.0.1:3000 MCP_SMOKE_QUERY=CrossCode MCP_SMOKE_LIM
 ```
 
 The script calls `POST /mcp` with a JSON-RPC `tools/call search_games` request and fails if `structuredContent.games` is empty. It never prints API keys.
+
+Recorded live IGDB MCP result on `2026-06-16`:
+
+```json
+{
+  "ok": true,
+  "mode": "temporary-nest-app",
+  "provider": "igdb",
+  "query": "CrossCode",
+  "resultCount": 2,
+  "firstGames": ["CrossCode", "CrossCode: A New Home"]
+}
+```
 
 ## AI Recommendation Agent Loop
 
