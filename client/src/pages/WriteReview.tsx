@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
 import { api } from '../api'
+import GameSearchInput from './GameSearchInput'
 
 function WriteReview() {
   const navigate = useNavigate()
   const [gameTitle, setGameTitle] = useState('')
+  const [igdbGameId, setIgdbGameId] = useState<string | null>(null)
   const [reviewTitle, setReviewTitle] = useState('')
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
@@ -21,11 +23,12 @@ function WriteReview() {
       await api.post('/posts', {
         type: 'REVIEW',
         gameTitle,
+        igdbGameId: igdbGameId ?? undefined,
         title: reviewTitle,
         content: review,
         rating: parseFloat(rating),
       })
-      
+
       navigate('/journals')
     } catch {
       setMessage('POST FAILED')
@@ -36,20 +39,31 @@ function WriteReview() {
     <PageChrome active="journals">
       <main className="write-review-page flex-grow w-full max-w-[1200px] mx-auto px-8 py-20 flex flex-col gap-[80px]">
         <div className="mb-16">
-          <h1 className="font-headline-xl text-headline-xl uppercase">#REVIEW</h1>
+          <h1 className="font-headline-xl text-headline-xl uppercase">
+            #REVIEW
+          </h1>
           <div className="w-24 h-2 bg-[var(--gjc-primary)] mt-4"></div>
         </div>
-        <form className="grid grid-cols-12 gap-x-gutter gap-y-10" onSubmit={handleSubmit}>
+        <form
+          className="grid grid-cols-12 gap-x-gutter gap-y-10"
+          onSubmit={handleSubmit}
+        >
           <label className="col-span-12 flex flex-col gap-2 md:col-span-8">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
               GAME_TITLE *
             </span>
-            <input
-              className="w-full border-2 border-primary bg-surface p-4 font-body-lg text-body-lg"
-              onChange={(event) => setGameTitle(event.target.value)}
+            <GameSearchInput
+              inputClassName="w-full border-2 border-primary bg-surface p-4 font-body-lg text-body-lg"
+              onChange={(value) => {
+                setGameTitle(value)
+                setIgdbGameId(null)
+              }}
+              onSelect={(game) => {
+                setGameTitle(game.title)
+                setIgdbGameId(game.externalId.id)
+              }}
               placeholder="ENTER_GAME_TITLE"
-              required
-              type="text"
+              selectedIgdbGameId={igdbGameId}
               value={gameTitle}
             />
           </label>
@@ -115,7 +129,9 @@ function WriteReview() {
           </div>
         </form>
 
-        {message ? <p className="mt-8 font-label-caps text-primary">{message}</p> : null}
+        {message ? (
+          <p className="mt-8 font-label-caps text-primary">{message}</p>
+        ) : null}
       </main>
     </PageChrome>
   )

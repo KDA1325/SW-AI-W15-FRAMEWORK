@@ -14,16 +14,14 @@ import CreateCommentDto from './dto/create-comment.dto';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
 import UpdateCommentDto from './dto/update-comment.dto';
-import {
-    ArchivePost,
-    ArchivePostType,
-} from './entities/archivePost.entity';
+import { ArchivePost, ArchivePostType } from './entities/archivePost.entity';
 import { Comment } from './entities/comment.entity';
 import { Game } from '../auth/entities/game.entity';
+import { IgdbService } from '../ai/igdb.service';
 
 type PostListSort = 'latest' | 'oldest' | 'rating';
 
-// 요청 DTO를 DB 엔티티로 바꾸고 권한 규칙을 보장하기 
+// 요청 DTO를 DB 엔티티로 바꾸고 권한 규칙을 보장하기
 // PostsService는 컨트롤러에서 받은 DTO를 DB 엔티티로 바꾸고,
 // 게시글 생성/조회/수정/삭제에 필요한 비즈니스 규칙을 보장합니다.
 @Injectable()
@@ -37,7 +35,9 @@ export default class PostsService {
 
         @InjectRepository(Game)
         private gameRepository: Repository<Game>,
-    ) { }
+
+        private igdbService: IgdbService,
+    ) {}
 
     // 새 저널/리뷰를 저장합니다.
     // 작성자는 요청 body가 아니라 JWT에서 꺼낸 userId로 고정해서 위조를 막습니다.
@@ -46,7 +46,8 @@ export default class PostsService {
         this.validatePostPayload(dto.type, dto.rating);
 
         // 클라이언트는 gameTitle만 보내므로, 서버에서 Game 레코드를 찾아 연결합니다.
-        const game = await this.findOrCreateGame(dto.gameTitle);
+        // IGDB 선택값이 있으면 자유 입력 제목보다 canonical id를 우선해 Game을 연결합니다.
+        const game = await this.findOrCreateGame(dto.gameTitle, dto.igdbGameId);
 
         const post = this.postRepository.create({
             userId,
@@ -76,7 +77,7 @@ export default class PostsService {
     ) {
         const keyword = query?.trim();
         const normalizedSort = this.parseListSort(sort);
-        // 기본값 설정? 
+        // 기본값 설정?
         const normalizedLimit = this.parseListLimit(limit);
         const normalizedPage = this.parsePositiveNumber(page, 1, 'page');
         // 목록 조회는 조건이 여러 개 조합됩니다.
@@ -95,11 +96,11 @@ export default class PostsService {
         if (normalizedSort === 'oldest') {
             postsQuery.orderBy('post.createdAt', 'ASC');
         }
-        // 평점 순 
+        // 평점 순
         else if (normalizedSort === 'rating') {
             postsQuery.orderBy('post.rating', 'DESC', 'NULLS LAST');
         }
-        // 최신 순  
+        // 최신 순
         else {
             postsQuery.orderBy('post.createdAt', 'DESC');
         }
@@ -129,9 +130,15 @@ export default class PostsService {
             // 그래서 사용자가 게임 제목 일부나 글 본문 키워드를 입력해도 결과를 찾을 수 있습니다.
             postsQuery.andWhere(
                 new Brackets((qb) => {
-                    qb.where('post.title ILIKE :keyword', { keyword: `%${keyword}%` })
-                        .orWhere('post.content ILIKE :keyword', { keyword: `%${keyword}%` })
-                        .orWhere('game.title ILIKE :keyword', { keyword: `%${keyword}%` });
+                    qb.where('post.title ILIKE :keyword', {
+                        keyword: `%${keyword}%`,
+                    })
+                        .orWhere('post.content ILIKE :keyword', {
+                            keyword: `%${keyword}%`,
+                        })
+                        .orWhere('game.title ILIKE :keyword', {
+                            keyword: `%${keyword}%`,
+                        });
                 }),
             );
         }
@@ -144,6 +151,24 @@ export default class PostsService {
             ...post,
             canEdit: post.userId === userId,
         }));
+    }
+
+    async searchGames(query?: string) {
+        const normalizedQuery = query?.trim() ?? '';
+
+        if (normalizedQuery.length < 2) {
+            return {
+                error: null,
+                errorCode: null,
+                games: [],
+                provider: 'igdb' as const,
+            };
+        }
+
+        return this.igdbService.searchGames({
+            limit: 8,
+            query: normalizedQuery,
+        });
     }
 
     // 게시글 상세를 조회합니다.
@@ -202,7 +227,9 @@ export default class PostsService {
             });
 
             if (!parentComment) {
-                throw new BadRequestException('대댓글을 달 원본 댓글을 찾을 수 없습니다.');
+                throw new BadRequestException(
+                    '대댓글을 달 원본 댓글을 찾을 수 없습니다.',
+                );
             }
         }
 
@@ -226,7 +253,10 @@ export default class PostsService {
 
         // 게임 제목이 바뀌면 새 제목에 해당하는 Game을 찾아 다시 연결합니다.
         if (dto.gameTitle) {
-            const game = await this.findOrCreateGame(dto.gameTitle);
+            const game = await this.findOrCreateGame(
+                dto.gameTitle,
+                dto.igdbGameId,
+            );
             post.gameId = game.id;
         }
 
@@ -240,7 +270,9 @@ export default class PostsService {
 
         if (dto.rating !== undefined) {
             if (post.type !== ArchivePostType.REVIEW) {
-                throw new BadRequestException('저널에는 평점을 저장할 수 없습니다.');
+                throw new BadRequestException(
+                    '저널에는 평점을 저장할 수 없습니다.',
+                );
             }
 
             post.rating = dto.rating;
@@ -250,14 +282,19 @@ export default class PostsService {
 
         return this.findOne(userId, id);
     }
-    
+
     // 댓글을 수정합니다.
     // postId와 commentId로 댓글을 찾고, 댓글 작성자만 내용을 바꿀 수 있게 합니다.
     // 수정 후에는 게시글 상세를 다시 반환해 프론트가 댓글 목록을 갱신할 수 있게 합니다.
-    async updateComment(userId: string, postId: string, commentId: string, dto: UpdateCommentDto) {
+    async updateComment(
+        userId: string,
+        postId: string,
+        commentId: string,
+        dto: UpdateCommentDto,
+    ) {
         const comment = await this.findCommentOrThrow(postId, commentId);
         this.assertCommentOwner(comment, userId);
-        
+
         if (dto.content !== undefined) {
             comment.content = dto.content;
         }
@@ -292,22 +329,57 @@ export default class PostsService {
 
     // gameTitle을 기준으로 Game을 찾고, 아직 없으면 새로 만듭니다.
     // 게시글은 gameId를 필요로 하므로 생성 API에서 공통으로 사용하는 helper입니다.
-    private async findOrCreateGame(gameTitle: string) {
+    private async findOrCreateGame(gameTitle: string, igdbGameId?: string) {
         const title = gameTitle.trim();
+        const igdbId = this.normalizeIgdbGameId(igdbGameId);
 
-        let game = await this.gameRepository.findOne({
-            where: { title },
-        });
+        if (!title) {
+            throw new BadRequestException('gameTitle is required.');
+        }
+
+        let game = igdbId
+            ? await this.gameRepository.findOne({
+                  where: { igdbId },
+              })
+            : null;
+
+        if (!game) {
+            game = await this.gameRepository.findOne({
+                where: { title },
+            });
+        }
 
         if (!game) {
             game = this.gameRepository.create({
+                igdbId,
                 title,
             });
+
+            game = await this.gameRepository.save(game);
+        } else if ((igdbId && game.igdbId !== igdbId) || game.title !== title) {
+            game.igdbId = igdbId ?? game.igdbId;
+            game.title = title;
 
             game = await this.gameRepository.save(game);
         }
 
         return game;
+    }
+
+    private normalizeIgdbGameId(igdbGameId?: string) {
+        const trimmed = igdbGameId?.trim();
+
+        if (!trimmed) {
+            return null;
+        }
+
+        if (!/^\d+$/.test(trimmed)) {
+            throw new BadRequestException(
+                'igdbGameId must be a numeric IGDB id.',
+            );
+        }
+
+        return trimmed;
     }
 
     // id로 게시글을 찾고, 없으면 404 예외를 던집니다.
@@ -345,7 +417,9 @@ export default class PostsService {
     // 다르면 403으로 막아 "본인 글만 수정/삭제" 완료 기준을 만족시킵니다.
     private assertOwner(post: ArchivePost, userId: string) {
         if (post.userId !== userId) {
-            throw new ForbiddenException('본인 글만 수정하거나 삭제할 수 있습니다.');
+            throw new ForbiddenException(
+                '본인 글만 수정하거나 삭제할 수 있습니다.',
+            );
         }
     }
 
@@ -353,7 +427,9 @@ export default class PostsService {
     // 다르면 403으로 막아 "본인 댓글만 수정/삭제" 완료 기준을 만족시킵니다.
     private assertCommentOwner(comment: Comment, userId: string) {
         if (comment.userId !== userId) {
-            throw new ForbiddenException('본인 댓글만 수정하거나 삭제할 수 있습니다.');
+            throw new ForbiddenException(
+                '본인 댓글만 수정하거나 삭제할 수 있습니다.',
+            );
         }
     }
 
@@ -361,16 +437,22 @@ export default class PostsService {
         if (!sort) {
             return 'latest';
         }
-        
-        // sort 종류 검증 
+
+        // sort 종류 검증
         if (sort === 'latest' || sort === 'oldest' || sort === 'rating') {
             return sort;
         }
 
-        throw new BadRequestException('sort는 latest, oldest, rating 중 하나여야 합니다.');
+        throw new BadRequestException(
+            'sort는 latest, oldest, rating 중 하나여야 합니다.',
+        );
     }
 
-    private parsePositiveNumber(value: string | undefined, defaultValue: number, field: string) {
+    private parsePositiveNumber(
+        value: string | undefined,
+        defaultValue: number,
+        field: string,
+    ) {
         if (!value) {
             return defaultValue;
         }
@@ -378,13 +460,15 @@ export default class PostsService {
         const parsed = Number(value);
 
         if (!Number.isInteger(parsed) || parsed < 1) {
-            throw new BadRequestException(`${field}는 1 이상의 정수여야 합니다.`);
+            throw new BadRequestException(
+                `${field}는 1 이상의 정수여야 합니다.`,
+            );
         }
 
         return parsed;
     }
 
-    // 리스트 보기 개수 5, 10, 15개 제한 
+    // 리스트 보기 개수 5, 10, 15개 제한
     private parseListLimit(limit?: string) {
         if (!limit) {
             return 10;
@@ -407,8 +491,9 @@ export default class PostsService {
         }
 
         if (type === ArchivePostType.JOURNAL && rating !== undefined) {
-            throw new BadRequestException('저널에는 평점을 저장할 수 없습니다.');
+            throw new BadRequestException(
+                '저널에는 평점을 저장할 수 없습니다.',
+            );
         }
     }
-
 }

@@ -21,6 +21,7 @@ type TwitchTokenResponse = {
 };
 
 type IgdbGameRow = {
+  alternative_names?: Array<{ name?: string }>;
   cover?: {
     image_id?: string;
     url?: string;
@@ -46,6 +47,7 @@ export type SearchGamesResult = {
   error: string | null;
   errorCode: ExternalApiErrorCode | null;
   games: Array<{
+    aliases: string[];
     externalId: {
       id: string;
       provider: 'igdb';
@@ -149,7 +151,7 @@ export class IgdbService {
 
     // IGDB uses APICalypse syntax: a plain-text query body with fields/search/where/limit clauses.
     return [
-      'fields name,slug,summary,first_release_date,total_rating,cover.image_id,genres.name,platforms.name,themes.name;',
+      'fields name,slug,summary,first_release_date,total_rating,alternative_names.name,cover.image_id,genres.name,platforms.name,themes.name;',
       `search "${search}";`,
       'where version_parent = null;',
       `limit ${limit};`,
@@ -172,6 +174,7 @@ export class IgdbService {
     const slug = game.slug ?? this.slugify(game.name);
 
     return {
+      aliases: this.names(game.alternative_names).slice(0, 3),
       externalId: {
         id: String(game.id),
         provider: 'igdb',
