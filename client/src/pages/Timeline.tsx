@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import PageChrome from './PageChrome'
-import ProfileAvatar from './ProfileAvatar'
+import ProfileAvatar, {
+  PROFILE_AVATAR_GRAYSCALE_HOVER_IMAGE_CLASS,
+} from './ProfileAvatar'
 import type { JournalPost, PostListResponse } from './Journals'
 
 type TimelineFilter = 'ALL' | 'REVIEW' | 'JOURNAL'
@@ -221,6 +223,7 @@ function Timeline() {
                       <ProfileAvatar
                         alt={`${post.user.nickname} profile`}
                         className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant"
+                        imageClassName={PROFILE_AVATAR_GRAYSCALE_HOVER_IMAGE_CLASS}
                         profileImageUrl={post.user.profileImageUrl}
                       />
                       <div className="min-w-0">

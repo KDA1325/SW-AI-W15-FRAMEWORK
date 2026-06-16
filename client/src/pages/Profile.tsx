@@ -292,7 +292,7 @@ function Profile() {
           <div className="col-span-1 md:col-span-3 aspect-square border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-dim)] relative group overflow-hidden flex items-center justify-center p-2">
             <img
               alt="Pixelated retro monitor portrait"
-              className="w-full h-full object-cover filter grayscale contrast-125 mix-blend-multiply opacity-80"
+              className="w-full h-full object-cover filter contrast-125 mix-blend-multiply opacity-80"
               src={resolveProfileImageUrl(user?.profileImageUrl)}
             />
             <div className="absolute inset-0 border-4 border-[var(--gjc-primary)] m-2 pointer-events-none hidden group-hover:block" />
@@ -352,7 +352,7 @@ function Profile() {
             {steamProfile ? (
               <img
                 alt={`${steamProfile.personaName} Steam avatar`}
-                className="h-24 w-24 border-2 border-[var(--gjc-primary)] object-cover grayscale contrast-125"
+                className="h-24 w-24 border-2 border-[var(--gjc-primary)] object-cover contrast-125"
                 src={steamProfile.avatarUrl}
               />
             ) : (

@@ -7,7 +7,9 @@ import DeleteJournalModal from './DeleteJournalModal'
 import EditJournalModal from './EditJournalModal'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
-import ProfileAvatar from './ProfileAvatar'
+import ProfileAvatar, {
+  PROFILE_AVATAR_COLOR_IMAGE_CLASS,
+} from './ProfileAvatar'
 import '../styles/JournalDetail.css'
 
 type DetailComment = {
@@ -368,6 +370,7 @@ function JournalDetail() {
                     <ProfileAvatar
                       alt={`${author} profile`}
                       className="flex h-10 w-10 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant"
+                      imageClassName={PROFILE_AVATAR_COLOR_IMAGE_CLASS}
                       profileImageUrl={authorProfileImageUrl}
                     />
                     <span className="font-ui-button text-ui-button group-hover:underline">{author}</span>
@@ -458,6 +461,7 @@ function JournalDetail() {
                       <ProfileAvatar
                         alt={`${currentUserName} profile`}
                         className="flex h-6 w-6 items-center justify-center overflow-hidden border border-primary bg-surface-variant"
+                        imageClassName={PROFILE_AVATAR_COLOR_IMAGE_CLASS}
                         profileImageUrl={currentUserProfileImageUrl}
                       />
                       <span className="font-label-caps text-label-caps uppercase">USER_ID: {currentUserName}</span>
@@ -488,6 +492,7 @@ function JournalDetail() {
                               <ProfileAvatar
                                 alt={`${entry.user.nickname} profile`}
                                 className="flex h-6 w-6 items-center justify-center overflow-hidden border border-primary bg-surface-variant"
+                                imageClassName={PROFILE_AVATAR_COLOR_IMAGE_CLASS}
                                 profileImageUrl={entry.user.profileImageUrl}
                               />
                               <span className="font-label-caps text-label-caps font-bold">
@@ -525,6 +530,7 @@ function JournalDetail() {
                                         <ProfileAvatar
                                           alt={`${reply.user.nickname} profile`}
                                           className="flex h-6 w-6 items-center justify-center overflow-hidden border border-primary bg-surface-variant"
+                                          imageClassName={PROFILE_AVATAR_COLOR_IMAGE_CLASS}
                                           profileImageUrl={reply.user.profileImageUrl}
                                         />
                                         <span className="font-label-caps text-label-caps font-bold">

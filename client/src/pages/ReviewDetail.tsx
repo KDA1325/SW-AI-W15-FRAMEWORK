@@ -5,7 +5,9 @@ import DeleteReviewModal from './DeleteReviewModal'
 import EditReviewModal from './EditReviewModal'
 import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
-import ProfileAvatar from './ProfileAvatar'
+import ProfileAvatar, {
+  PROFILE_AVATAR_COLOR_IMAGE_CLASS,
+} from './ProfileAvatar'
 import '../styles/JournalDetail.css'
 
 type ReviewDetailPost = JournalPost & {
@@ -158,6 +160,7 @@ function ReviewDetail() {
                     <ProfileAvatar
                       alt={`${author} profile`}
                       className="flex h-10 w-10 items-center justify-center overflow-hidden border-2 border-primary bg-surface-variant"
+                      imageClassName={PROFILE_AVATAR_COLOR_IMAGE_CLASS}
                       profileImageUrl={authorProfileImageUrl}
                     />
                     <span className="font-ui-button text-ui-button group-hover:underline">{author}</span>
