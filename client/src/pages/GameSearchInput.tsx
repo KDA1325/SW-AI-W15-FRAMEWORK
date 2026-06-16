@@ -140,10 +140,10 @@ function GameSearchInput({
       </div>
 
       {isOpen && (games.length > 0 || status === 'loading' || message) ? (
-        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 border-2 border-primary bg-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div className="absolute left-0 right-0 top-[calc(100%+4px)] z-30 border-2 border-primary bg-[var(--gjc-surface)] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
           {games.map((game) => (
             <button
-              className="grid w-full grid-cols-[56px_1fr] gap-3 border-b-2 border-primary p-3 text-left transition-colors last:border-b-0 hover:bg-primary hover:text-on-primary"
+              className="grid w-full grid-cols-[56px_1fr] gap-3 border-b-2 border-primary p-3 text-left transition-colors last:border-b-0 hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)]"
               key={game.externalId.id}
               onClick={() => selectGame(game)}
               type="button"
@@ -151,7 +151,7 @@ function GameSearchInput({
               {game.imageUrl ? (
                 <img
                   alt={`${game.title} cover`}
-                  className="h-16 w-14 border-2 border-primary object-cover grayscale contrast-125"
+                  className="h-16 w-14 border-2 border-primary object-cover contrast-125"
                   src={game.imageUrl}
                 />
               ) : (

@@ -81,6 +81,10 @@ function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR')
 }
 
+function gameInitials(title: string) {
+  return title.slice(0, 2).toUpperCase()
+}
+
 function Journals() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialSearchQuery = searchParams.get('q')?.trim() ?? ''
@@ -337,7 +341,17 @@ function Journals() {
             {reviews.map((post) => (
               <article className="group relative w-[320px] flex-shrink-0 cursor-crosshair" key={post.id}>
                 <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden border-2 border-[var(--gjc-primary)] bg-surface-container-high grayscale transition-all duration-300 hover:grayscale-0">
-                  <span className="font-headline-xl text-5xl">{post.title.slice(0, 2)}</span>
+                  {post.game.imageUrl ? (
+                    <img
+                      alt={`${post.game.title} cover`}
+                      className="h-full w-full object-cover contrast-125"
+                      src={post.game.imageUrl}
+                    />
+                  ) : (
+                    <span className="font-headline-xl text-5xl">
+                      {gameInitials(post.game.title)}
+                    </span>
+                  )}
                   <div className="absolute inset-0 flex flex-col bg-[var(--gjc-primary)] p-6 text-[var(--gjc-on-primary)] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                     {post.canEdit ? (
                       <div className="absolute right-4 top-4 z-10 flex gap-2">
@@ -436,8 +450,16 @@ function Journals() {
             ) : null}
             {journals.map((post) => (
               <article className="flex flex-col overflow-hidden border-2 border-[var(--gjc-primary)] md:flex-row" key={post.id}>
-                <div className="flex aspect-square w-full flex-shrink-0 items-center justify-center border-b-2 border-primary bg-surface-dim font-headline-lg text-4xl md:w-48 md:border-b-0 md:border-r-2">
-                  {post.game.title.slice(0, 2)}
+                <div className="flex aspect-square w-full flex-shrink-0 items-center justify-center overflow-hidden border-b-2 border-primary bg-surface-dim font-headline-lg text-4xl md:w-48 md:border-b-0 md:border-r-2">
+                  {post.game.imageUrl ? (
+                    <img
+                      alt={`${post.game.title} cover`}
+                      className="h-full w-full object-cover contrast-125"
+                      src={post.game.imageUrl}
+                    />
+                  ) : (
+                    gameInitials(post.game.title)
+                  )}
                 </div>
                 <div className="flex flex-grow flex-col bg-surface-container-lowest p-6">
                   <div className="mb-4 flex items-start justify-between">
@@ -454,7 +476,7 @@ function Journals() {
                           EDIT
                         </button>
                         <button
-                          className="border border-[var(--gjc-primary)] bg-[var(--gjc-on-error-fixed)] px-4 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-surface)] transition-colors hover:bg-surface-variant"
+                          className="border border-[var(--gjc-primary)] bg-[var(--gjc-on-error-fixed)] px-4 py-1 font-label-caps text-[10px] font-bold uppercase text-[var(--gjc-on-primary)] transition-colors hover:bg-surface-variant"
                           onClick={() => openModal('delete-journal', post)}
                           type="button"
                         >

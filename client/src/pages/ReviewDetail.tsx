@@ -219,7 +219,7 @@ function ReviewDetail() {
                 {post.game.imageUrl ? (
                   <img
                     alt={`${gameTitle} cover`}
-                    className="h-full w-full object-cover grayscale contrast-125"
+                    className="h-full w-full object-cover contrast-125"
                     src={post.game.imageUrl}
                   />
                 ) : (
@@ -235,20 +235,6 @@ function ReviewDetail() {
                 <div>
                   <p className="whitespace-pre-wrap leading-relaxed">{post.content}</p>
 
-                  {post.game.imageUrl ? (
-                    <figure className="mb-12 mt-8">
-                      <div className="border-2 border-primary bg-black p-1">
-                        <img
-                          alt={`${gameTitle} capture`}
-                          className="h-auto w-full grayscale contrast-125"
-                          src={post.game.imageUrl}
-                        />
-                      </div>
-                      <figcaption className="mt-4 text-center font-label-caps text-label-caps uppercase italic text-secondary">
-                        [Review Archive] {gameTitle}
-                      </figcaption>
-                    </figure>
-                  ) : null}
                 </div>
               </article>
 

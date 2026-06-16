@@ -410,7 +410,7 @@ function JournalDetail() {
                 {post.game.imageUrl ? (
                   <img
                     alt={`${gameTitle} cover`}
-                    className="h-full w-full object-cover grayscale contrast-125"
+                    className="h-full w-full object-cover contrast-125"
                     src={post.game.imageUrl}
                   />
                 ) : (
@@ -426,20 +426,21 @@ function JournalDetail() {
                 <div>
                   <p className="whitespace-pre-wrap leading-relaxed">{post.content}</p>
 
+                  {/*
                   {post.game.imageUrl ? (
                     <figure className="mb-12 mt-8">
-                      <div className="border-2 border-primary bg-black p-1">
+                       <div className="border-2 border-primary bg-black p-1">
                         <img
                           alt={`${gameTitle} capture`}
                           className="h-auto w-full grayscale contrast-125"
                           src={post.game.imageUrl}
                         />
-                      </div>
+                      </div> 
                       <figcaption className="mt-4 text-center font-label-caps text-label-caps uppercase italic text-secondary">
                         [Game Archive] {gameTitle}
                       </figcaption>
-                    </figure>
-                  ) : null}
+                    </figure> 
+                  ) : null}*/}
                 </div>
 
                 <section className="mt-12 space-y-8 border-t-2 border-primary pt-12">
