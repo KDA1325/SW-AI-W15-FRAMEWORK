@@ -485,6 +485,48 @@ describe('PostsService IGDB game selection', () => {
         expect(listQuery.andWhere).toHaveBeenCalledWith(expect.any(Object));
     });
 
+    it('keeps the multiplayer persona journals visible with default list paging', async () => {
+        const { postRepository, service } = createService();
+        const personaJournalPosts = Array.from({ length: 7 }, (_, index) => ({
+            game: {
+                genres: ['Multiplayer'],
+                id: `game-${index + 1}`,
+                imageUrl: `https://example.com/game-${index + 1}.jpg`,
+                platforms: ['PC'],
+                tags: ['TEAMPLAY'],
+                title: `Persona journal game ${index + 1}`,
+            },
+            id: `journal-${index + 1}`,
+            title: `Persona journal ${index + 1}`,
+            type: ArchivePostType.JOURNAL,
+            userId: 'persona-multiplayer',
+        }));
+        const listQuery = createListQuery(personaJournalPosts, 7);
+
+        postRepository.createQueryBuilder.mockReturnValueOnce(listQuery);
+
+        await expect(
+            service.findAll(
+                'persona-multiplayer',
+                ArchivePostType.JOURNAL,
+                true,
+            ),
+        ).resolves.toMatchObject({
+            hasNextPage: false,
+            items: expect.arrayContaining([
+                expect.objectContaining({ id: 'journal-1' }),
+                expect.objectContaining({ id: 'journal-7' }),
+            ]),
+            limit: 10,
+            page: 1,
+            total: 7,
+            totalPages: 1,
+        });
+        // GJC-182: the default mine=true journal query must fit all 7 persona journals on page one.
+        expect(listQuery.take).toHaveBeenCalledWith(10);
+        expect(listQuery.skip).toHaveBeenCalledWith(0);
+    });
+
     it('normalizes and stores unique post tags', async () => {
         const { service, tagRepository } = createService();
 
