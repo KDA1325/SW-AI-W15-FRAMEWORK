@@ -7,9 +7,11 @@ import { ValidationPipe } from '@nestjs/common';
 
 // NestFactory는 NestJS 앱을 생성할 때 사용합니다.
 import { NestFactory } from '@nestjs/core';
+import { join } from 'node:path';
 
 // cookieParser는 요청에 담긴 쿠키를 읽을 수 있게 해줍니다.
 import cookieParser from 'cookie-parser';
+import express from 'express';
 
 // 앱의 최상위 모듈입니다.
 import { AppModule } from './app.module';
@@ -25,6 +27,7 @@ async function bootstrap() {
 
   // req.cookies로 쿠키를 읽을 수 있게 설정합니다.
   app.use(cookieParser());
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
 
   // React 개발 서버에서 NestJS API를 호출할 수 있게 허용합니다.
   // CORS(Cross-Origin Resource Sharing) 설정 => 다른 도메인에서 API를 호출할 수 있게 허용하는 설정

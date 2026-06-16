@@ -1,6 +1,7 @@
 // Controller, Get, Post 같은 데코레이터는 API 주소를 만들 때 사용합니다.
 // Body는 요청 body를 꺼낼 때, Req/Res는 요청/응답 객체를 직접 다룰 때 사용합니다.
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -10,8 +11,11 @@ import {
   Query,
   Req,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 
 // Express의 Request, Response 타입입니다.
 import type { Request, Response } from 'express'
@@ -27,6 +31,11 @@ import { UpdateProfileDto } from './dto/update-profile.dto'
 
 // 로그인한 사용자만 접근할 수 있게 막는 Guard입니다.
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
+import {
+  isAllowedProfileImageMimeType,
+  PROFILE_IMAGE_MAX_BYTES,
+  type UploadedProfileImage,
+} from './profile-image'
 import { SteamService } from './steam.service'
 
 // JWT 인증에 성공하면 req.user에 userId와 email이 들어갑니다.
@@ -80,6 +89,34 @@ export class AuthController {
   @Patch('me')
   updateMe(@Req() req: AuthedRequest, @Body() dto: UpdateProfileDto) {
     return this.authService.updateProfile(req.user.userId, dto)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('me/profile-image')
+  @UseInterceptors(
+    FileInterceptor('profileImage', {
+      fileFilter: (_req, file, callback) => {
+        if (isAllowedProfileImageMimeType(file.mimetype)) {
+          callback(null, true)
+          return
+        }
+
+        callback(
+          new BadRequestException('PNG, JPG, WEBP, GIF 이미지만 업로드할 수 있습니다.'),
+          false,
+        )
+      },
+      limits: {
+        fileSize: PROFILE_IMAGE_MAX_BYTES,
+        files: 1,
+      },
+    }),
+  )
+  updateProfileImage(
+    @Req() req: AuthedRequest,
+    @UploadedFile() file?: UploadedProfileImage,
+  ) {
+    return this.authService.updateProfileImage(req.user.userId, file)
   }
 
   @UseGuards(JwtAuthGuard)

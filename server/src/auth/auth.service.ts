@@ -9,6 +9,9 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common'
+import { randomUUID } from 'node:crypto'
+import { mkdir, rm, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 // JWT 토큰을 만들기 위한 NestJS 서비스입니다.
 import { JwtService } from '@nestjs/jwt'
@@ -40,6 +43,13 @@ import { LoginDto } from './dto/login.dto'
 // 회원가입 요청 데이터 타입입니다.
 import { RegisterDto } from './dto/register.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
+import {
+  getProfileImageExtension,
+  PROFILE_IMAGE_MAX_BYTES,
+  PROFILE_IMAGE_PUBLIC_PATH,
+  PROFILE_IMAGE_UPLOAD_DIR,
+  type UploadedProfileImage,
+} from './profile-image'
 
 // @Injectable()을 붙이면 NestJS가 AuthService를 서비스로 관리합니다.
 // 안 붙이면? -> NestJS가 이 클래스를 인식하지 못해서 DI(의존성 주입)도 안 되고, 다른 서비스나 컨트롤러에서 주입받아 사용할 수도 없음
@@ -213,6 +223,51 @@ export class AuthService {
     return this.safeUser(savedUser)
   }
 
+  async updateProfileImage(
+    userId: string,
+    file: UploadedProfileImage | undefined,
+  ) {
+    const user = await this.userRepository.findOneBy({ id: userId })
+
+    if (!user) {
+      throw new UnauthorizedException()
+    }
+
+    if (!file) {
+      throw new BadRequestException('프로필 이미지를 선택해주세요.')
+    }
+
+    const extension = getProfileImageExtension(file.mimetype)
+
+    if (!extension) {
+      throw new BadRequestException('PNG, JPG, WEBP, GIF 이미지만 업로드할 수 있습니다.')
+    }
+
+    if (file.size > PROFILE_IMAGE_MAX_BYTES) {
+      throw new BadRequestException('프로필 이미지는 2MB 이하만 업로드할 수 있습니다.')
+    }
+
+    await mkdir(PROFILE_IMAGE_UPLOAD_DIR, { recursive: true })
+
+    const fileName = `${user.id}-${Date.now()}-${randomUUID()}${extension}`
+    const filePath = join(PROFILE_IMAGE_UPLOAD_DIR, fileName)
+    const previousProfileImageUrl = user.profileImageUrl
+
+    try {
+      await writeFile(filePath, file.buffer)
+
+      user.profileImageUrl = `${PROFILE_IMAGE_PUBLIC_PATH}/${fileName}`
+      const savedUser = await this.userRepository.save(user)
+
+      await this.removeUploadedProfileImage(previousProfileImageUrl)
+
+      return this.safeUser(savedUser)
+    } catch (error) {
+      await rm(filePath, { force: true })
+      throw error
+    }
+  }
+
   // 로그아웃 로직입니다.
   // 쿠키를 이 아래에서 만드는 데 로그아웃 로직이 먼저 나와도 되나
   // -> AuthService 클래스 안에서 메서드의 순서는 크게 중요하지 않음
@@ -289,6 +344,20 @@ export class AuthService {
       .filter((tag) => tag.length > 0)
 
     return [...new Set(normalizedTags)].slice(0, 6)
+  }
+
+  private async removeUploadedProfileImage(profileImageUrl: string | null) {
+    if (!profileImageUrl?.startsWith(`${PROFILE_IMAGE_PUBLIC_PATH}/`)) {
+      return
+    }
+
+    const fileName = profileImageUrl.slice(PROFILE_IMAGE_PUBLIC_PATH.length + 1)
+
+    if (!fileName || fileName.includes('/') || fileName.includes('\\')) {
+      return
+    }
+
+    await rm(join(PROFILE_IMAGE_UPLOAD_DIR, fileName), { force: true })
   }
 
   // 프론트엔드로 보내도 되는 사용자 정보만 골라서 반환합니다.
