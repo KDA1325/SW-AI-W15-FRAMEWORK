@@ -94,6 +94,110 @@ describe('AgentService user-scoped recommendations', () => {
     );
   });
 
+  it('uses a FastAPI LangGraph search plan before the local query builder', async () => {
+    const ragContext: AiRagAnalysisResponse = {
+      contextSources: [
+        {
+          excerpt: 'Optimization puzzle notes.',
+          gameTitle: 'Opus Magnum',
+          similarity: 0.91,
+          sourceId: 'post-1',
+          sourceType: 'ARCHIVE_POST',
+          title: 'Optimizing machines',
+        },
+      ],
+      embedding: {
+        dimensions: 1536,
+        model: 'demo-hash-embedding-v1',
+        provider: 'demo',
+        refreshedDocuments: 0,
+      },
+      generatedAt: '2026-06-16T00:00:00.000Z',
+      playStyleSummary: 'Current user likes optimization puzzles.',
+      preferenceTags: [{ label: 'PUZZLE_SYSTEMS', sourceCount: 3, weight: 0.9 }],
+      userId: 'current-user-id',
+      wordCloud: [],
+    };
+    const dataSource = {
+      getRepository: jest.fn(),
+      query: jest.fn().mockResolvedValueOnce([]).mockResolvedValueOnce([]),
+    };
+    const config = { get: jest.fn() };
+    const mcpService = {
+      handle: jest.fn().mockResolvedValue({
+        result: {
+          structuredContent: {
+            error: null,
+            errorCode: null,
+            games: [
+              {
+                aliases: [],
+                externalId: { id: '200', provider: 'igdb' },
+                genres: ['Puzzle'],
+                imageUrl: 'https://images.example/baba.jpg',
+                platforms: ['PC'],
+                releaseDate: '2019-03-13',
+                sourceUrl: 'https://www.igdb.com/games/baba-is-you',
+                summary:
+                  'A logic puzzle game where rules are objects and players solve spatial word puzzles.',
+                tags: ['Puzzle', 'Logic'],
+                title: 'Baba Is You',
+                totalRating: 90,
+              },
+            ],
+            provider: 'igdb',
+          },
+        },
+      }),
+    };
+    const ragService = {
+      analyzeForUser: jest.fn().mockResolvedValue(ragContext),
+    };
+    const aiComputeClient = {
+      planAgentSearches: jest.fn().mockResolvedValue({
+        errors: [],
+        iterations: 1,
+        maxIterations: 4,
+        provider: 'langgraph',
+        searchQueries: ['logic puzzle'],
+        stoppedReason: 'completed',
+        toolPlan: [],
+      }),
+    };
+    const aiProfileRepository = {
+      create: jest.fn((value) => ({ ...value })),
+      findOne: jest.fn().mockResolvedValue(null),
+      save: jest.fn().mockResolvedValue(undefined),
+    };
+    dataSource.getRepository.mockReturnValue(aiProfileRepository);
+    const service = new AgentService(
+      dataSource as never,
+      config as never,
+      mcpService as never,
+      ragService as never,
+      aiComputeClient as never,
+    );
+
+    const result = await service.syncRecommendations('current-user-id', {
+      requestId: 'plan-test',
+    });
+
+    expect(aiComputeClient.planAgentSearches).toHaveBeenCalledWith(
+      expect.objectContaining({
+        maxIterations: 4,
+        requestId: 'plan-test',
+        userId: 'current-user-id',
+      }),
+    );
+    expect(mcpService.handle).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'logic puzzle',
+        method: 'tools/call',
+      }),
+    );
+    expect(result.recommendations[0].title).toBe('Baba Is You');
+  });
+
   it('filters already recorded games and low-confidence IGDB title matches', async () => {
     const ragContext: AiRagAnalysisResponse = {
       contextSources: [

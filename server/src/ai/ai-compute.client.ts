@@ -33,6 +33,37 @@ export type AiComputeRagSearchRow = {
   sourceType: string;
 };
 
+export type AiComputeAgentPlanRequest = {
+  contextSources: Array<{
+    gameTitle: string | null;
+    sourceId: string;
+    sourceType: string;
+    title: string;
+  }>;
+  maxIterations: number;
+  preferenceTags: Array<{
+    label: string;
+    sourceCount: number;
+    weight: number;
+  }>;
+  requestId: string;
+  timeoutMs: number;
+  userId: string;
+};
+
+export type AiComputeAgentPlanResult = {
+  errors: string[];
+  iterations: number;
+  maxIterations: number;
+  provider: 'langgraph';
+  searchQueries: string[];
+  stoppedReason: 'completed' | 'max_iterations' | 'timeout';
+  toolPlan: Array<{
+    arguments: Record<string, unknown>;
+    name: 'search_games';
+  }>;
+};
+
 type AiComputeEmbedResponse = {
   dimensions?: number;
   embedding?: number[];
@@ -44,6 +75,8 @@ type AiComputeRagSearchResponse = {
   provider?: 'langchain-pgvector';
   rows?: AiComputeRagSearchRow[];
 };
+
+type AiComputeAgentPlanResponse = Partial<AiComputeAgentPlanResult>;
 
 @Injectable()
 export class AiComputeClient {
@@ -129,18 +162,65 @@ export class AiComputeClient {
     }
   }
 
+  async planAgentSearches(
+    request: AiComputeAgentPlanRequest,
+  ): Promise<AiComputeAgentPlanResult | null> {
+    const baseUrl = this.agentBaseUrl();
+
+    if (!baseUrl) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post<AiComputeAgentPlanResponse>(
+        `${baseUrl}/agent/recommendations/plan`,
+        request,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: this.agentTimeoutMs(),
+        },
+      );
+
+      if (
+        response.data.provider !== 'langgraph' ||
+        !Array.isArray(response.data.searchQueries)
+      ) {
+        throw new Error('FastAPI Agent plan response did not include queries.');
+      }
+
+      return response.data as AiComputeAgentPlanResult;
+    } catch (error) {
+      this.logger.warn(
+        `FastAPI Agent plan failed; falling back inside NestJS. ${this.errorMessage(error)}`,
+      );
+      return null;
+    }
+  }
+
   private baseUrl(): string | null {
+    const configured = this.config.get<string>('FASTAPI_AI_COMPUTE_URL');
+
+    return configured ? configured.replace(/\/+$/, '') : null;
+  }
+
+  private agentBaseUrl(): string | null {
     const configured =
-      this.config.get<string>('FASTAPI_AI_COMPUTE_URL') ??
-      this.config.get<string>('FASTAPI_AGENT_URL');
+      this.config.get<string>('FASTAPI_AGENT_URL') ??
+      this.config.get<string>('FASTAPI_AI_COMPUTE_URL');
 
     return configured ? configured.replace(/\/+$/, '') : null;
   }
 
   private timeoutMs(): number {
     return Number(
-      this.config.get<string>('FASTAPI_AI_COMPUTE_TIMEOUT_MS') ??
-        this.config.get<string>('FASTAPI_AGENT_TIMEOUT_MS') ??
+      this.config.get<string>('FASTAPI_AI_COMPUTE_TIMEOUT_MS') ?? 5000,
+    );
+  }
+
+  private agentTimeoutMs(): number {
+    return Number(
+      this.config.get<string>('FASTAPI_AGENT_TIMEOUT_MS') ??
+        this.config.get<string>('FASTAPI_AI_COMPUTE_TIMEOUT_MS') ??
         5000,
     );
   }

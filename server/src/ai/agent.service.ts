@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -11,6 +11,7 @@ import {
 } from './recommendation-contract';
 import { AiProfile } from '../auth/entities/aiProfile.entity';
 import { User } from '../auth/entities/user.entity';
+import { AiComputeClient } from './ai-compute.client';
 import { McpService } from './mcp.service';
 import { RagService } from './rag.service';
 
@@ -111,6 +112,7 @@ export class AgentService {
     private readonly config: ConfigService,
     private readonly mcpService: McpService,
     private readonly ragService: RagService,
+    @Optional() private readonly aiComputeClient?: AiComputeClient,
   ) {}
 
   async syncRecommendations(
@@ -134,7 +136,15 @@ export class AgentService {
     const nickname = await this.loadUserNickname(userId);
     let usedFallback = false;
 
-    for (const query of this.buildSearchQueries(ragContext)) {
+    const searchQueries =
+      (await this.planSearchQueriesWithFastApi(
+        userId,
+        requestId,
+        ragContext,
+        state,
+      )) ?? this.buildSearchQueries(ragContext);
+
+    for (const query of searchQueries) {
       if (this.shouldStop(state)) {
         break;
       }
@@ -242,6 +252,33 @@ export class AgentService {
 
     // The loop treats each query as a function-calling decision: inspect state, call search_games, merge results.
     return [...new Set([...sourceQueries, ...tagQueries, 'story rich RPG'])];
+  }
+
+  private async planSearchQueriesWithFastApi(
+    userId: string,
+    requestId: string,
+    ragContext: AiRagAnalysisResponse,
+    state: AgentState,
+  ): Promise<string[] | null> {
+    const plan = await this.aiComputeClient?.planAgentSearches({
+      contextSources: ragContext.contextSources.map((source) => ({
+        gameTitle: source.gameTitle,
+        sourceId: source.sourceId,
+        sourceType: source.sourceType,
+        title: source.title,
+      })),
+      maxIterations: state.maxIterations,
+      preferenceTags: ragContext.preferenceTags,
+      requestId,
+      timeoutMs: this.timeoutMs(),
+      userId,
+    });
+
+    if (!plan?.searchQueries.length) {
+      return null;
+    }
+
+    return plan.searchQueries;
   }
 
   private async callSearchGamesTool(

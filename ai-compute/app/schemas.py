@@ -41,3 +41,40 @@ class RagSearchRow(BaseModel):
 class RagSearchResponse(BaseModel):
     provider: Literal["langchain-pgvector"]
     rows: list[RagSearchRow]
+
+
+class AgentPreferenceTag(BaseModel):
+    label: str
+    weight: float = 0
+    sourceCount: int = 0
+
+
+class AgentContextSource(BaseModel):
+    gameTitle: str | None = None
+    sourceId: str
+    sourceType: str
+    title: str
+
+
+class AgentPlanRequest(BaseModel):
+    contextSources: list[AgentContextSource] = Field(default_factory=list)
+    maxIterations: int = Field(4, ge=1, le=12)
+    preferenceTags: list[AgentPreferenceTag] = Field(default_factory=list)
+    requestId: str
+    timeoutMs: int = Field(30000, ge=1000, le=120000)
+    userId: str = Field(..., min_length=1)
+
+
+class AgentToolPlan(BaseModel):
+    arguments: dict[str, object]
+    name: Literal["search_games"]
+
+
+class AgentPlanResponse(BaseModel):
+    errors: list[str]
+    iterations: int
+    maxIterations: int
+    provider: Literal["langgraph"]
+    searchQueries: list[str]
+    stoppedReason: Literal["completed", "max_iterations", "timeout"]
+    toolPlan: list[AgentToolPlan]

@@ -13,7 +13,7 @@ This document fixes the model, library, database, API, and data-flow choices nee
 | Embedding dimensions | `1536` via `OPENAI_EMBEDDING_DIMENSIONS` | Keeps `EmbeddingDocument.embedding vector(1536)` and seed/demo vectors compatible. |
 | RAG runtime | NestJS `RagService` + PostgreSQL pgvector + FastAPI LangChain retriever | NestJS keeps auth and DB ownership while FastAPI can run Python-native retrieval when available. |
 | LangChain scope | Runtime dependency in the FastAPI AI compute service for OpenAI embedding calls and pgvector retrieval | Keeps Python AI integration inside the FastAPI split without adding LangChain to the NestJS runtime. |
-| FastAPI scope | Reserved agent service behind `FASTAPI_AGENT_URL`; not required for the one-day MVP | The MVP proves RAG, MCP, and Agent end to end through NestJS. FastAPI can later own LangGraph orchestration. |
+| FastAPI scope | AI compute service for embeddings, LangChain pgvector retrieval, and LangGraph Agent planning behind `FASTAPI_AI_COMPUTE_URL`/`FASTAPI_AGENT_URL` | FastAPI owns Python-native AI orchestration pieces while NestJS keeps auth, MCP execution, persistence, and public API boundaries. |
 | Embedding sync | Refresh on RAG/SYNC request for MVP; background/outbox sync after MVP | Request-time refresh keeps edits visible in demos. Event-driven sync is better once write volume matters. |
 
 ## Environment Contract
@@ -76,6 +76,8 @@ Demo seed or user-authored ArchivePost rows
   -> FastAPI /rag/search LangChain retriever over pgvector
   -> fallback to NestJS pgvector top-k SQL with cosine distance if FastAPI is unavailable
   -> OpenAI structured JSON analysis or rule-based fallback
+  -> FastAPI /agent/recommendations/plan LangGraph planner chooses MCP search queries
+  -> fallback to NestJS local query planning if FastAPI Agent planning is unavailable
   -> preferenceTags + playStyleSummary + wordCloud + contextSources
 ```
 
@@ -106,6 +108,7 @@ React /recommend SYNC_DATA
   -> JwtAuthGuard resolves userId from access_token
   -> AgentService calls RagService.analyzeForUser()
   -> RagService refreshes embeddings and prefers FastAPI /rag/search for context retrieval
+  -> AgentService asks FastAPI /agent/recommendations/plan for LangGraph tool planning
   -> AgentService calls MCP tools/call search_games
   -> McpService calls IGDB through IgdbService
   -> AgentService merges IGDB results or local DB fallback cards
@@ -119,6 +122,7 @@ Public MVP endpoints:
 | `GET /ai/rag/context?topK=6&refreshEmbeddings=true` | Inspect user-scoped RAG analysis directly. |
 | `POST /embed` on FastAPI | Generate OpenAI/LangChain or deterministic demo embeddings. |
 | `POST /rag/search` on FastAPI | Retrieve user-scoped archive context with a LangChain retriever over pgvector. |
+| `POST /agent/recommendations/plan` on FastAPI | Run a LangGraph state graph that plans bounded MCP `search_games` queries from RAG context. |
 | `POST /mcp` | JSON-RPC MCP server with `initialize`, `tools/list`, and `tools/call`. |
 | `POST /ai/recommendations/sync` | Full RAG + MCP + Agent recommendation sync used by React. |
 
@@ -133,35 +137,34 @@ The dedicated LangChain `PGVector` vector store uses its own collection schema,
 so this project keeps the TypeORM-owned table and exposes a compatible
 LangChain retriever wrapper instead of migrating stored documents.
 
-FastAPI becomes useful when the team wants a Python-native agent service. At that point:
+FastAPI now also hosts the first Python-native Agent orchestration step:
 
 ```text
 NestJS
   -> stays responsible for auth, cookies, user-facing REST, and DB ownership boundaries
-  -> calls FASTAPI_AGENT_URL with { userId, requestId, forceRefresh, topK }
+  -> calls FASTAPI_AGENT_URL with { userId, requestId, contextSources, preferenceTags, maxIterations, timeoutMs }
+  -> executes MCP JSON-RPC tools and persists the final recommendation snapshot
 
 FastAPI
   -> owns LangChain PGVector retriever setup
-  -> owns LangGraph or equivalent state-machine orchestration
-  -> calls the same MCP JSON-RPC tools
-  -> returns AiRecommendationSyncResponse-compatible JSON
+  -> owns LangGraph state-machine planning
+  -> returns planned `search_games` tool arguments and stop metadata
 ```
 
-Recommended post-MVP FastAPI responsibilities:
+The current LangGraph planner keeps the same state guard concepts as the NestJS
+loop: request id, user id, context titles, preference tags, tool results,
+iterations, max iterations, timeout, and stopped reason. It plans MCP tool calls
+without executing external services, so API keys and authorization stay in the
+NestJS/MCP layer.
 
 ```python
-# Sketch only. Keep the response compatible with AiRecommendationSyncResponse.
-retriever = PGVector(
-    embeddings=openai_embeddings,
-    collection_name="embedding_documents",
-    connection=postgres_connection,
-)
-
 state = {
     "user_id": user_id,
     "iterations": 0,
-    "recommendations": [],
+    "search_queries": [],
     "tool_results": [],
+    "max_iterations": 4,
+    "timeout_ms": 30000,
 }
 ```
 
@@ -192,3 +195,4 @@ This keeps today's demo simple while documenting the production-safe direction.
 - OpenAI embeddings API: https://developers.openai.com/api/reference/resources/embeddings/methods/create
 - OpenAI `gpt-4o-mini` model page: https://platform.openai.com/docs/models/gpt-4o-mini
 - LangChain PGVector integration: https://docs.langchain.com/oss/python/integrations/vectorstores/pgvector
+- LangGraph overview: https://docs.langchain.com/oss/python/langgraph/overview

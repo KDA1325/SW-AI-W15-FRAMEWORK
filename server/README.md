@@ -75,7 +75,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 | MCP HTTP endpoint auth                        | `MCP_REQUIRE_AUTH`, `MCP_INTERNAL_TOKEN`, optional JWT cookie | `POST /mcp` returns a JSON-RPC auth error instead of executing tools |
 | Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
 | Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
-| FastAPI Agent loop                            | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | Reserved for a later service split; NestJS should still return a structured fallback response          |
+| FastAPI Agent planner                         | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | Calls `/agent/recommendations/plan`; NestJS falls back to its local query builder when unavailable     |
 
 ### External Failure Mapping
 
@@ -371,12 +371,14 @@ GJC-183 adds the first FastAPI split:
 GET http://localhost:8000/health
 POST http://localhost:8000/embed
 POST http://localhost:8000/rag/search
+POST http://localhost:8000/agent/recommendations/plan
 ```
 
-NestJS keeps authentication, data loading, pgvector persistence, and
-recommendation orchestration. FastAPI receives only the text/model/dimensions
-payload needed for embedding calculation or the userId/queryEmbedding/topK
-payload needed for user-scoped context retrieval:
+NestJS keeps authentication, data loading, pgvector persistence, MCP execution,
+recommendation merging, and final response persistence. FastAPI receives only
+the text/model/dimensions payload needed for embedding calculation, the
+userId/queryEmbedding/topK payload needed for user-scoped context retrieval, or
+the RAG context needed to produce a LangGraph MCP search plan:
 
 ```json
 {
@@ -391,6 +393,17 @@ payload needed for user-scoped context retrieval:
   "userId": "user-id",
   "queryEmbedding": [0.1, -0.2, 0.3],
   "topK": 6
+}
+```
+
+```json
+{
+  "userId": "user-id",
+  "requestId": "manual-sync",
+  "maxIterations": 4,
+  "timeoutMs": 30000,
+  "preferenceTags": [{ "label": "PUZZLE_SYSTEMS", "weight": 0.9, "sourceCount": 3 }],
+  "contextSources": [{ "sourceType": "ARCHIVE_POST", "sourceId": "post-id", "title": "Puzzle notes", "gameTitle": "Baba Is You" }]
 }
 ```
 
@@ -494,7 +507,8 @@ Recorded live IGDB MCP result on `2026-06-16`:
 
 ## AI Recommendation Agent Loop
 
-GJC-88 implements the current MVP recommendation loop inside NestJS:
+GJC-88 implements the recommendation loop and GJC-185 adds a FastAPI LangGraph
+planner for the tool-selection step:
 
 ```text
 POST /ai/recommendations/sync
@@ -524,13 +538,16 @@ type AgentState = {
 Execution order:
 
 1. Read RAG context with `RagService.analyzeForUser`.
-2. Build search queries from source game titles and top preference tags.
-3. Call the MCP `search_games` tool through JSON-RPC.
-4. Merge and de-duplicate IGDB results into recommendation cards.
-5. Stop after at least 3 recommendations, `AGENT_MAX_ITERATIONS`, or `AGENT_TIMEOUT_MS`.
-6. If IGDB is unavailable, return local DB fallback recommendations so SYNC still produces a usable response.
+2. Ask FastAPI `POST /agent/recommendations/plan` to run a LangGraph state graph over the RAG context and return MCP `search_games` queries.
+3. If FastAPI is unavailable or returns no queries, build local fallback queries from source game titles and top preference tags.
+4. Call the MCP `search_games` tool through JSON-RPC.
+5. Merge and de-duplicate IGDB results into recommendation cards.
+6. Stop after enough recommendations, `AGENT_MAX_ITERATIONS`, or `AGENT_TIMEOUT_MS`.
+7. If IGDB is unavailable, return local DB fallback recommendations so SYNC still produces a usable response.
 
-The FastAPI service described in the original architecture can later host the same loop behind `FASTAPI_AGENT_URL`; the current NestJS implementation keeps the API contract and state transitions testable before that split.
+FastAPI currently owns the state-machine planning step through LangGraph. NestJS
+keeps the actual MCP call, fallback, and persistence path so the authenticated
+public API remains stable while the Agent orchestration moves incrementally.
 
 ## Domain Data Model
 
@@ -593,8 +610,9 @@ GJC-163 fixes the one-day MVP contract for the AI recommendation flow. The contr
 React /recommend SYNC button
   -> POST /ai/recommendations/sync
   -> NestJS BFF validates JWT cookie and resolves userId
-  -> NestJS AgentService runs the MVP loop
-  -> Later FastAPI Agent can receive { userId, requestId, forceRefresh, topK }
+  -> NestJS AgentService runs the SYNC loop
+  -> FastAPI Agent planner receives { userId, requestId, contextSources, preferenceTags }
+  -> LangGraph chooses MCP search_games queries with max-iteration and timeout state
   -> RAG reads ArchivePost, Game, AiProfile, and EmbeddingDocument through Postgres pgvector
   -> MCP JSON-RPC server exposes tools/list and tools/call
   -> Agent calls search_games through MCP and normalizes tool/fallback results into final JSON

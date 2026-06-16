@@ -9,6 +9,7 @@ for auth, authorization, data loading, persistence, and API orchestration.
 GET /health
 POST /embed
 POST /rag/search
+POST /agent/recommendations/plan
 ```
 
 `POST /embed` accepts:
@@ -36,6 +37,22 @@ falls back to its original SQL retriever if this FastAPI path is unavailable.
   "userId": "user-id",
   "queryEmbedding": [0.1, -0.2, 0.3],
   "topK": 6
+}
+```
+
+`POST /agent/recommendations/plan` accepts user-scoped RAG context and uses a
+LangGraph state graph to choose MCP `search_games` queries. NestJS still executes
+the MCP calls and recommendation persistence, and it falls back to its local
+query builder if this endpoint is unavailable.
+
+```json
+{
+  "userId": "user-id",
+  "requestId": "manual-sync",
+  "maxIterations": 4,
+  "timeoutMs": 30000,
+  "preferenceTags": [{ "label": "PUZZLE_SYSTEMS", "weight": 0.9, "sourceCount": 3 }],
+  "contextSources": [{ "sourceType": "ARCHIVE_POST", "sourceId": "post-id", "title": "Puzzle notes", "gameTitle": "Baba Is You" }]
 }
 ```
 

@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 
+from .agent_graph import build_agent_plan
 from .embedding import create_embedding
 from .retrieval import search_archive_context
 from .schemas import (
+    AgentPlanRequest,
+    AgentPlanResponse,
     EmbedRequest,
     EmbedResponse,
     HealthResponse,
@@ -47,3 +50,10 @@ async def rag_search(request: RagSearchRequest) -> RagSearchResponse:
             request.topK,
         ),
     )
+
+
+@app.post("/agent/recommendations/plan", response_model=AgentPlanResponse)
+async def agent_recommendation_plan(
+    request: AgentPlanRequest,
+) -> AgentPlanResponse:
+    return build_agent_plan(request)

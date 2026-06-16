@@ -1,5 +1,6 @@
 fastapi>=0.115,<1
 langchain>=1,<2
 langchain-openai>=1,<2
+langgraph>=0.2,<1
 psycopg[binary]>=3,<4
 uvicorn[standard]>=0.30,<1
