@@ -45,6 +45,15 @@ type PostListResponse = {
     totalPages: number;
 };
 
+type GameMetadata = {
+    description: string | null;
+    genres: string[];
+    igdbId: string | null;
+    imageUrl: string | null;
+    platforms: string[];
+    tags: string[];
+};
+
 // 요청 DTO를 DB 엔티티로 바꾸고 권한 규칙을 보장하기
 // PostsService는 컨트롤러에서 받은 DTO를 DB 엔티티로 바꾸고,
 // 게시글 생성/조회/수정/삭제에 필요한 비즈니스 규칙을 보장합니다.
@@ -203,13 +212,14 @@ export default class PostsService {
 
         const [posts, total] = await postsQuery.getManyAndCount();
         const totalPages = Math.ceil(total / normalizedLimit);
+        const hydratedPosts = await this.hydrateMissingGameMetadata(posts);
 
         // Timeline still receives all posts, while journals can request mineOnly for just my posts.
         // canEdit remains useful for shared list UIs that need to hide edit/delete controls.
         return {
             hasNextPage: normalizedPage * normalizedLimit < total,
             hasPreviousPage: normalizedPage > 1,
-            items: posts.map((post) => ({
+            items: hydratedPosts.map((post) => ({
                 ...post,
                 canEdit: post.userId === userId,
             })),
@@ -318,9 +328,11 @@ export default class PostsService {
             throw new NotFoundException('게시글을 찾을 수 없습니다.');
         }
 
+        const [hydratedPost] = await this.hydrateMissingGameMetadata([post]);
+
         return {
-            ...post,
-            canEdit: post.userId === userId,
+            ...hydratedPost,
+            canEdit: hydratedPost.userId === userId,
         };
     }
 
@@ -454,6 +466,8 @@ export default class PostsService {
             throw new BadRequestException('gameTitle is required.');
         }
 
+        const metadata = await this.findIgdbGameMetadata(title, igdbId);
+
         let game = igdbId
             ? await this.gameRepository.findOne({
                   where: { igdbId },
@@ -469,18 +483,116 @@ export default class PostsService {
         if (!game) {
             game = this.gameRepository.create({
                 igdbId,
+                ...(metadata ?? {}),
                 title,
             });
 
             game = await this.gameRepository.save(game);
-        } else if ((igdbId && game.igdbId !== igdbId) || game.title !== title) {
+        } else if (
+            (igdbId && game.igdbId !== igdbId) ||
+            game.title !== title ||
+            this.shouldRefreshGameMetadata(game, metadata)
+        ) {
             game.igdbId = igdbId ?? game.igdbId;
             game.title = title;
+            this.applyGameMetadata(game, metadata);
 
             game = await this.gameRepository.save(game);
         }
 
         return game;
+    }
+
+    private async findIgdbGameMetadata(
+        title: string,
+        igdbId: string | null,
+    ): Promise<GameMetadata | null> {
+        const result = await this.igdbService.searchGames({
+            limit: 8,
+            query: title,
+        });
+        const normalizedTitle = this.normalizeGameTitle(title);
+        const matchedGame = igdbId
+            ? result.games.find((game) => game.externalId.id === igdbId)
+            : result.games.find(
+                  (game) => this.normalizeGameTitle(game.title) === normalizedTitle,
+              );
+
+        if (!matchedGame) {
+            return null;
+        }
+
+        return {
+            description: matchedGame.summary,
+            genres: matchedGame.genres,
+            igdbId: matchedGame.externalId.id,
+            imageUrl: matchedGame.imageUrl,
+            platforms: matchedGame.platforms,
+            tags: matchedGame.tags,
+        };
+    }
+
+    private async hydrateMissingGameMetadata<TPost extends ArchivePost>(
+        posts: TPost[],
+    ) {
+        const gamesById = new Map<string, Game>();
+
+        for (const post of posts) {
+            const game = post.game;
+
+            if (
+                game?.id &&
+                (game.igdbId || game.title.trim().length >= 2) &&
+                this.isGameMissingMetadata(game)
+            ) {
+                gamesById.set(game.id, game);
+            }
+        }
+
+        for (const game of gamesById.values()) {
+            const metadata = await this.findIgdbGameMetadata(
+                game.title,
+                game.igdbId,
+            );
+
+            if (metadata) {
+                this.applyGameMetadata(game, metadata);
+                await this.gameRepository.save(game);
+            }
+        }
+
+        return posts;
+    }
+
+    private shouldRefreshGameMetadata(
+        game: Game,
+        metadata: GameMetadata | null,
+    ) {
+        return Boolean(metadata && this.isGameMissingMetadata(game));
+    }
+
+    private isGameMissingMetadata(game: Game) {
+        return Boolean(
+            !game.imageUrl ||
+                !game.description ||
+                !game.platforms?.length ||
+                !game.genres?.length,
+        );
+    }
+
+    private applyGameMetadata(game: Game, metadata: GameMetadata | null) {
+        if (!metadata) {
+            return;
+        }
+
+        game.description = metadata.description ?? game.description;
+        game.genres = metadata.genres.length ? metadata.genres : game.genres;
+        game.igdbId = metadata.igdbId ?? game.igdbId;
+        game.imageUrl = metadata.imageUrl ?? game.imageUrl;
+        game.platforms = metadata.platforms.length
+            ? metadata.platforms
+            : game.platforms;
+        game.tags = metadata.tags.length ? metadata.tags : game.tags;
     }
 
     private normalizeIgdbGameId(igdbGameId?: string) {

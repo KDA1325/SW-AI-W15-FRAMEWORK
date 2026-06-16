@@ -119,6 +119,160 @@ describe('PostsService IGDB game selection', () => {
         );
     });
 
+    it('stores IGDB image metadata for the selected game', async () => {
+        const { gameRepository, igdbService, service } = createService();
+
+        igdbService.searchGames.mockResolvedValueOnce({
+            error: null,
+            errorCode: null,
+            games: [
+                {
+                    aliases: [],
+                    externalId: { id: '114795', provider: 'igdb' },
+                    genres: ['Action'],
+                    imageUrl:
+                        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+                    platforms: ['PC'],
+                    releaseDate: '2020-09-17',
+                    sourceUrl: 'https://www.igdb.com/games/hades',
+                    summary: 'A rogue-like dungeon crawler.',
+                    tags: ['Fantasy'],
+                    title: 'Hades',
+                },
+            ],
+            provider: 'igdb',
+        });
+
+        await service.create('user-1', {
+            content: 'Great run structure.',
+            gameTitle: 'Hades',
+            igdbGameId: '114795',
+            rating: 5,
+            title: 'Combat stays readable',
+            type: ArchivePostType.REVIEW,
+        });
+
+        expect(gameRepository.create).toHaveBeenCalledWith({
+            description: 'A rogue-like dungeon crawler.',
+            genres: ['Action'],
+            igdbId: '114795',
+            imageUrl:
+                'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+            platforms: ['PC'],
+            tags: ['Fantasy'],
+            title: 'Hades',
+        });
+    });
+
+    it('hydrates missing IGDB image metadata when loading an existing post', async () => {
+        const { gameRepository, igdbService, postRepository, service } =
+            createService();
+        const existingPost = {
+            game: {
+                description: null,
+                genres: [],
+                id: 'game-1',
+                igdbId: '114795',
+                imageUrl: null,
+                platforms: [],
+                tags: [],
+                title: 'Hades',
+            },
+            id: 'post-1',
+            userId: 'user-1',
+        };
+
+        postRepository.findOne.mockResolvedValueOnce(existingPost);
+        igdbService.searchGames.mockResolvedValueOnce({
+            error: null,
+            errorCode: null,
+            games: [
+                {
+                    aliases: [],
+                    externalId: { id: '114795', provider: 'igdb' },
+                    genres: ['Action'],
+                    imageUrl:
+                        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+                    platforms: ['PC'],
+                    releaseDate: '2020-09-17',
+                    sourceUrl: 'https://www.igdb.com/games/hades',
+                    summary: 'A rogue-like dungeon crawler.',
+                    tags: ['Fantasy'],
+                    title: 'Hades',
+                },
+            ],
+            provider: 'igdb',
+        });
+
+        await expect(service.findOne('user-1', 'post-1')).resolves.toMatchObject(
+            {
+                game: {
+                    imageUrl:
+                        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+                    platforms: ['PC'],
+                },
+            },
+        );
+        expect(gameRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                imageUrl:
+                    'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+                platforms: ['PC'],
+            }),
+        );
+    });
+
+    it('hydrates missing game metadata by exact title when IGDB id is absent', async () => {
+        const { gameRepository, igdbService, postRepository, service } =
+            createService();
+        const existingPost = {
+            game: {
+                description: null,
+                genres: [],
+                id: 'game-1',
+                igdbId: null,
+                imageUrl: null,
+                platforms: [],
+                tags: [],
+                title: 'Hades',
+            },
+            id: 'post-1',
+            userId: 'user-1',
+        };
+
+        postRepository.findOne.mockResolvedValueOnce(existingPost);
+        igdbService.searchGames.mockResolvedValueOnce({
+            error: null,
+            errorCode: null,
+            games: [
+                {
+                    aliases: [],
+                    externalId: { id: '114795', provider: 'igdb' },
+                    genres: ['Action'],
+                    imageUrl:
+                        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+                    platforms: ['PC'],
+                    releaseDate: '2020-09-17',
+                    sourceUrl: 'https://www.igdb.com/games/hades',
+                    summary: 'A rogue-like dungeon crawler.',
+                    tags: ['Fantasy'],
+                    title: 'Hades',
+                },
+            ],
+            provider: 'igdb',
+        });
+
+        await service.findOne('user-1', 'post-1');
+
+        expect(gameRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                igdbId: '114795',
+                imageUrl:
+                    'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+            }),
+        );
+    });
+
     it('attaches normalized tags when creating a post', async () => {
         const { postRepository, service, tagRepository } = createService();
 
