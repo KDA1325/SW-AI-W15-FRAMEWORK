@@ -25,6 +25,7 @@ describe('AgentService user-scoped recommendations', () => {
       ],
     };
     const dataSource = {
+      getRepository: jest.fn(),
       query: jest.fn().mockResolvedValue([
         {
           genres: ['Strategy'],
@@ -54,6 +55,12 @@ describe('AgentService user-scoped recommendations', () => {
     const ragService = {
       analyzeForUser: jest.fn().mockResolvedValue(ragContext),
     };
+    const aiProfileRepository = {
+      create: jest.fn((value) => ({ ...value })),
+      findOne: jest.fn().mockResolvedValue(null),
+      save: jest.fn().mockResolvedValue(undefined),
+    };
+    dataSource.getRepository.mockReturnValue(aiProfileRepository);
     const service = new AgentService(
       dataSource as never,
       config as never,
@@ -74,5 +81,62 @@ describe('AgentService user-scoped recommendations', () => {
     expect(result.recommendations[0].reason).toContain(
       "this user's own journal, review, and Steam play signals",
     );
+    expect(aiProfileRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        lastRecommendationSync: result,
+        userId: 'current-user-id',
+      }),
+    );
+  });
+
+  it('returns the latest saved recommendation snapshot without running sync', async () => {
+    const latestSync = {
+      contextSources: [],
+      generatedAt: '2026-06-16T00:00:00.000Z',
+      lastSyncAt: '2026-06-16T00:00:00.000Z',
+      pipeline: {
+        agent: {
+          iterations: 0,
+          maxIterations: 4,
+          stoppedReason: 'completed',
+        },
+        mcp: {
+          provider: 'igdb',
+          resultCount: 0,
+          toolName: 'search_games',
+        },
+        rag: {
+          sourceCount: 0,
+          topK: 6,
+        },
+      },
+      playStyleSummary: 'Saved summary',
+      preferenceTags: [],
+      recommendations: [],
+      requestId: 'saved-request',
+      userId: 'current-user-id',
+      wordCloud: [],
+    };
+    const aiProfileRepository = {
+      findOne: jest.fn().mockResolvedValue({
+        lastRecommendationSync: latestSync,
+      }),
+    };
+    const dataSource = {
+      getRepository: jest.fn().mockReturnValue(aiProfileRepository),
+    };
+    const service = new AgentService(
+      dataSource as never,
+      { get: jest.fn() } as never,
+      { handle: jest.fn() } as never,
+      { analyzeForUser: jest.fn() } as never,
+    );
+
+    await expect(
+      service.getLatestRecommendations('current-user-id'),
+    ).resolves.toBe(latestSync);
+    expect(aiProfileRepository.findOne).toHaveBeenCalledWith({
+      where: { userId: 'current-user-id' },
+    });
   });
 });

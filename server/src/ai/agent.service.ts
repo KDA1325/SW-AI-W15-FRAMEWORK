@@ -8,6 +8,7 @@ import {
   AiRecommendationSyncResponse,
   AiRagAnalysisResponse,
 } from './recommendation-contract';
+import { AiProfile } from '../auth/entities/aiProfile.entity';
 import { McpService } from './mcp.service';
 import { RagService } from './rag.service';
 
@@ -131,7 +132,7 @@ export class AgentService {
 
     const now = new Date().toISOString();
 
-    return {
+    const response: AiRecommendationSyncResponse = {
       requestId,
       userId,
       generatedAt: now,
@@ -166,6 +167,20 @@ export class AgentService {
         },
       },
     };
+
+    await this.saveLatestRecommendationSync(userId, response);
+
+    return response;
+  }
+
+  async getLatestRecommendations(
+    userId: string,
+  ): Promise<AiRecommendationSyncResponse | null> {
+    const profile = await this.dataSource.getRepository(AiProfile).findOne({
+      where: { userId },
+    });
+
+    return profile?.lastRecommendationSync ?? null;
   }
 
   private buildSearchQueries(ragContext: AiRagAnalysisResponse): string[] {
@@ -341,6 +356,29 @@ export class AgentService {
       `,
       [userId],
     );
+  }
+
+  private async saveLatestRecommendationSync(
+    userId: string,
+    response: AiRecommendationSyncResponse,
+  ): Promise<void> {
+    const repository = this.dataSource.getRepository(AiProfile);
+    let profile = await repository.findOne({ where: { userId } });
+
+    if (!profile) {
+      profile = repository.create({ userId });
+    }
+
+    // The page reload path reads this exact snapshot, so only an explicit SYNC click changes what React displays.
+    profile.lastRecommendationSync = response;
+    profile.playStyleSummary = response.playStyleSummary;
+    profile.favoriteKeywords = response.preferenceTags.map((tag) => tag.label);
+    profile.favoriteGenres = response.wordCloud
+      .filter((term) => term.category === 'genre')
+      .map((term) => term.label);
+    profile.lastAnalyzedAt = new Date(response.generatedAt);
+
+    await repository.save(profile);
   }
 
   private recommendationReason(

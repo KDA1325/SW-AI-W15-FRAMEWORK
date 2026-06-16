@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AgentService } from './agent.service';
@@ -20,6 +20,11 @@ type SyncRecommendationBody = {
 @Controller('ai/recommendations')
 export class RecommendationsController {
   constructor(private readonly agentService: AgentService) {}
+
+  @Get('latest')
+  latest(@Req() req: AuthedRequest) {
+    return this.agentService.getLatestRecommendations(req.user.userId);
+  }
 
   @Post('sync')
   sync(@Req() req: AuthedRequest, @Body() body: SyncRecommendationBody) {

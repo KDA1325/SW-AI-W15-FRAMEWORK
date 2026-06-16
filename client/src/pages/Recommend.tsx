@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import RecommendAnalyzingModal from './RecommendAnalyzingModal'
 import PageChrome from './PageChrome'
@@ -143,6 +143,33 @@ function Recommend() {
     () => syncData?.preferenceTags.slice(0, tagPositions.length) ?? [],
     [syncData],
   )
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadLatestSync() {
+      try {
+        const response = await api.get<AiRecommendationSyncResponse | null>(
+          '/ai/recommendations/latest',
+        )
+
+        // Page entry only restores the last saved snapshot; it never triggers a new AI analysis by itself.
+        if (isMounted) {
+          setSyncData(response.data)
+        }
+      } catch (error) {
+        if (isMounted) {
+          setSyncError(getApiErrorMessage(error, 'AI LAST SYNC LOAD FAILED'))
+        }
+      }
+    }
+
+    void loadLatestSync()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const syncRecommendations = async () => {
     const requestOrder = syncRequestIdRef.current + 1

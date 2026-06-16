@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import type { AiRecommendationSyncResponse } from '../../ai/recommendation-contract';
 import { User } from './user.entity';
 
 // AiProfile은 사용자의 플레이 기록/리뷰/저널을 분석해서 만든 AI용 취향 프로필입니다.
@@ -36,6 +37,10 @@ export class AiProfile {
   // 마지막 분석 시각입니다. 아직 분석 전이면 null입니다.
   @Column({ type: 'timestamptz', nullable: true })
   lastAnalyzedAt!: Date | null;
+
+  // 마지막 SYNC 응답 전체를 저장해 새로고침해도 추천 페이지가 같은 결과를 다시 보여줄 수 있게 합니다.
+  @Column({ type: 'jsonb', nullable: true })
+  lastRecommendationSync!: AiRecommendationSyncResponse | null;
 
   // AiProfile은 User와 1:1 관계입니다.
   // JoinColumn이 있는 쪽이 실제 외래키(userId)를 가진 owner 쪽입니다.
