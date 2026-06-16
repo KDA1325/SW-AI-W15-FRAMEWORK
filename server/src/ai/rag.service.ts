@@ -533,7 +533,37 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'PUZZLE_SYSTEMS',
-        terms: ['puzzle', 'rules', 'systems', 'dungeon'],
+        terms: ['puzzle', 'rules', 'systems', 'logic', 'deduction'],
+      },
+      {
+        category: 'mechanic',
+        label: 'DEDUCTION',
+        terms: ['deduction', 'mystery', 'clue', 'case', 'observation'],
+      },
+      {
+        category: 'mechanic',
+        label: 'SPATIAL_REASONING',
+        terms: ['spatial', 'space', 'position', 'perspective', 'portal'],
+      },
+      {
+        category: 'mechanic',
+        label: 'SOKOBAN',
+        terms: ['sokoban', 'push', 'box', 'grid', 'block'],
+      },
+      {
+        category: 'mechanic',
+        label: 'OPTIMIZATION',
+        terms: ['optimization', 'efficient', 'factory', 'machine', 'automation'],
+      },
+      {
+        category: 'mechanic',
+        label: 'PROGRAMMING_PUZZLE',
+        terms: ['programming', 'recursion', 'rule manipulation', 'logic'],
+      },
+      {
+        category: 'theme',
+        label: 'EUREKA_MOMENTS',
+        terms: ['eureka', 'solution', 'aha', 'discover', 'secret'],
       },
       {
         category: 'pace',
@@ -579,13 +609,14 @@ export class RagService {
             },
           ];
 
-    const preferenceTags = fallback.slice(0, 6).map((item) => ({
+    // GJC-180: keep more granular tags so puzzle-heavy users do not collapse into one generic PUZZLE label.
+    const preferenceTags = fallback.slice(0, 10).map((item) => ({
       label: item.label,
       sourceCount: item.sourceCount,
       weight: item.weight,
     }));
 
-    const wordCloud = fallback.slice(0, 10).map((item) => ({
+    const wordCloud = fallback.slice(0, 12).map((item) => ({
       category: item.category,
       label: item.label.replaceAll('_', ' '),
       sourceCount: item.sourceCount,
@@ -618,7 +649,7 @@ export class RagService {
           ? analysis.playStyleSummary
           : 'The available sources describe a focused player profile.',
       preferenceTags: Array.isArray(analysis.preferenceTags)
-        ? analysis.preferenceTags.slice(0, 8)
+        ? analysis.preferenceTags.slice(0, 10)
         : [],
       wordCloud: Array.isArray(analysis.wordCloud)
         ? analysis.wordCloud.slice(0, 12)

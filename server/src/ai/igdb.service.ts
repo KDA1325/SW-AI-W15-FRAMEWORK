@@ -189,7 +189,8 @@ export class IgdbService {
         : null,
       sourceUrl: slug ? `https://www.igdb.com/games/${slug}` : null,
       summary: game.summary ?? null,
-      tags: this.names(game.themes),
+      // GJC-180: themes alone are sparse, so tags also include genres for downstream taste analysis.
+      tags: [...new Set([...this.names(game.themes), ...this.names(game.genres)])],
       title: game.name,
     };
   }

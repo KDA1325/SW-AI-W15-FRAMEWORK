@@ -81,15 +81,6 @@ const wordPositions = [
   { left: '44%', top: '78%' },
 ]
 
-const tagPositions = [
-  { left: '16%', top: '18%' },
-  { right: '14%', top: '16%' },
-  { left: '50%', top: '45%', transform: 'translate(-50%, -50%)' },
-  { left: '12%', top: '66%' },
-  { right: '20%', top: '72%' },
-  { left: '36%', top: '80%' },
-]
-
 function normalizeLabel(label: string) {
   return label.replaceAll('_', ' ').toUpperCase()
 }
@@ -125,10 +116,6 @@ function wordStyle(word: AiWordCloudTerm, index: number) {
     color,
     fontSize,
   }
-}
-
-function tagStyle(index: number) {
-  return tagPositions[index % tagPositions.length]
 }
 
 function isJsonRecord(value: unknown): value is JsonRecord {
@@ -300,7 +287,7 @@ function Recommend() {
     [syncData],
   )
   const visibleTags = useMemo(
-    () => syncData?.preferenceTags.slice(0, tagPositions.length) ?? [],
+    () => syncData?.preferenceTags.slice(0, 10) ?? [],
     [syncData],
   )
 
@@ -505,17 +492,19 @@ function Recommend() {
             <p className="font-label-caps text-label-caps mb-8 text-[var(--gjc-secondary)]">
               (BASED ON GAME RATINGS AND PLAY HISTORY)
             </p>
-            <div className="relative min-h-[300px] flex items-center justify-center p-8">
+            <div className="min-h-[300px] content-center p-8">
               {visibleTags.length > 0 ? (
-                visibleTags.map((tag, index) => (
+                // GJC-180: tags wrap in normal document flow so more than six analysis tags never overlap.
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  {visibleTags.map((tag) => (
                   <span
-                    className="absolute text-xl font-body-md text-[var(--gjc-primary)] border border-[var(--gjc-primary)] px-3 py-1 bg-[var(--gjc-surface-container-lowest)]"
+                    className="text-base font-body-md text-[var(--gjc-primary)] border border-[var(--gjc-primary)] px-3 py-1 bg-[var(--gjc-surface-container-lowest)] md:text-xl"
                     key={tag.label}
-                    style={tagStyle(index)}
                   >
                     #{tag.label}
                   </span>
-                ))
+                  ))}
+                </div>
               ) : (
                 <span className="font-label-caps text-xs text-[var(--gjc-secondary)] uppercase">
                   NO_TAGS
