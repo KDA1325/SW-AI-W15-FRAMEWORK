@@ -141,6 +141,16 @@ function Journals() {
     return () => window.clearTimeout(timeoutId)
   }, [fetchPosts])
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      // Search input is debounced before it becomes an API query, so typing does not fire one request per key.
+      setJournalPage(1)
+      setSearchQuery(searchInput.trim())
+    }, 350)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchInput])
+
   const closeModal = () => {
     setActiveModal(null)
     setSelectedPost(null)
@@ -159,6 +169,16 @@ function Journals() {
     // A new search should always start from the first journal page.
     setJournalPage(1)
     setSearchQuery(searchInput.trim())
+  }
+
+  const resetFilters = () => {
+    // Reset every query-backed control to its default so the next fetch reproduces the initial list state.
+    setSearchInput('')
+    setSearchQuery('')
+    setReviewSort('rating')
+    setJournalSort('latest')
+    setJournalLimit(5)
+    setJournalPage(1)
   }
 
   return (
@@ -184,6 +204,14 @@ function Journals() {
             >
               SEARCH
               <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+            <button
+              className="flex items-center justify-center gap-2 border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] px-6 py-2 font-ui-button text-xs uppercase tracking-widest text-primary transition-colors hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)]"
+              onClick={resetFilters}
+              type="button"
+            >
+              RESET
+              <span className="material-symbols-outlined text-sm">restart_alt</span>
             </button>
           </form>
           {message ? <p className="font-label-caps text-xs uppercase text-primary">{message}</p> : null}
