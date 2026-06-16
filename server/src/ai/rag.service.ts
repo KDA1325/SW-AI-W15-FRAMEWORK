@@ -410,7 +410,7 @@ export class RagService {
           messages: [
             {
               content:
-                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context. Write playStyleSummary in Korean.',
+                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context. Write playStyleSummary in Korean. Keep preferenceTags and wordCloud distinct: preferenceTags are enjoyed game elements such as genre, theme, mechanics, and presentation; wordCloud terms are player behavior/style patterns such as role, activity, pace, motivation, and social pattern.',
               role: 'system',
             },
             {
@@ -446,7 +446,7 @@ export class RagService {
   }
 
   private analysisPrompt(searchRows: RagSearchRow[]): string {
-    return searchRows
+    const sourceText = searchRows
       .map((row, index) =>
         [
           `SOURCE ${index + 1}`,
@@ -457,6 +457,15 @@ export class RagService {
         ].join('\n'),
       )
       .join('\n\n---\n\n');
+
+    return [
+      'Extract two different analysis layers.',
+      '- preferenceTags: why positively rated/repeated games were enjoyable, for example STORY_RICH, CRAFTING, HORROR_ATMOSPHERE, COZY_SIM.',
+      '- wordCloud: how the user tends to play, for example FARMING_LOOP, TANK_ROLE, AESTHETIC_EXPLORER, SOLO_PLANNER, COOP_TEAMPLAYER.',
+      'Do not copy the same labels into both arrays unless the evidence truly names both a game feature and a play behavior.',
+      '',
+      sourceText,
+    ].join('\n');
   }
 
   private analysisJsonSchema() {
@@ -478,7 +487,7 @@ export class RagService {
                 required: ['label', 'weight', 'sourceCount'],
                 type: 'object',
               },
-              maxItems: 8,
+              maxItems: 14,
               type: 'array',
             },
             wordCloud: {
@@ -510,14 +519,14 @@ export class RagService {
   }
 
   private createFallbackAnalysis(searchRows: RagSearchRow[]): RagAnalysisDraft {
-    const candidates: Array<{
+    const gameElementCandidates: Array<{
       category: AiWordCloudTerm['category'];
       label: string;
       terms: string[];
     }> = [
       {
         category: 'mechanic',
-        label: 'TACTICAL_RPG',
+        label: 'TACTICAL_COMBAT',
         terms: ['tactical', 'turn-based', 'strategy', 'planning', 'board'],
       },
       {
@@ -527,13 +536,38 @@ export class RagService {
       },
       {
         category: 'mood',
-        label: 'RETRO_PIXEL',
+        label: 'PIXEL_ART',
         terms: ['pixel', 'retro', 'screen language', 'readable'],
       },
       {
         category: 'mechanic',
         label: 'PUZZLE_SYSTEMS',
         terms: ['puzzle', 'rules', 'systems', 'logic', 'deduction'],
+      },
+      {
+        category: 'mechanic',
+        label: 'CRAFTING',
+        terms: ['crafting', 'craft', 'item synthesis', 'gear', 'equipment'],
+      },
+      {
+        category: 'mechanic',
+        label: 'COLLECTION',
+        terms: ['collection', 'collect', 'unlock', 'catalog', 'items'],
+      },
+      {
+        category: 'mood',
+        label: 'COZY_SIM',
+        terms: ['cozy', 'relaxed', 'life sim', 'farming', 'routine'],
+      },
+      {
+        category: 'theme',
+        label: 'HORROR_ATMOSPHERE',
+        terms: ['horror', 'dread', 'survival horror', 'limited resources'],
+      },
+      {
+        category: 'mood',
+        label: 'AESTHETIC_PRESENTATION',
+        terms: ['art', 'music', 'atmosphere', 'visual', 'beautiful'],
       },
       {
         category: 'mechanic',
@@ -547,37 +581,146 @@ export class RagService {
       },
       {
         category: 'mechanic',
-        label: 'SOKOBAN',
-        terms: ['sokoban', 'push', 'box', 'grid', 'block'],
-      },
-      {
-        category: 'mechanic',
         label: 'OPTIMIZATION',
         terms: ['optimization', 'efficient', 'factory', 'machine', 'automation'],
-      },
-      {
-        category: 'mechanic',
-        label: 'PROGRAMMING_PUZZLE',
-        terms: ['programming', 'recursion', 'rule manipulation', 'logic'],
       },
       {
         category: 'theme',
         label: 'EUREKA_MOMENTS',
         terms: ['eureka', 'solution', 'aha', 'discover', 'secret'],
       },
+    ];
+
+    const playStyleCandidates: Array<{
+      category: AiWordCloudTerm['category'];
+      label: string;
+      terms: string[];
+    }> = [
       {
         category: 'pace',
-        label: 'DELIBERATE_PLAY',
-        terms: ['deliberate', 'focus', 'precise', 'timing'],
+        label: 'DELIBERATE_PLANNER',
+        terms: ['planning', 'strategy', 'turn-based', 'deliberate', 'focus'],
+      },
+      {
+        category: 'mechanic',
+        label: 'SYSTEM_OPTIMIZER',
+        terms: ['optimization', 'efficient', 'factory', 'automation', 'systems'],
+      },
+      {
+        category: 'mechanic',
+        label: 'FARMING_LOOP',
+        terms: ['farming', 'grind', 'routine', 'harvest', 'repeat'],
+      },
+      {
+        category: 'mechanic',
+        label: 'HUNTING_LOOP',
+        terms: ['hunt', 'boss', 'monster', 'pattern', 'gear progression'],
+      },
+      {
+        category: 'theme',
+        label: 'NARRATIVE_ROLEPLAYER',
+        terms: ['roleplay', 'choice', 'story', 'social link', 'quest'],
       },
       {
         category: 'mood',
-        label: 'HIGH_DIFFICULTY',
-        terms: ['failure', 'difficult', 'loss', 'sacrifice'],
+        label: 'AESTHETIC_EXPLORER',
+        terms: ['art', 'atmosphere', 'music', 'world', 'exploration'],
+      },
+      {
+        category: 'mechanic',
+        label: 'COLLECTION_COMPLETIONIST',
+        terms: ['collection', 'collect', 'unlock', 'catalog', 'achievement'],
+      },
+      {
+        category: 'pace',
+        label: 'LOW_PRESSURE_ROUTINE',
+        terms: ['relaxed', 'cozy', 'low pressure', 'calm', 'routine'],
+      },
+      {
+        category: 'mechanic',
+        label: 'SOLO_PROBLEM_SOLVER',
+        terms: ['solo', 'single player', 'puzzle', 'deduction', 'logic'],
+      },
+      {
+        category: 'mechanic',
+        label: 'COOP_TEAMPLAYER',
+        terms: ['co-op', 'coop', 'team', 'voice', 'multiplayer'],
+      },
+      {
+        category: 'mechanic',
+        label: 'TANK_ROLE',
+        terms: ['tank', 'defense', 'shield', 'frontline', 'aggro'],
       },
     ];
 
-    const scored = candidates
+    const scoredGameElements = this.scoreAnalysisCandidates(
+      searchRows,
+      gameElementCandidates,
+    );
+    const scoredPlayStyles = this.scoreAnalysisCandidates(
+      searchRows,
+      playStyleCandidates,
+    );
+
+    const gameElementFallback =
+      scoredGameElements.length > 0
+        ? scoredGameElements
+        : [
+            {
+              category: 'theme' as const,
+              label: 'GAME_ELEMENTS',
+              sourceCount: searchRows.length,
+              terms: ['archive'],
+              weight: 0.6,
+            },
+          ];
+    const playStyleFallback =
+      scoredPlayStyles.length > 0
+        ? scoredPlayStyles
+        : [
+            {
+              category: 'pace' as const,
+              label: 'ARCHIVE_BASED_PLAYER',
+              sourceCount: searchRows.length,
+              terms: ['archive'],
+              weight: 0.6,
+            },
+          ];
+
+    // GJC-180: keep more granular tags so puzzle-heavy users do not collapse into one generic PUZZLE label.
+    const preferenceTags = gameElementFallback.slice(0, 14).map((item) => ({
+      label: item.label,
+      sourceCount: item.sourceCount,
+      weight: item.weight,
+    }));
+
+    const preferenceLabels = new Set(preferenceTags.map((tag) => tag.label));
+    const wordCloud = playStyleFallback
+      .filter((item) => !preferenceLabels.has(item.label))
+      .slice(0, 18)
+      .map((item) => ({
+        category: item.category,
+        label: item.label.replaceAll('_', ' '),
+        sourceCount: item.sourceCount,
+        weight: item.weight,
+      }));
+
+    return {
+      playStyleSummary: this.fallbackSummary(wordCloud),
+      preferenceTags,
+      wordCloud,
+    };
+  }
+
+  private scoreAnalysisCandidates(
+    searchRows: RagSearchRow[],
+    candidates: Array<{
+      category: AiWordCloudTerm['category'];
+      label: string;
+      terms: string[];
+    }>,
+  ) {
+    return candidates
       .map((candidate) => {
         const sourceCount = searchRows.filter((row) =>
           candidate.terms.some((term) =>
@@ -595,66 +738,48 @@ export class RagService {
       })
       .filter((candidate) => candidate.sourceCount > 0)
       .sort((left, right) => right.weight - left.weight);
-
-    const fallback =
-      scored.length > 0
-        ? scored
-        : [
-            {
-              category: 'theme' as const,
-              label: 'PLAYER_ARCHIVE',
-              sourceCount: searchRows.length,
-              terms: ['archive'],
-              weight: 0.6,
-            },
-          ];
-
-    // GJC-180: keep more granular tags so puzzle-heavy users do not collapse into one generic PUZZLE label.
-    const preferenceTags = fallback.slice(0, 10).map((item) => ({
-      label: item.label,
-      sourceCount: item.sourceCount,
-      weight: item.weight,
-    }));
-
-    const wordCloud = fallback.slice(0, 18).map((item) => ({
-      category: item.category,
-      label: item.label.replaceAll('_', ' '),
-      sourceCount: item.sourceCount,
-      weight: item.weight,
-    }));
-
-    return {
-      playStyleSummary: this.fallbackSummary(preferenceTags),
-      preferenceTags,
-      wordCloud,
-    };
   }
 
-  private fallbackSummary(tags: AiPreferenceTag[]): string {
-    const labels = tags
+  private fallbackSummary(styles: AiWordCloudTerm[]): string {
+    const labels = styles
       .slice(0, 3)
-      .map((tag) => tag.label.replaceAll('_', ' '));
+      .map((style) => style.label.replaceAll('_', ' '));
 
     if (labels.length === 0) {
       return '아직 분석할 기록이 부족하므로 더 많은 저널이나 리뷰가 쌓이면 추천 정확도가 높아집니다.';
     }
 
-    return `이 플레이어는 ${labels.join(', ').toLowerCase()} 성향이 강하며, 추천은 본인의 저널, 리뷰, 플레이 기록 근거를 함께 볼 때 가장 안정적입니다.`;
+    return `이 플레이어는 ${labels.join(', ').toLowerCase()} 플레이 성향이 강하며, 추천은 게임 요소 태그와 별도로 사용자의 행동 패턴과 기록 맥락을 함께 반영합니다.`;
   }
 
   private normalizeAnalysis(analysis: RagAnalysisDraft): RagAnalysisDraft {
+    const preferenceTags = Array.isArray(analysis.preferenceTags)
+      ? analysis.preferenceTags.slice(0, 14)
+      : [];
+    const preferenceLabels = new Set(
+      preferenceTags.map((tag) => this.normalizeAnalysisLabel(tag.label)),
+    );
+    const wordCloud = Array.isArray(analysis.wordCloud)
+      ? analysis.wordCloud
+          .filter(
+            (term) =>
+              !preferenceLabels.has(this.normalizeAnalysisLabel(term.label)),
+          )
+          .slice(0, 18)
+      : [];
+
     return {
       playStyleSummary:
         typeof analysis.playStyleSummary === 'string'
           ? analysis.playStyleSummary
           : 'The available sources describe a focused player profile.',
-      preferenceTags: Array.isArray(analysis.preferenceTags)
-        ? analysis.preferenceTags.slice(0, 10)
-        : [],
-      wordCloud: Array.isArray(analysis.wordCloud)
-        ? analysis.wordCloud.slice(0, 18)
-        : [],
+      preferenceTags,
+      wordCloud,
     };
+  }
+
+  private normalizeAnalysisLabel(label: string): string {
+    return label.trim().replaceAll(' ', '_').toUpperCase();
   }
 
   private toContextSource(row: RagSearchRow): AiRagContextSource {
