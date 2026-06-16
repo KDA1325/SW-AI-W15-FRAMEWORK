@@ -66,7 +66,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 
 | Feature                                       | Variables                                           | Behavior when missing                                                                                  |
 | --------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| FastAPI/OpenAI RAG embeddings                 | `FASTAPI_AI_COMPUTE_URL`, `OPENAI_API_KEY`, optional model vars | Calls FastAPI `/embed`; falls back to NestJS OpenAI/demo embedding when unavailable                    |
+| FastAPI LangChain/OpenAI RAG embeddings       | `FASTAPI_AI_COMPUTE_URL`, `OPENAI_API_KEY`, optional model vars | Calls FastAPI `/embed`; FastAPI uses LangChain for OpenAI embeddings and NestJS falls back when unavailable |
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
 | Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
 | Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
@@ -329,10 +329,12 @@ Response shape:
 ```
 
 When FastAPI is running, RAG asks the stateless AI compute service to generate
-embeddings through `POST /embed`. If that service is unavailable, NestJS falls
-back to its existing OpenAI or deterministic demo embedding path so pgvector
-top-k search remains testable in local development. Structured JSON analysis is
-still performed inside NestJS.
+embeddings through `POST /embed`. If `OPENAI_API_KEY` is set and a non-demo
+model is requested, FastAPI uses LangChain `OpenAIEmbeddings`; otherwise it
+returns the deterministic demo embedding. If that service is unavailable, NestJS
+falls back to its existing OpenAI or deterministic demo embedding path so
+pgvector top-k search remains testable in local development. Structured JSON
+analysis is still performed inside NestJS.
 
 ### FastAPI AI Compute Service
 
@@ -356,7 +358,8 @@ payload needed for embedding calculation and returns a vector response:
 ```
 
 The local FastAPI fallback uses the same deterministic demo vector shape as the
-previous NestJS-only path. Run a sample comparison with:
+previous NestJS-only path. OpenAI embeddings use LangChain's provider package.
+Run a sample comparison with:
 
 ```bash
 cd server

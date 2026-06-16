@@ -1,8 +1,6 @@
 import os
 from dataclasses import dataclass
 
-import httpx
-
 DEMO_EMBEDDING_DIMENSIONS = 1536
 DEMO_EMBEDDING_MODEL = "demo-hash-embedding-v1"
 MAX_EMBEDDING_INPUT_CHARS = 12000
@@ -52,7 +50,7 @@ async def create_embedding(
     )
 
     if requested_model != DEMO_EMBEDDING_MODEL and os.getenv("OPENAI_API_KEY"):
-        openai_result = await create_openai_embedding(
+        openai_result = await create_langchain_openai_embedding(
             truncate_embedding_input(text),
             requested_model,
             requested_dimensions,
@@ -69,7 +67,7 @@ async def create_embedding(
     )
 
 
-async def create_openai_embedding(
+async def create_langchain_openai_embedding(
     text: str,
     model: str,
     dimensions: int,
@@ -78,37 +76,28 @@ async def create_openai_embedding(
     if not api_key:
         return None
 
-    payload: dict[str, object] = {
-        "encoding_format": "float",
-        "input": text,
-        "model": model,
-    }
-
-    if model.startswith("text-embedding-3"):
-        payload["dimensions"] = dimensions
-
     try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            response = await client.post(
-                "https://api.openai.com/v1/embeddings",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                },
-                json=payload,
-            )
-            response.raise_for_status()
+        from langchain_openai import OpenAIEmbeddings
 
-        body = response.json()
-        values = body.get("data", [{}])[0].get("embedding")
-        if not isinstance(values, list) or not values:
+        embedding_options: dict[str, object] = {
+            "api_key": api_key,
+            "model": model,
+        }
+
+        if model.startswith("text-embedding-3"):
+            embedding_options["dimensions"] = dimensions
+
+        embeddings = OpenAIEmbeddings(**embedding_options)
+        values = await embeddings.aembed_query(text)
+
+        if not values:
             return None
 
         return EmbeddingResult(
             dimensions=len(values),
             embedding=[float(value) for value in values],
-            model=str(body.get("model") or model),
+            model=model,
             provider="openai",
         )
-    except httpx.HTTPError:
+    except Exception:
         return None

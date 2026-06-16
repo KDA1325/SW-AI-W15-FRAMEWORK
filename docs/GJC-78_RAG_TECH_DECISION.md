@@ -12,7 +12,7 @@ This document fixes the model, library, database, API, and data-flow choices nee
 | Embedding model | OpenAI `text-embedding-3-small` via `OPENAI_EMBEDDING_MODEL` | Matches the current 1536-dimensional pgvector column and supports local fallback when the key is missing. |
 | Embedding dimensions | `1536` via `OPENAI_EMBEDDING_DIMENSIONS` | Keeps `EmbeddingDocument.embedding vector(1536)` and seed/demo vectors compatible. |
 | RAG runtime | NestJS `RagService` + PostgreSQL pgvector | Lowest-risk MVP path because auth, DB entities, seeding, and React API are already in the same app. |
-| LangChain scope | Reference design for the FastAPI split; no runtime dependency in the NestJS MVP | Avoids dependency churn while still leaving a clear future path to a LangChain `PGVector` retriever. |
+| LangChain scope | Runtime dependency in the FastAPI AI compute service for OpenAI embedding calls; still no NestJS runtime dependency | Keeps Python AI integration inside the FastAPI split while leaving a clear future path to a LangChain `PGVector` retriever. |
 | FastAPI scope | Reserved agent service behind `FASTAPI_AGENT_URL`; not required for the one-day MVP | The MVP proves RAG, MCP, and Agent end to end through NestJS. FastAPI can later own LangGraph orchestration. |
 | Embedding sync | Refresh on RAG/SYNC request for MVP; background/outbox sync after MVP | Request-time refresh keeps edits visible in demos. Event-driven sync is better once write volume matters. |
 
@@ -118,7 +118,7 @@ Public MVP endpoints:
 
 ## LangChain And FastAPI Split
 
-The current MVP intentionally does not add LangChain to the NestJS runtime. The code already performs the required loader, embedding, vector query, and fallback steps directly against PostgreSQL.
+The current MVP intentionally does not add LangChain to the NestJS runtime. NestJS still performs the required loader, vector query, and fallback orchestration directly against PostgreSQL. LangChain is introduced in the FastAPI AI compute service for OpenAI embedding calls.
 
 FastAPI becomes useful when the team wants a Python-native agent service. At that point:
 

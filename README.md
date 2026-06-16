@@ -9,14 +9,15 @@ Gaming Journal Club is a retro 8-bit styled game journal and recommendation MVP.
 | Frontend               | React, Vite, TypeScript                                          |
 | Backend API            | NestJS                                                           |
 | Database               | PostgreSQL with pgvector                                         |
-| RAG                    | NestJS RAG service, pgvector, FastAPI/OpenAI/demo embeddings     |
+| RAG                    | NestJS RAG service, pgvector, FastAPI LangChain/OpenAI/demo embeddings |
 | MCP                    | JSON-RPC MCP endpoint with `search_games` tool                   |
 | Agent                  | NestJS MVP Agent loop with max iterations, timeout, and fallback |
 | External game metadata | IGDB API through MCP                                             |
 
 FastAPI is now attached as a stateless AI compute service for embedding
-generation. The current one-day MVP keeps the Agent loop inside NestJS so RAG,
-MCP, and React can be tested end to end.
+generation and uses LangChain for OpenAI embedding calls. The current one-day
+MVP keeps the Agent loop inside NestJS so RAG, MCP, and React can be tested end
+to end.
 
 ## Quickstart
 

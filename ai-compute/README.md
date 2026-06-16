@@ -22,7 +22,8 @@ POST /embed
 
 The local fallback returns deterministic vectors compatible with the NestJS demo
 embedding algorithm. If `OPENAI_API_KEY` is set and a non-demo model is
-requested, the service calls OpenAI embeddings from FastAPI.
+requested, the service calls OpenAI embeddings through LangChain's
+`OpenAIEmbeddings` provider.
 
 ## Run Locally
 

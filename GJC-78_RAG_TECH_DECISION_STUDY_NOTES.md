@@ -127,13 +127,12 @@ JwtAuthGuard
 
 Study point: this keeps `userId` out of the public request body. The server derives it from the authenticated cookie and passes it through internal services.
 
-## Why LangChain Is Not A Runtime Dependency Yet
+## Why LangChain Belongs In FastAPI, Not NestJS
 
-The current NestJS code already covers the MVP pieces:
+The current NestJS code already covers the orchestration pieces:
 
 ```text
 document assembly
-embedding creation
 pgvector similarity search
 structured JSON analysis
 MCP tool calling
@@ -141,17 +140,18 @@ agent loop guards
 fallback recommendations
 ```
 
-Adding LangChain inside NestJS now would mostly duplicate those pieces. The better later split is:
+Adding LangChain inside NestJS would mostly duplicate those pieces. The current split keeps NestJS as the BFF/auth/API layer and puts Python-native AI libraries in FastAPI:
 
 ```text
 NestJS BFF/auth/API
-  -> FastAPI agent service
-  -> LangChain PGVector retriever
-  -> LangGraph-style state loop
+  -> FastAPI AI compute service
+  -> LangChain OpenAIEmbeddings for embedding calls
+  -> future LangChain PGVector retriever
+  -> future LangGraph-style state loop
   -> MCP JSON-RPC tools
 ```
 
-That split is useful after the demo when the team needs richer agent orchestration, retries, tracing, and Python-native AI libraries.
+That split is useful after the demo when the team needs richer agent orchestration, retries, tracing, and Python-native AI libraries without moving auth, persistence, or API ownership out of NestJS.
 
 ## Files Updated
 
