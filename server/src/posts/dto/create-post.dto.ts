@@ -1,11 +1,14 @@
 // 로그인 요청 데이터 검사를 위해 class-validator 기능을 가져옵니다.
 import {
+    ArrayMaxSize,
+    IsArray,
     IsEnum,
     IsNotEmpty,
     IsNumber,
     IsOptional,
     IsString,
     Max,
+    MaxLength,
     Min,
 } from 'class-validator';
 
@@ -42,4 +45,11 @@ export default class CreatePostDto {
     @Min(1)
     @Max(5)
     rating?: number;
+
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(6)
+    @IsString({ each: true })
+    @MaxLength(40, { each: true })
+    tags?: string[];
 }

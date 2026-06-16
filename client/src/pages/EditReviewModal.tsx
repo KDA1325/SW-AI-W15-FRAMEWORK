@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import type { JournalPost } from './Journals'
+import PostTagInput from './PostTagInput'
 
 type EditReviewModalProps = {
   isOpen: boolean
@@ -15,6 +16,7 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
   const [reviewTitle, setReviewTitle] = useState('')
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -26,6 +28,7 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
       setReviewTitle(post.title)
       setRating(String(post.rating ?? 1))
       setReview(post.content)
+      setTags(post.tags?.map((tag) => tag.name) ?? [])
       setMessage('')
     }, 0)
 
@@ -48,6 +51,7 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
         title: reviewTitle,
         content: review,
         rating: parseFloat(rating),
+        tags,
       })
 
       await onSaved()
@@ -117,6 +121,12 @@ function EditReviewModal({ isOpen, post, onClose, onSaved }: EditReviewModalProp
               value={review}
             />
           </label>
+
+          <PostTagInput
+            className="md:col-span-2"
+            onChange={setTags}
+            tags={tags}
+          />
 
           {message ? (
             <p className="font-label-caps text-xs uppercase text-primary md:col-span-2">{message}</p>

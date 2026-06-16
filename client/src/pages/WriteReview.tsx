@@ -4,6 +4,7 @@ import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
 import { api, getApiErrorMessage } from '../api'
 import GameSearchInput from './GameSearchInput'
+import PostTagInput from './PostTagInput'
 
 type ReviewDuplicateResponse = {
   duplicate: boolean
@@ -20,6 +21,7 @@ function WriteReview() {
   const [reviewTitle, setReviewTitle] = useState('')
   const [rating, setRating] = useState('4.5')
   const [review, setReview] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
   const [duplicateReview, setDuplicateReview] = useState<{
     duplicate: boolean
@@ -109,6 +111,7 @@ function WriteReview() {
         title: reviewTitle,
         content: review,
         rating: parseFloat(rating),
+        tags,
       })
 
       navigate('/journals')
@@ -180,6 +183,12 @@ function WriteReview() {
               value={rating}
             />
           </label>
+
+          <PostTagInput
+            className="col-span-12"
+            onChange={setTags}
+            tags={tags}
+          />
 
           <label className="col-span-12 flex flex-col gap-2">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">

@@ -27,6 +27,8 @@ const POST_LIST_TYPES = new Set<string>([
     ArchivePostType.REVIEW,
     ArchivePostType.JOURNAL,
 ]);
+const POST_TAG_LIMIT = 6;
+const POST_TAG_NAME_LIMIT = 40;
 
 type PostListItem = ArchivePost & {
     canEdit: boolean;
@@ -78,6 +80,8 @@ export default class PostsService {
             await this.assertReviewNotDuplicated(userId, game);
         }
 
+        const tags = await this.findOrCreateTags(dto.tags ?? []);
+
         const post = this.postRepository.create({
             userId,
             gameId: game.id,
@@ -85,6 +89,7 @@ export default class PostsService {
             title: dto.title,
             content: dto.content,
             rating: dto.type === ArchivePostType.REVIEW ? dto.rating! : null,
+            tags,
         });
 
         const savedPost = await this.savePostOrConflict(post, dto.type);
@@ -385,6 +390,11 @@ export default class PostsService {
             post.rating = dto.rating;
         }
 
+        if (dto.tags !== undefined) {
+            // PATCH에서 tags가 들어오면 기존 태그 관계를 요청 값으로 교체합니다.
+            post.tags = await this.findOrCreateTags(dto.tags);
+        }
+
         await this.postRepository.save(post);
 
         return this.findOne(userId, id);
@@ -591,8 +601,10 @@ export default class PostsService {
             throw new BadRequestException('tag name is required.');
         }
 
-        if (normalizedName.length > 40) {
-            throw new BadRequestException('tag name must be 40 characters or less.');
+        if (normalizedName.length > POST_TAG_NAME_LIMIT) {
+            throw new BadRequestException(
+                'tag name must be 40 characters or less.',
+            );
         }
 
         const existingTag = await this.tagRepository.findOne({
@@ -633,6 +645,40 @@ export default class PostsService {
             .replace(/_+/g, '_')
             .replace(/^_+|_+$/g, '')
             .toUpperCase();
+    }
+
+    private async findOrCreateTags(names: string[]) {
+        const normalizedNames = this.normalizePostTagNames(names);
+
+        return Promise.all(
+            normalizedNames.map((normalizedName) =>
+                this.findOrCreateTag(normalizedName),
+            ),
+        );
+    }
+
+    private normalizePostTagNames(names: string[]) {
+        if (names.length > POST_TAG_LIMIT) {
+            throw new BadRequestException('tags must contain at most 6 items.');
+        }
+
+        const normalizedNames = names.map((name) => {
+            const normalizedName = this.normalizeTagName(name);
+
+            if (!normalizedName) {
+                throw new BadRequestException('tag name is required.');
+            }
+
+            if (normalizedName.length > POST_TAG_NAME_LIMIT) {
+                throw new BadRequestException(
+                    'tag name must be 40 characters or less.',
+                );
+            }
+
+            return normalizedName;
+        });
+
+        return [...new Set(normalizedNames)];
     }
 
     private async savePostOrConflict(post: ArchivePost, type: ArchivePostType) {

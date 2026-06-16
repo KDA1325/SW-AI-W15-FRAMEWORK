@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { api, getApiErrorMessage } from '../api'
 import type { JournalPost } from './Journals'
+import PostTagInput from './PostTagInput'
 
 type EditJournalModalProps = {
   isOpen: boolean
@@ -14,6 +15,7 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
   const [gameTitle, setGameTitle] = useState('')
   const [logTitle, setLogTitle] = useState('')
   const [content, setContent] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   useEffect(() => {
@@ -24,6 +26,7 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
       setGameTitle(post.game.title)
       setLogTitle(post.title)
       setContent(post.content)
+      setTags(post.tags?.map((tag) => tag.name) ?? [])
       setMessage('')
     }, 0)
 
@@ -45,6 +48,7 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
         gameTitle,
         title: logTitle,
         content,
+        tags,
       })
 
       await onSaved()
@@ -116,6 +120,8 @@ function EditJournalModal({ isOpen, post, onClose, onSaved }: EditJournalModalPr
               />
             </div>
           </label>
+
+          <PostTagInput onChange={setTags} tags={tags} />
 
           {message ? <p className="font-label-caps text-xs uppercase text-primary">{message}</p> : null}
 

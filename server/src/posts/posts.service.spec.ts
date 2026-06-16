@@ -119,6 +119,40 @@ describe('PostsService IGDB game selection', () => {
         );
     });
 
+    it('attaches normalized tags when creating a post', async () => {
+        const { postRepository, service, tagRepository } = createService();
+
+        await service.create('user-1', {
+            content: 'Tags should become reusable archive metadata.',
+            gameTitle: 'Hades',
+            rating: 5,
+            tags: [' tactical-rpg ', '#retro-pixel', 'tactical rpg'],
+            title: 'Tagged review',
+            type: ArchivePostType.REVIEW,
+        });
+
+        expect(tagRepository.create).toHaveBeenCalledWith({
+            name: 'TACTICAL_RPG',
+            normalizedName: 'TACTICAL_RPG',
+        });
+        expect(tagRepository.create).toHaveBeenCalledWith({
+            name: 'RETRO_PIXEL',
+            normalizedName: 'RETRO_PIXEL',
+        });
+        expect(postRepository.create).toHaveBeenCalledWith(
+            expect.objectContaining({
+                tags: [
+                    expect.objectContaining({
+                        normalizedName: 'TACTICAL_RPG',
+                    }),
+                    expect.objectContaining({
+                        normalizedName: 'RETRO_PIXEL',
+                    }),
+                ],
+            }),
+        );
+    });
+
     it('rejects a non-numeric IGDB game id', async () => {
         const { service } = createService();
 
@@ -271,6 +305,33 @@ describe('PostsService IGDB game selection', () => {
             name: 'TACTICAL_RPG',
             normalizedName: 'TACTICAL_RPG',
         });
+    });
+
+    it('replaces post tags on update when tags are provided', async () => {
+        const { postRepository, service } = createService();
+
+        postRepository.findOne.mockResolvedValueOnce({
+            id: 'post-1',
+            type: ArchivePostType.JOURNAL,
+            userId: 'user-1',
+        });
+
+        await service.update('user-1', 'post-1', {
+            tags: ['story rich', 'retro-pixel'],
+        });
+
+        expect(postRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                tags: [
+                    expect.objectContaining({
+                        normalizedName: 'STORY_RICH',
+                    }),
+                    expect.objectContaining({
+                        normalizedName: 'RETRO_PIXEL',
+                    }),
+                ],
+            }),
+        );
     });
 
     it('reuses an existing normalized tag instead of creating duplicates', async () => {

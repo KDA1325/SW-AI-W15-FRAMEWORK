@@ -4,6 +4,7 @@ import type { FormEvent } from 'react'
 import PageChrome from './PageChrome'
 import { api } from '../api'
 import GameSearchInput from './GameSearchInput'
+import PostTagInput from './PostTagInput'
 
 function WriteJournal() {
   const navigate = useNavigate()
@@ -11,6 +12,7 @@ function WriteJournal() {
   const [igdbGameId, setIgdbGameId] = useState<string | null>(null)
   const [logTitle, setLogTitle] = useState('')
   const [logContent, setContent] = useState('')
+  const [tags, setTags] = useState<string[]>([])
   const [message, setMessage] = useState('')
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -24,6 +26,7 @@ function WriteJournal() {
         igdbGameId: igdbGameId ?? undefined,
         title: logTitle,
         content: logContent,
+        tags,
       })
 
       navigate('/journals')
@@ -64,6 +67,12 @@ function WriteJournal() {
               value={gameTitle}
             />
           </label>
+
+          <PostTagInput
+            className="col-span-12"
+            onChange={setTags}
+            tags={tags}
+          />
 
           <label className="col-span-12 flex flex-col gap-2">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
