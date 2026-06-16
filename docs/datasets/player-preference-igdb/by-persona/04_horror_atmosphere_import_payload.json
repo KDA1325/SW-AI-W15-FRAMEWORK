@@ -1,0 +1,360 @@
+{
+  "generated_at": "2026-06-17T00:00:00+09:00",
+  "account": {
+    "email": "persona-horror@gaming-journal.club",
+    "password": "PersonaTest!2026",
+    "nickname": "HORROR_TEST",
+    "bio": "공포, 생존, 불안한 분위기, 사운드 디자인 중심의 테스트 페르소나입니다.",
+    "gamerTags": [
+      "HORROR",
+      "ATMOSPHERE",
+      "SURVIVAL",
+      "DREAD",
+      "SOUND_DESIGN",
+      "LIMITED_RESOURCES"
+    ]
+  },
+  "player_type": {
+    "id": "horror_atmosphere",
+    "name": "공포 게임 선호 플레이어",
+    "dominantKeywords": [
+      "HORROR",
+      "ATMOSPHERE",
+      "SURVIVAL",
+      "DREAD",
+      "SOUND_DESIGN",
+      "LIMITED_RESOURCES"
+    ],
+    "avoidanceKeywords": [
+      "LOW_TENSION",
+      "COZY_LOOP",
+      "BRIGHT_TONE",
+      "SPORTS_SIM"
+    ]
+  },
+  "post_count": 20,
+  "counts_by_signal": {
+    "LIKE": 15,
+    "MIXED": 2,
+    "DISLIKE": 3
+  },
+  "counts_by_type": {
+    "JOURNAL": 7,
+    "REVIEW": 13
+  },
+  "posts": [
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Resident Evil 7: Biohazard",
+      "gamePlatform": "PC",
+      "title": "저널 - Resident Evil 7: Biohazard: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Resident Evil 7: Biohazard이다. 좁은 집과 가족의 위협이 계속 신경을 곤두세운다는 점이 특히 기억에 남았고, 소리, 어둠, 추격, 심리적 압박이 기억에 남는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Resident Evil Village",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Resident Evil Village에서 찾은 오래 붙잡을 이유",
+      "content": "Resident Evil Village을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 마을과 성의 분위기가 강하고 탐색 보상이 좋다는 점 때문에 다시 켜고 싶은 마음이 생겼고, HORROR, ATMOSPHERE, SURVIVAL 성향을 잘 설명한다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Silent Hill 2",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Silent Hill 2은 공포 게임 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Silent Hill 2은 심리적 상징과 안개 낀 공간이 오래 남는다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Amnesia: The Dark Descent",
+      "gamePlatform": "PC",
+      "title": "저널 - Amnesia: The Dark Descent: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Amnesia: The Dark Descent이다. 무력감과 어둠 관리가 공포를 직접 만든다는 점이 특히 기억에 남았고, 소리, 어둠, 추격, 심리적 압박이 기억에 남는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "SOMA",
+      "gamePlatform": "PC",
+      "title": "리뷰 - SOMA에서 찾은 오래 붙잡을 이유",
+      "content": "SOMA을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 존재론적 질문과 해저 시설의 고립감이 강하다는 점 때문에 다시 켜고 싶은 마음이 생겼고, HORROR, ATMOSPHERE, SURVIVAL 성향을 잘 설명한다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Outlast",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Outlast은 공포 게임 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Outlast은 카메라 야간시야와 도주 중심 구조가 긴장을 유지한다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Outlast 2",
+      "gamePlatform": "PC",
+      "title": "저널 - Outlast 2: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Outlast 2이다. 광신도 마을과 추격 연출이 강하게 몰아친다는 점이 특히 기억에 남았고, 소리, 어둠, 추격, 심리적 압박이 기억에 남는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Alien: Isolation",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Alien: Isolation에서 찾은 오래 붙잡을 이유",
+      "content": "Alien: Isolation을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 외계 생명체의 예측 불가능성이 계속 긴장을 만든다는 점 때문에 다시 켜고 싶은 마음이 생겼고, HORROR, ATMOSPHERE, SURVIVAL 성향을 잘 설명한다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Dead Space",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Dead Space은 공포 게임 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Dead Space은 절단 전투와 우주선 음향이 생존 공포를 살린다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Dead Space (2023)",
+      "gamePlatform": "PC",
+      "title": "저널 - Dead Space (2023): 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Dead Space (2023)이다. 현대화된 조명과 사운드가 이시무라의 압박을 되살린다는 점이 특히 기억에 남았고, 소리, 어둠, 추격, 심리적 압박이 기억에 남는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Evil Within",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Evil Within에서 찾은 오래 붙잡을 이유",
+      "content": "The Evil Within을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 탄약 부족과 기괴한 장면 전환이 불안하다는 점 때문에 다시 켜고 싶은 마음이 생겼고, HORROR, ATMOSPHERE, SURVIVAL 성향을 잘 설명한다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Phasmophobia",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Phasmophobia은 공포 게임 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Phasmophobia은 친구들과 증거를 모을수록 공포와 웃음이 같이 생긴다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Visage",
+      "gamePlatform": "PC",
+      "title": "저널 - Visage: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Visage이다. 집 안의 초자연 현상이 심리적으로 압박한다는 점이 특히 기억에 남았고, 소리, 어둠, 추격, 심리적 압박이 기억에 남는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Layers of Fear",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Layers of Fear에서 찾은 오래 붙잡을 이유",
+      "content": "Layers of Fear을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 방이 뒤틀리는 연출과 예술가의 광기가 분위기를 만든다는 점 때문에 다시 켜고 싶은 마음이 생겼고, HORROR, ATMOSPHERE, SURVIVAL 성향을 잘 설명한다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Until Dawn",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Until Dawn은 공포 게임 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Until Dawn은 선택과 생존 여부가 슬래셔 영화처럼 긴장된다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Little Nightmares",
+      "gamePlatform": "PC",
+      "title": "저널 - Little Nightmares: 좋은 점과 마찰이 함께 남았다",
+      "content": "오늘 Little Nightmares을 하며 취향이 갈리는 지점을 메모했다. 작은 몸으로 거대한 위협을 피하는 비주얼이 훌륭하다는 좋았지만 플랫폼 조작 실패가 공포 몰입을 끊는다는 이유로 오래 이어 하지는 못했다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Alan Wake 2",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Alan Wake 2은 일부만 내 취향이었다",
+      "content": "Alan Wake 2에서 재미를 느낀 순간은 있었다. 다만 퍼즐과 전투 리듬이 취향보다 느릴 때가 있다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 3.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Stardew Valley",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Stardew Valley은 오래 붙잡기 어려웠다",
+      "content": "추천 모델 관점에서 Stardew Valley은 부정 샘플에 가깝다. 긴장과 위협이 거의 없어 공포 취향 데이터에는 약하게 잡힌다는 요소가 내 플레이 동기를 꺾었고, 선호 장르와 감정 리듬이 맞지 않았다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 2.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Euro Truck Simulator 2",
+      "gamePlatform": "PC",
+      "title": "저널 - Euro Truck Simulator 2은 완성도와 별개로 내 취향 밖이었다",
+      "content": "오늘 Euro Truck Simulator 2을 시도했지만 금방 피로해졌다. 공포나 생존 압박이 없어 오래 붙잡을 이유가 적다는 점이 계속 신경 쓰였고, 내가 원하는 플레이 감각과 다르다는 결론이 났다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "EA Sports FC 24",
+      "gamePlatform": "PC",
+      "title": "리뷰 - EA Sports FC 24에서 선호 키워드가 약하게 잡혔다",
+      "content": "EA Sports FC 24을 평가하면 완성도와 선호도는 따로 봐야 한다. 경기 운영과 팬심은 이해된다는 부분은 인정하지만 스포츠 경쟁은 어둡고 불안한 분위기를 원하는 취향과 맞지 않는다는 점이 더 크게 다가와 낮은 선호로 남았다.",
+      "tags": [
+        "HORROR",
+        "ATMOSPHERE",
+        "SURVIVAL",
+        "DREAD",
+        "SOUND_DESIGN",
+        "LIMITED_RESOURCES"
+      ],
+      "rating": 1.8
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+[
+  {
+    "order": 1,
+    "player_type_id": "rpg_sim_solo",
+    "player_type_name": "RPG/시뮬레이션 솔로 선호 플레이어",
+    "email": "persona-rpg-sim-solo@gaming-journal.club",
+    "password": "PersonaTest!2026",
+    "nickname": "RPG_SIM_SOLO_TEST",
+    "bio": "RPG, 시뮬레이션, 솔로 플레이 중심의 테스트 페르소나입니다.",
+    "gamerTags": [
+      "SOLO_PLAY",
+      "RPG",
+      "SIMULATION",
+      "STORY_RICH",
+      "RELAXED_GRIND",
+      "EXPLORATION"
+    ],
+    "post_count": 40,
+    "records_json": "by-persona/01_rpg_sim_solo.json",
+    "records_jsonl": "by-persona/01_rpg_sim_solo.jsonl",
+    "records_csv": "by-persona/01_rpg_sim_solo.csv",
+    "import_payload": "by-persona/01_rpg_sim_solo_import_payload.json"
+  },
+  {
+    "order": 2,
+    "player_type_id": "puzzle_solo",
+    "player_type_name": "퍼즐 솔로 선호 플레이어",
+    "email": "persona-puzzle-solo@gaming-journal.club",
+    "password": "PersonaTest!2026",
+    "nickname": "PUZZLE_SOLO_TEST",
+    "bio": "퍼즐, 추리, 공간 사고, 솔로 플레이 중심의 테스트 페르소나입니다.",
+    "gamerTags": [
+      "PUZZLE",
+      "SOLO_PLAY",
+      "LOGIC",
+      "DEDUCTION",
+      "SPATIAL_REASONING",
+      "EUREKA"
+    ],
+    "post_count": 80,
+    "records_json": "by-persona/02_puzzle_solo.json",
+    "records_jsonl": "by-persona/02_puzzle_solo.jsonl",
+    "records_csv": "by-persona/02_puzzle_solo.csv",
+    "import_payload": "by-persona/02_puzzle_solo_import_payload.json"
+  },
+  {
+    "order": 3,
+    "player_type_id": "multiplayer_social",
+    "player_type_name": "멀티플레이 선호 플레이어",
+    "email": "persona-multiplayer@gaming-journal.club",
+    "password": "PersonaTest!2026",
+    "nickname": "MULTIPLAYER_TEST",
+    "bio": "협동, PvP, 팀플레이, 실시간 소셜 루프 중심의 테스트 페르소나입니다.",
+    "gamerTags": [
+      "MULTIPLAYER",
+      "COOP",
+      "PVP",
+      "TEAMPLAY",
+      "VOICE_COMMS",
+      "META_MASTERY"
+    ],
+    "post_count": 20,
+    "records_json": "by-persona/03_multiplayer_social.json",
+    "records_jsonl": "by-persona/03_multiplayer_social.jsonl",
+    "records_csv": "by-persona/03_multiplayer_social.csv",
+    "import_payload": "by-persona/03_multiplayer_social_import_payload.json"
+  },
+  {
+    "order": 4,
+    "player_type_id": "horror_atmosphere",
+    "player_type_name": "공포 게임 선호 플레이어",
+    "email": "persona-horror@gaming-journal.club",
+    "password": "PersonaTest!2026",
+    "nickname": "HORROR_TEST",
+    "bio": "공포, 생존, 불안한 분위기, 사운드 디자인 중심의 테스트 페르소나입니다.",
+    "gamerTags": [
+      "HORROR",
+      "ATMOSPHERE",
+      "SURVIVAL",
+      "DREAD",
+      "SOUND_DESIGN",
+      "LIMITED_RESOURCES"
+    ],
+    "post_count": 20,
+    "records_json": "by-persona/04_horror_atmosphere.json",
+    "records_jsonl": "by-persona/04_horror_atmosphere.jsonl",
+    "records_csv": "by-persona/04_horror_atmosphere.csv",
+    "import_payload": "by-persona/04_horror_atmosphere_import_payload.json"
+  }
+]

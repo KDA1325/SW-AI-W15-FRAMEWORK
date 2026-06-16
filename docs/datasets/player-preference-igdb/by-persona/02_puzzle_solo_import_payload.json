@@ -1,0 +1,1301 @@
+{
+  "generated_at": "2026-06-17T00:00:00+09:00",
+  "account": {
+    "email": "persona-puzzle-solo@gaming-journal.club",
+    "password": "PersonaTest!2026",
+    "nickname": "PUZZLE_SOLO_TEST",
+    "bio": "퍼즐, 추리, 공간 사고, 솔로 플레이 중심의 테스트 페르소나입니다.",
+    "gamerTags": [
+      "PUZZLE",
+      "SOLO_PLAY",
+      "LOGIC",
+      "DEDUCTION",
+      "SPATIAL_REASONING",
+      "EUREKA"
+    ]
+  },
+  "player_type": {
+    "id": "puzzle_solo",
+    "name": "퍼즐 솔로 선호 플레이어",
+    "dominantKeywords": [
+      "PUZZLE",
+      "SOLO_PLAY",
+      "LOGIC",
+      "DEDUCTION",
+      "SPATIAL_REASONING",
+      "EUREKA"
+    ],
+    "avoidanceKeywords": [
+      "GRIND",
+      "RANDOM_LOOT",
+      "PVP_PRESSURE",
+      "REFLEX_HEAVY",
+      "BUSYWORK"
+    ]
+  },
+  "post_count": 80,
+  "counts_by_signal": {
+    "LIKE": 53,
+    "MIXED": 14,
+    "DISLIKE": 13
+  },
+  "counts_by_type": {
+    "JOURNAL": 27,
+    "REVIEW": 53
+  },
+  "posts": [
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Portal",
+      "gamePlatform": "PC",
+      "title": "저널 - Portal: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Portal이다. 포털 규칙이 짧은 방마다 선명하게 확장된다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Portal 2",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Portal 2에서 찾은 오래 붙잡을 이유",
+      "content": "Portal 2을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 젤과 빛다리 같은 장치가 단계적으로 쌓인다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Witness",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Witness은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. The Witness은 섬 전체가 규칙 학습장처럼 연결된다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Baba Is You",
+      "gamePlatform": "PC",
+      "title": "저널 - Baba Is You: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Baba Is You이다. 문장을 바꾸면 세계 규칙이 바뀌는 발상이 강력하다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Return of the Obra Dinn",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Return of the Obra Dinn에서 찾은 오래 붙잡을 이유",
+      "content": "Return of the Obra Dinn을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 사망 장면과 단서 연결이 추리 노트처럼 작동한다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Outer Wilds",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Outer Wilds은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Outer Wilds은 지식 자체가 진행도가 되는 구조가 아름답다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Fez",
+      "gamePlatform": "PC",
+      "title": "저널 - Fez: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Fez이다. 시점을 돌리는 순간 공간 해석이 바뀐다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Braid",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Braid에서 찾은 오래 붙잡을 이유",
+      "content": "Braid을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 시간 조작을 퍼즐 문법으로 끝까지 밀어붙인다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Talos Principle",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Talos Principle은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. The Talos Principle은 레이저와 장치 조합이 차분한 사고 실험처럼 느껴진다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "The Talos Principle 2",
+      "gamePlatform": "PC",
+      "title": "저널 - The Talos Principle 2: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 The Talos Principle 2이다. 새 장치가 기존 규칙을 크게 무너뜨리지 않고 확장한다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Case of the Golden Idol",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Case of the Golden Idol에서 찾은 오래 붙잡을 이유",
+      "content": "The Case of the Golden Idol을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 단어 조각을 맞춰 사건의 인과관계를 세우는 맛이 좋다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Strange Horticulture",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Strange Horticulture은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Strange Horticulture은 식물 도감과 지도 단서를 조합하는 속도가 좋다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Unpacking",
+      "gamePlatform": "PC",
+      "title": "저널 - Unpacking: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Unpacking이다. 물건 배치만으로 인물의 삶을 읽게 한다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Gorogoa",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Gorogoa에서 찾은 오래 붙잡을 이유",
+      "content": "Gorogoa을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 그림 패널을 겹치고 이동하는 방식이 직관적이다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Monument Valley",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Monument Valley은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Monument Valley은 불가능한 건축물을 돌리는 감각이 간결하다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Monument Valley 2",
+      "gamePlatform": "PC",
+      "title": "저널 - Monument Valley 2: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Monument Valley 2이다. 부모와 아이의 이동이 퍼즐과 감정선을 함께 만든다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Opus Magnum",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Opus Magnum에서 찾은 오래 붙잡을 이유",
+      "content": "Opus Magnum을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 기계 팔을 배치해 더 효율적인 해법을 다듬는 재미가 크다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Hexcells",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Hexcells은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Hexcells은 숫자 단서만으로 안전하게 추론하는 맛이 깔끔하다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Stephen's Sausage Roll",
+      "gamePlatform": "PC",
+      "title": "저널 - Stephen's Sausage Roll: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Stephen's Sausage Roll이다. 단순한 소시지 굴리기가 무서운 깊이로 확장된다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Patrick's Parabox",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Patrick's Parabox에서 찾은 오래 붙잡을 이유",
+      "content": "Patrick's Parabox을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 상자 안의 상자라는 재귀 규칙이 명확하게 배운다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "A Monster's Expedition",
+      "gamePlatform": "PC",
+      "title": "리뷰 - A Monster's Expedition은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. A Monster's Expedition은 나무를 밀어 섬을 잇는 규칙이 부드럽게 변주된다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Bonfire Peaks",
+      "gamePlatform": "PC",
+      "title": "저널 - Bonfire Peaks: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Bonfire Peaks이다. 상자를 태우는 목표가 공간 퍼즐과 잘 맞는다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Cocoon",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Cocoon에서 찾은 오래 붙잡을 이유",
+      "content": "Cocoon을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 세계 구슬을 들고 들어가는 구조가 매끄럽다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Viewfinder",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Viewfinder은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Viewfinder은 사진이 실제 공간으로 변하는 순간이 계속 신선하다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Superliminal",
+      "gamePlatform": "PC",
+      "title": "저널 - Superliminal: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Superliminal이다. 크기와 시점 착시를 이용한 해법이 재치 있다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Antichamber",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Antichamber에서 찾은 오래 붙잡을 이유",
+      "content": "Antichamber을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 공간이 예상과 다르게 접히는 규칙을 관찰하게 한다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Manifold Garden",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Manifold Garden은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Manifold Garden은 중력과 무한 반복 공간이 압도적인 퍼즐 풍경을 만든다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Toki Tori 2+",
+      "gamePlatform": "PC",
+      "title": "저널 - Toki Tori 2+: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Toki Tori 2+이다. 아주 적은 행동으로 생태계 규칙을 풀게 한다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "World of Goo",
+      "gamePlatform": "PC",
+      "title": "리뷰 - World of Goo에서 찾은 오래 붙잡을 이유",
+      "content": "World of Goo을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 구조물 물리와 자원 제한이 직관적인 실험을 만든다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Mini Metro",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Mini Metro은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Mini Metro은 노선 하나가 도시 흐름을 바꾸는 압축감이 좋다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Mini Motorways",
+      "gamePlatform": "PC",
+      "title": "저널 - Mini Motorways: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Mini Motorways이다. 도로 배치와 병목 해소가 매 판 다른 사고를 요구한다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Dorfromantik",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Dorfromantik에서 찾은 오래 붙잡을 이유",
+      "content": "Dorfromantik을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 타일 배치가 점수와 풍경 감상을 동시에 준다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Islanders",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Islanders은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Islanders은 작은 섬에 건물을 배치하는 점수 규칙이 명료하다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Carto",
+      "gamePlatform": "PC",
+      "title": "저널 - Carto: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Carto이다. 지도를 조각내 다시 붙이는 발상이 탐험과 잘 맞는다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Chants of Sennaar",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Chants of Sennaar에서 찾은 오래 붙잡을 이유",
+      "content": "Chants of Sennaar을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 언어를 관찰하고 단어 의미를 추론하는 과정이 탁월하다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Heaven's Vault",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Heaven's Vault은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Heaven's Vault은 고대 문자를 해석하는 과정이 느린 추리처럼 쌓인다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "The Room",
+      "gamePlatform": "PC",
+      "title": "저널 - The Room: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 The Room이다. 장치 상자를 만지며 비밀을 여는 손맛이 좋다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Room Two",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Room Two에서 찾은 오래 붙잡을 이유",
+      "content": "The Room Two을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 여러 장치를 넘나드는 진행이 더 넓어졌다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Room Three",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Room Three은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. The Room Three은 분기와 장치 밀도가 높아져 탐색감이 좋다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "The Room 4: Old Sins",
+      "gamePlatform": "PC",
+      "title": "저널 - The Room 4: Old Sins: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 The Room 4: Old Sins이다. 인형집 구조가 작은 공간 퍼즐을 유기적으로 연결한다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Q.U.B.E. 2",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Q.U.B.E. 2에서 찾은 오래 붙잡을 이유",
+      "content": "Q.U.B.E. 2을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 색 블록 규칙이 일인칭 공간 퍼즐로 잘 정리된다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Swapper",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Swapper은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. The Swapper은 복제와 의식 이동 규칙이 퍼즐과 주제를 함께 만든다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Human Resource Machine",
+      "gamePlatform": "PC",
+      "title": "저널 - Human Resource Machine: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Human Resource Machine이다. 명령어를 조합해 문제를 해결하는 맛이 명확하다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "7 Billion Humans",
+      "gamePlatform": "PC",
+      "title": "리뷰 - 7 Billion Humans에서 찾은 오래 붙잡을 이유",
+      "content": "7 Billion Humans을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 병렬 명령을 설계하는 퍼즐이 더 복잡하고 흥미롭다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Infinifactory",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Infinifactory은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Infinifactory은 공장 라인을 설계하고 줄이는 과정이 강한 성취감을 준다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "SpaceChem",
+      "gamePlatform": "PC",
+      "title": "저널 - SpaceChem: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 SpaceChem이다. 분자 생산 라인을 설계하는 논리성이 깊다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Snakebird",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Snakebird에서 찾은 오래 붙잡을 이유",
+      "content": "Snakebird을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 움직임 하나하나가 공간 추론을 강하게 요구한다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Linelight",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Linelight은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Linelight은 선 위를 따라가는 규칙이 음악처럼 변주된다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Maquette",
+      "gamePlatform": "PC",
+      "title": "저널 - Maquette: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Maquette이다. 작은 세계와 큰 세계가 맞물리는 구조가 인상적이다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Pedestrian",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Pedestrian에서 찾은 오래 붙잡을 이유",
+      "content": "The Pedestrian을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 표지판을 잇는 방식이 깔끔한 공간 연결 퍼즐이다는 점 때문에 다시 켜고 싶은 마음이 생겼고, PUZZLE, SOLO_PLAY, LOGIC 성향을 잘 설명한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.5
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "GNOG",
+      "gamePlatform": "PC",
+      "title": "리뷰 - GNOG은 퍼즐 솔로 선호 플레이어에게 잘 맞았다",
+      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. GNOG은 장난감 머리를 돌리고 만지는 실험성이 즐겁다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 4.8
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Little Inferno",
+      "gamePlatform": "PC",
+      "title": "저널 - Little Inferno: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Little Inferno이다. 물건 조합과 블랙 코미디가 묘한 추론 욕구를 만든다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Tunic",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Tunic은 일부만 내 취향이었다",
+      "content": "Tunic에서 재미를 느낀 순간은 있었다. 다만 전투 난도와 반응 조작이 순수 퍼즐 집중을 방해한다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Animal Well",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Animal Well 플레이 후 남은 애매한 감정",
+      "content": "Animal Well은 취향의 경계에 있는 게임이었다. 도구 조합과 비밀 발견이 깊다는 점은 좋았지만 플랫폼 조작과 어두운 탐색이 피곤한 날에는 버겁다는 점이 오래 플레이하는 데 방해가 됐다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Lorelei and the Laser Eyes",
+      "gamePlatform": "PC",
+      "title": "저널 - Lorelei and the Laser Eyes: 좋은 점과 마찰이 함께 남았다",
+      "content": "오늘 Lorelei and the Laser Eyes을 하며 취향이 갈리는 지점을 메모했다. 상징과 숫자 퍼즐의 밀도가 매우 좋다는 좋았지만 불친절한 구조 때문에 노트 정리가 필수다는 이유로 오래 이어 하지는 못했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Myst",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Myst은 일부만 내 취향이었다",
+      "content": "Myst에서 재미를 느낀 순간은 있었다. 다만 현대 퍼즐에 비해 이동과 단서 연결이 느리다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Riven",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Riven 플레이 후 남은 애매한 감정",
+      "content": "Riven은 취향의 경계에 있는 게임이었다. 세계 자체를 해석해야 하는 설계가 깊다는 점은 좋았지만 단서 밀도가 높아 짧은 세션에는 부담스럽다는 점이 오래 플레이하는 데 방해가 됐다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Obduction",
+      "gamePlatform": "PC",
+      "title": "저널 - Obduction: 좋은 점과 마찰이 함께 남았다",
+      "content": "오늘 Obduction을 하며 취향이 갈리는 지점을 메모했다. 낯선 공간의 기계 규칙을 읽는 재미가 있다는 좋았지만 이동 동선이 길어 사고 흐름이 끊긴다는 이유로 오래 이어 하지는 못했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "The Forgotten City",
+      "gamePlatform": "PC",
+      "title": "리뷰 - The Forgotten City은 일부만 내 취향이었다",
+      "content": "The Forgotten City에서 재미를 느낀 순간은 있었다. 다만 퍼즐보다 대화와 탐문 비중이 커서 장르 기대와 다르다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Her Story",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Her Story 플레이 후 남은 애매한 감정",
+      "content": "Her Story은 취향의 경계에 있는 게임이었다. 검색어를 떠올려 사건을 복원하는 방식이 독특하다는 점은 좋았지만 영상 단서를 보는 시간이 길어 수동 퍼즐감은 약하다는 점이 오래 플레이하는 데 방해가 됐다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Telling Lies",
+      "gamePlatform": "PC",
+      "title": "저널 - Telling Lies: 좋은 점과 마찰이 함께 남았다",
+      "content": "오늘 Telling Lies을 하며 취향이 갈리는 지점을 메모했다. 대화 조각을 검색해 인물 관계를 재구성하는 재미가 있다는 좋았지만 퍼즐 해법보다 서사 감상이 중심이다는 이유로 오래 이어 하지는 못했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Immortality",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Immortality은 일부만 내 취향이었다",
+      "content": "Immortality에서 재미를 느낀 순간은 있었다. 다만 해석 중심이라 명확한 정답 퍼즐을 기대하면 흔들린다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Disco Elysium",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Disco Elysium 플레이 후 남은 애매한 감정",
+      "content": "Disco Elysium은 취향의 경계에 있는 게임이었다. 대화 추리와 선택지는 깊다는 점은 좋았지만 논리 퍼즐보다 텍스트 RPG라 피로도가 다르다는 점이 오래 플레이하는 데 방해가 됐다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Civilization VI",
+      "gamePlatform": "PC",
+      "title": "저널 - Civilization VI: 좋은 점과 마찰이 함께 남았다",
+      "content": "오늘 Civilization VI을 하며 취향이 갈리는 지점을 메모했다. 장기 계획과 타일 판단은 퍼즐처럼 재미있다는 좋았지만 한 판이 너무 길어 순수 퍼즐 세션으로는 무겁다는 이유로 오래 이어 하지는 못했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Into the Breach",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Into the Breach은 일부만 내 취향이었다",
+      "content": "Into the Breach에서 재미를 느낀 순간은 있었다. 다만 전투 손실과 캠페인 압박은 차분한 퍼즐과 다르다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.2
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Slay the Spire",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Slay the Spire 플레이 후 남은 애매한 감정",
+      "content": "Slay the Spire은 취향의 경계에 있는 게임이었다. 카드 조합을 계산하는 맛이 있다는 점은 좋았지만 확률과 빌드 운이 개입해 순수 논리 퍼즐과 차이가 있다는 점이 오래 플레이하는 데 방해가 됐다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 3.5
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Escape Simulator",
+      "gamePlatform": "PC",
+      "title": "저널 - Escape Simulator: 내 취향을 또렷하게 보여준 기록",
+      "content": "오늘 플레이한 게임은 Escape Simulator이다. 방 안의 사물과 단서를 조합해 탈출 루트를 찾는 흐름이 좋다는 점이 특히 기억에 남았고, 힌트를 적게 받고 천천히 구조를 해석하는 경험을 좋아한다는 사실을 다시 확인했다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Call of Duty: Modern Warfare III",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Call of Duty: Modern Warfare III에서 선호 키워드가 약하게 잡혔다",
+      "content": "Call of Duty: Modern Warfare III을 평가하면 완성도와 선호도는 따로 봐야 한다. 총격 연출은 강렬하다는 부분은 인정하지만 반사 신경 중심이라 규칙을 천천히 해석할 시간이 부족하다는 점이 더 크게 다가와 낮은 선호로 남았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 1.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "EA Sports FC 24",
+      "gamePlatform": "PC",
+      "title": "리뷰 - EA Sports FC 24은 오래 붙잡기 어려웠다",
+      "content": "추천 모델 관점에서 EA Sports FC 24은 부정 샘플에 가깝다. 스포츠 경기 반복은 추리와 공간 퍼즐 취향을 거의 건드리지 못한다는 요소가 내 플레이 동기를 꺾었고, 선호 장르와 감정 리듬이 맞지 않았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 2.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Diablo IV",
+      "gamePlatform": "PC",
+      "title": "저널 - Diablo IV은 완성도와 별개로 내 취향 밖이었다",
+      "content": "오늘 Diablo IV을 시도했지만 금방 피로해졌다. 랜덤 장비 파밍이 논리 해법보다 반복 보상에 기대고 있다는 점이 계속 신경 쓰였고, 내가 원하는 플레이 감각과 다르다는 결론이 났다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Path of Exile",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Path of Exile에서 선호 키워드가 약하게 잡혔다",
+      "content": "Path of Exile을 평가하면 완성도와 선호도는 따로 봐야 한다. 빌드 트리는 복잡하고 분석할 거리가 많다는 부분은 인정하지만 파밍과 경제 지식 부담이 퍼즐의 깔끔함과 다르다는 점이 더 크게 다가와 낮은 선호로 남았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 1.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Monster Hunter: World",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Monster Hunter: World은 오래 붙잡기 어려웠다",
+      "content": "추천 모델 관점에서 Monster Hunter: World은 부정 샘플에 가깝다. 장비 파밍과 액션 숙련이 더 큰 비중이라 오래 맞지 않았다는 요소가 내 플레이 동기를 꺾었고, 선호 장르와 감정 리듬이 맞지 않았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 2.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Apex Legends",
+      "gamePlatform": "PC",
+      "title": "저널 - Apex Legends은 완성도와 별개로 내 취향 밖이었다",
+      "content": "오늘 Apex Legends을 시도했지만 금방 피로해졌다. 빠른 교전과 에임 압박이 사고 시간을 줄인다는 점이 계속 신경 쓰였고, 내가 원하는 플레이 감각과 다르다는 결론이 났다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Fortnite",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Fortnite에서 선호 키워드가 약하게 잡혔다",
+      "content": "Fortnite을 평가하면 완성도와 선호도는 따로 봐야 한다. 건설과 전투의 조합은 독특하다는 부분은 인정하지만 시즌 콘텐츠와 전투 속도가 차분한 솔로 퍼즐과 맞지 않는다는 점이 더 크게 다가와 낮은 선호로 남았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 1.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Grand Theft Auto V",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Grand Theft Auto V은 오래 붙잡기 어려웠다",
+      "content": "추천 모델 관점에서 Grand Theft Auto V은 부정 샘플에 가깝다. 명확한 규칙 퍼즐보다 액션과 상황극이 중심이라 선호도가 낮다는 요소가 내 플레이 동기를 꺾었고, 선호 장르와 감정 리듬이 맞지 않았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 2.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Red Dead Redemption 2",
+      "gamePlatform": "PC",
+      "title": "저널 - Red Dead Redemption 2은 완성도와 별개로 내 취향 밖이었다",
+      "content": "오늘 Red Dead Redemption 2을 시도했지만 금방 피로해졌다. 느린 이동과 서사 몰입이 퍼즐 해법의 쾌감과는 다르게 다가왔다는 점이 계속 신경 쓰였고, 내가 원하는 플레이 감각과 다르다는 결론이 났다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Tekken 8",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Tekken 8에서 선호 키워드가 약하게 잡혔다",
+      "content": "Tekken 8을 평가하면 완성도와 선호도는 따로 봐야 한다. 프레임 지식과 심리전은 분석할 수 있다는 부분은 인정하지만 입력 숙련과 대전 압박이 혼자 푸는 퍼즐 취향과 충돌한다는 점이 더 크게 다가와 낮은 선호로 남았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 1.8
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Forza Horizon 5",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Forza Horizon 5은 오래 붙잡기 어려웠다",
+      "content": "추천 모델 관점에서 Forza Horizon 5은 부정 샘플에 가깝다. 속도와 차량 수집이 논리 추론 취향을 충분히 채우지 못한다는 요소가 내 플레이 동기를 꺾었고, 선호 장르와 감정 리듬이 맞지 않았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 2.2
+    },
+    {
+      "type": "JOURNAL",
+      "gameTitle": "Doom Eternal",
+      "gamePlatform": "PC",
+      "title": "저널 - Doom Eternal은 완성도와 별개로 내 취향 밖이었다",
+      "content": "오늘 Doom Eternal을 시도했지만 금방 피로해졌다. 항상 움직이고 쏘는 압박이 조용한 사고 시간을 빼앗는다는 점이 계속 신경 쓰였고, 내가 원하는 플레이 감각과 다르다는 결론이 났다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ]
+    },
+    {
+      "type": "REVIEW",
+      "gameTitle": "Hades",
+      "gamePlatform": "PC",
+      "title": "리뷰 - Hades에서 선호 키워드가 약하게 잡혔다",
+      "content": "Hades을 평가하면 완성도와 선호도는 따로 봐야 한다. 무기와 신 은혜 조합은 매력적이다는 부분은 인정하지만 반복 전투와 반응 조작이 퍼즐 중심 만족과 거리가 있다는 점이 더 크게 다가와 낮은 선호로 남았다.",
+      "tags": [
+        "PUZZLE",
+        "SOLO_PLAY",
+        "LOGIC",
+        "DEDUCTION",
+        "SPATIAL_REASONING",
+        "EUREKA"
+      ],
+      "rating": 1.8
+    }
+  ]
+}

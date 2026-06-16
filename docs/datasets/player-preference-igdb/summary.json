@@ -1,0 +1,74 @@
+{
+  "generated_at": "2026-06-17T00:00:00+09:00",
+  "total_records": 160,
+  "source": "synthetic_original_ko",
+  "igdb_note": "Rows use IGDB title lookup queries, slug hints, and source URL hints. Numeric igdb_game_id is null because this offline generator does not call the IGDB API.",
+  "test_accounts_file": "test_persona_accounts.json",
+  "split_output_dir": "by-persona",
+  "counts_by_player_type": [
+    {
+      "player_type_id": "rpg_sim_solo",
+      "player_type_name": "RPG/시뮬레이션 솔로 선호 플레이어",
+      "expected_count": 40,
+      "actual_count": 40,
+      "counts_by_signal": {
+        "LIKE": 28,
+        "MIXED": 4,
+        "DISLIKE": 8
+      },
+      "counts_by_type": {
+        "JOURNAL": 14,
+        "REVIEW": 26
+      },
+      "import_payload": "by-persona/01_rpg_sim_solo_import_payload.json"
+    },
+    {
+      "player_type_id": "puzzle_solo",
+      "player_type_name": "퍼즐 솔로 선호 플레이어",
+      "expected_count": 80,
+      "actual_count": 80,
+      "counts_by_signal": {
+        "LIKE": 53,
+        "MIXED": 14,
+        "DISLIKE": 13
+      },
+      "counts_by_type": {
+        "JOURNAL": 27,
+        "REVIEW": 53
+      },
+      "import_payload": "by-persona/02_puzzle_solo_import_payload.json"
+    },
+    {
+      "player_type_id": "multiplayer_social",
+      "player_type_name": "멀티플레이 선호 플레이어",
+      "expected_count": 20,
+      "actual_count": 20,
+      "counts_by_signal": {
+        "LIKE": 16,
+        "DISLIKE": 3,
+        "MIXED": 1
+      },
+      "counts_by_type": {
+        "JOURNAL": 7,
+        "REVIEW": 13
+      },
+      "import_payload": "by-persona/03_multiplayer_social_import_payload.json"
+    },
+    {
+      "player_type_id": "horror_atmosphere",
+      "player_type_name": "공포 게임 선호 플레이어",
+      "expected_count": 20,
+      "actual_count": 20,
+      "counts_by_signal": {
+        "LIKE": 15,
+        "MIXED": 2,
+        "DISLIKE": 3
+      },
+      "counts_by_type": {
+        "JOURNAL": 7,
+        "REVIEW": 13
+      },
+      "import_payload": "by-persona/04_horror_atmosphere_import_payload.json"
+    }
+  ]
+}
