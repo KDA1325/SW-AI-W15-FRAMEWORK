@@ -24,10 +24,10 @@
 
 | 순서 | 플레이어 유형 | 이메일 | 비밀번호 | 게시글 |
 | --- | --- | --- | --- | --- |
-| 1 | RPG/시뮬레이션 솔로 선호 플레이어 | `persona-rpg-sim-solo@gaming-journal.club` | `PersonaTest!2026` | 40 |
-| 2 | 퍼즐 솔로 선호 플레이어 | `persona-puzzle-solo@gaming-journal.club` | `PersonaTest!2026` | 80 |
-| 3 | 멀티플레이 선호 플레이어 | `persona-multiplayer@gaming-journal.club` | `PersonaTest!2026` | 20 |
-| 4 | 공포 게임 선호 플레이어 | `persona-horror@gaming-journal.club` | `PersonaTest!2026` | 20 |
+| 1 | RPG/시뮬레이션 솔로 선호 플레이어 | `test1@test.com` | `personatest1` | 40 |
+| 2 | 퍼즐 솔로 선호 플레이어 | `test2@test.com` | `personatest2` | 80 |
+| 3 | 멀티플레이 선호 플레이어 | `test3@test.com` | `personatest3` | 20 |
+| 4 | 공포 게임 선호 플레이어 | `test4@test.com` | `personatest4` | 20 |
 
 각 계정의 `by-persona/*_import_payload.json` 파일에는 계정 정보와 게시글 생성 payload가 함께 들어 있습니다.
 
