@@ -73,6 +73,43 @@ function normalizeLabel(label: string) {
   return label.replaceAll('_', ' ').toUpperCase()
 }
 
+function analysisLabelKo(label: string) {
+  const normalized = label.trim().replaceAll(' ', '_').toUpperCase()
+  const labels: Record<string, string> = {
+    AESTHETIC_EXPLORER: '심미적 탐험 성향',
+    AESTHETIC_PRESENTATION: '아트와 분위기',
+    ARCHIVE_BASED_PLAYER: '기록 기반 플레이 성향',
+    ATMOSPHERE: '분위기',
+    COOP_TEAMPLAYER: '협동 플레이 성향',
+    COLLECTION: '수집 요소',
+    COLLECTION_COMPLETIONIST: '수집 완성형 플레이',
+    COZY_SIM: '편안한 시뮬레이션 감성',
+    CRAFTING: '제작과 장비 성장',
+    DEDUCTION: '추리 요소',
+    DELIBERATE_PLANNER: '신중한 계획형 플레이',
+    EUREKA_MOMENTS: '깨달음이 있는 퍼즐',
+    FARMING_LOOP: '파밍 루프',
+    GAME_ELEMENTS: '선호 게임 요소',
+    HORROR_ATMOSPHERE: '공포 분위기',
+    HUNTING_LOOP: '사냥과 보스 공략',
+    LOW_PRESSURE_ROUTINE: '부담 없는 반복 플레이',
+    NARRATIVE_ROLEPLAYER: '서사 몰입형 플레이',
+    OPTIMIZATION: '최적화 요소',
+    PIXEL_ART: '픽셀 아트',
+    PROGRAMMING_PUZZLE: '프로그래밍 퍼즐',
+    PUZZLE_SYSTEMS: '퍼즐 시스템',
+    SOLO_PROBLEM_SOLVER: '혼자 문제를 푸는 성향',
+    SPATIAL_REASONING: '공간 추론',
+    STORY_DRIVEN: '스토리 중심 구성',
+    SYSTEM_OPTIMIZER: '시스템 최적화 성향',
+    TACTICAL_COMBAT: '전술 전투',
+    TACTICAL_RPG: '전술 RPG',
+    TANK_ROLE: '탱커 역할 선호',
+  }
+
+  return labels[normalized] ?? normalizeLabel(label)
+}
+
 function formatSyncTime(value: string | null) {
   if (!value) {
     return 'NOT_SYNCED'
@@ -273,7 +310,7 @@ function Recommend() {
     [syncData],
   )
   const visibleTags = useMemo(
-    () => syncData?.preferenceTags.slice(0, 10) ?? [],
+    () => syncData?.preferenceTags.slice(0, 14) ?? [],
     [syncData],
   )
 
@@ -462,7 +499,7 @@ function Recommend() {
                     key={`${word.label}-${word.category}`}
                     style={wordStyle(word)}
                   >
-                    {normalizeLabel(word.label)}
+                    {analysisLabelKo(word.label)}
                   </span>
                   ))}
                 </div>
@@ -490,7 +527,7 @@ function Recommend() {
                     className="text-base font-body-md text-[var(--gjc-primary)] border border-[var(--gjc-primary)] px-3 py-1 bg-[var(--gjc-surface-container-lowest)] md:text-xl"
                     key={tag.label}
                   >
-                    #{tag.label}
+                    #{analysisLabelKo(tag.label)}
                   </span>
                   ))}
                 </div>
