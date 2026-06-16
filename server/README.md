@@ -19,16 +19,20 @@ cp .env.example .env
 
 Required values:
 
-| Name                | Description                        | Local value              |
-| ------------------- | ---------------------------------- | ------------------------ |
-| `DATABASE_HOST`     | PostgreSQL host                    | `localhost`              |
-| `DATABASE_PORT`     | PostgreSQL port                    | `5432`                   |
-| `DATABASE_USER`     | PostgreSQL user                    | `game_archive_user`      |
-| `DATABASE_PASSWORD` | PostgreSQL password                | `game_archive_password`  |
-| `DATABASE_NAME`     | PostgreSQL database name           | `game_archive`           |
-| `JWT_SECRET`        | Secret key used to sign JWT tokens | Use a long random string |
-| `JWT_EXPIRES_IN`    | JWT expiration time                | `1d`                     |
-| `CLIENT_URL`        | Frontend origin allowed by CORS    | `http://localhost:5173`  |
+| Name                 | Description                                 | Local value                |
+| -------------------- | ------------------------------------------- | -------------------------- |
+| `DATABASE_HOST`      | PostgreSQL host                             | `localhost`                |
+| `DATABASE_PORT`      | PostgreSQL port                             | `5432`                     |
+| `DATABASE_USER`      | PostgreSQL user                             | `game_archive_user`        |
+| `DATABASE_PASSWORD`  | PostgreSQL password                         | `game_archive_password`    |
+| `DATABASE_NAME`      | PostgreSQL database name                    | `game_archive`             |
+| `JWT_SECRET`         | Secret key used to sign JWT tokens          | Use a long random string   |
+| `JWT_EXPIRES_IN`     | JWT expiration time                         | `1d`                       |
+| `CLIENT_URL`         | Frontend origin allowed by CORS             | `http://localhost:5173`    |
+| `DEMO_SEED_ENABLED`  | Enables local demo AI seed data             | `true`                     |
+| `DEMO_USER_EMAIL`    | Fixed demo login email                      | `demo@gaming-journal.club` |
+| `DEMO_USER_PASSWORD` | Fixed demo login password                   | `demo-password`            |
+| `DEMO_STEAM_ID`      | Optional SteamID64 for demo profile linking | empty                      |
 
 Do not commit `server/.env`. It can contain secrets such as `JWT_SECRET`.
 
@@ -101,6 +105,41 @@ This lets TypeORM update the local database schema from entity classes during de
 It is convenient for local work, but it should not be used in production because schema changes can cause data loss.
 
 Before production deployment, replace this with TypeORM migrations.
+
+## Demo AI Seed Data
+
+`DEMO_SEED_ENABLED=true` seeds the minimum data required by the AI recommendation MVP. The seed runs during NestJS application bootstrap after TypeORM synchronization and pgvector setup.
+
+Seeded values:
+
+| Data                   | Purpose                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| Demo user              | Fixed user id `00000000-0000-4000-8000-000000000001` for end-to-end AI demos                            |
+| Games                  | `Into the Breach`, `Disco Elysium`, `CrossCode` with Steam ids, tags, genres, platforms, and cover URLs |
+| Posts                  | One review and two journal entries connected to the demo user and games                                 |
+| UserGame rows          | Playtime and achievement signals for taste analysis                                                     |
+| AiProfile              | Precomputed play style summary, favorite keywords, favorite genres                                      |
+| Recommendation         | A saved recommendation row for `CrossCode`                                                              |
+| EmbeddingDocument rows | Journal, review, profile, and game source documents with pgvector values                                |
+
+The seed is idempotent: restarting the server updates the same fixed records instead of creating duplicates.
+
+Useful verification query:
+
+```sql
+SELECT
+  ed."sourceType",
+  ed."sourceId",
+  ed.metadata ->> 'title' AS title,
+  ed.metadata ->> 'model' AS embedding_model,
+  ed."embedding" IS NOT NULL AS has_embedding
+FROM "EmbeddingDocument" ed
+ORDER BY ed."sourceType", title;
+```
+
+The local seed uses deterministic demo vectors named `demo-hash-embedding-v1`. Real model embeddings are wired in the later RAG issue so local DB setup can be verified without an LLM API key.
+
+For later MCP/API-key work, game metadata should come from IGDB, while Steam API data should be used for Steam profile and play-history linking. GJC-164 only prepares the local DB rows and optional `DEMO_STEAM_ID`; it does not call external APIs.
 
 ## Domain Data Model
 
