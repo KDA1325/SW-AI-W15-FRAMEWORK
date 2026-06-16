@@ -15,6 +15,7 @@ import { RagService } from './rag.service';
 const DEFAULT_AGENT_MAX_ITERATIONS = 4;
 const DEFAULT_AGENT_TIMEOUT_MS = 30_000;
 const MIN_RECOMMENDATION_COUNT = 3;
+const MAX_RECOMMENDATIONS_PER_SERIES = 1;
 
 type AgentSyncOptions = {
   forceRefresh?: boolean;
@@ -26,6 +27,7 @@ type AgentToolResult = {
   error: string | null;
   errorCode: string | null;
   games: Array<{
+    aliases?: string[];
     externalId: {
       id: string;
       provider: 'igdb';
@@ -50,6 +52,7 @@ type McpToolCallSuccess = {
 };
 
 type AgentState = {
+  exclusionSet: RecommendationExclusionSet;
   maxIterations: number;
   recommendations: AiRecommendationCard[];
   startedAt: number;
@@ -66,6 +69,19 @@ type LocalGameRow = {
   steamAppId: string | null;
   tags: string[];
   title: string;
+};
+
+type RecommendationExclusionRow = {
+  gameId: string | null;
+  igdbId: string | null;
+  steamAppId: string | null;
+  title: string;
+};
+
+type RecommendationExclusionSet = {
+  externalIds: Set<string>;
+  gameIds: Set<string>;
+  titles: Set<string>;
 };
 
 @Injectable()
@@ -86,7 +102,9 @@ export class AgentService {
       refreshEmbeddings: options.forceRefresh !== false,
       topK: options.topK,
     });
+    const exclusionSet = await this.loadRecommendationExclusionSet(userId);
     const state: AgentState = {
+      exclusionSet,
       maxIterations: this.maxIterations(),
       recommendations: [],
       startedAt: Date.now(),
@@ -189,7 +207,11 @@ export class AgentService {
       .map((tag) => tag.label.replaceAll('_', ' '));
     const sourceQueries = ragContext.contextSources
       .map((source) => source.gameTitle)
-      .filter((title): title is string => Boolean(title));
+      .filter((title): title is string => Boolean(title))
+      .filter(
+        (title) =>
+          !this.isExcludedTitle(title, this.buildTitleExclusionSet(ragContext)),
+      );
 
     // The loop treats each query as a function-calling decision: inspect state, call search_games, merge results.
     return [...new Set([...sourceQueries, ...tagQueries, 'story rich RPG'])];
@@ -235,29 +257,35 @@ export class AgentService {
       .slice(0, 4)
       .map((tag) => tag.label);
 
-    return toolResult.games.map((game, index) => ({
-      externalId: game.externalId,
-      gameId: null,
-      genres: game.genres,
-      imageUrl: game.imageUrl,
-      matchedTags,
-      matchScore: Number(
-        Math.max(
-          0.72,
-          0.94 - (state.recommendations.length + index) * 0.04,
-        ).toFixed(2),
-      ),
-      platforms: game.platforms,
-      rank: state.recommendations.length + index + 1,
-      reason: this.recommendationReason(
-        game.title,
-        matchedTags,
-        toolResult.query,
-      ),
-      sourceUrl: game.sourceUrl,
-      tags: game.tags,
-      title: game.title,
-    }));
+    return toolResult.games
+      .filter((game) => this.isRecommendationCandidate(game, toolResult.query, state))
+      .map((game, index) => {
+        const candidateTags = this.tagsSupportedByCandidate(matchedTags, game);
+
+        return {
+          externalId: game.externalId,
+          gameId: null,
+          genres: game.genres,
+          imageUrl: game.imageUrl,
+          matchedTags: candidateTags,
+          matchScore: Number(
+            Math.max(
+              0.72,
+              0.94 - (state.recommendations.length + index) * 0.04,
+            ).toFixed(2),
+          ),
+          platforms: game.platforms,
+          rank: state.recommendations.length + index + 1,
+          reason: this.recommendationReason(
+            game.title,
+            candidateTags,
+            toolResult.query,
+          ),
+          sourceUrl: game.sourceUrl,
+          tags: game.tags,
+          title: game.title,
+        };
+      });
   }
 
   private isMcpToolCallSuccess(
@@ -277,8 +305,16 @@ export class AgentService {
       .slice(0, 4)
       .map((tag) => tag.label);
 
-    return localGames.map((game, index) => {
+    return localGames
+      .filter((game) => !this.isExcludedLocalGame(game, state.exclusionSet))
+      .map((game, index) => {
       const signalScore = Number(game.signalScore);
+      const candidateTags = this.tagsSupportedByCandidate(matchedTags, {
+        genres: game.genres,
+        summary: null,
+        tags: game.tags,
+        title: game.title,
+      });
 
       return {
         externalId: {
@@ -288,7 +324,7 @@ export class AgentService {
         gameId: game.id,
         genres: game.genres,
         imageUrl: game.imageUrl,
-        matchedTags,
+        matchedTags: candidateTags,
         matchScore: Number(
           Math.min(
             0.92,
@@ -299,7 +335,7 @@ export class AgentService {
         rank: state.recommendations.length + index + 1,
         reason:
           `Fallback recommendation from this user's own journal, review, and Steam play signals. ` +
-          this.recommendationReason(game.title, matchedTags, game.title),
+          this.recommendationReason(game.title, candidateTags, game.title),
         sourceUrl: game.steamAppId
           ? `https://store.steampowered.com/app/${game.steamAppId}`
           : null,
@@ -346,6 +382,18 @@ export class AgentService {
         FROM "Game" game
         CROSS JOIN user_signal_terms signals
         WHERE COALESCE(array_length(signals.terms, 1), 0) > 0
+          AND NOT EXISTS (
+            SELECT 1
+            FROM "ArchivePost" played_post
+            WHERE played_post."userId" = $1
+              AND played_post."gameId" = game.id
+          )
+          AND NOT EXISTS (
+            SELECT 1
+            FROM "UserGame" played_game
+            WHERE played_game."userId" = $1
+              AND played_game."gameId" = game.id
+          )
           AND EXISTS (
             SELECT 1
             FROM unnest(game.tags || game.genres || game.platforms) AS candidate(term)
@@ -356,6 +404,47 @@ export class AgentService {
       `,
       [userId],
     );
+  }
+
+  private async loadRecommendationExclusionSet(
+    userId: string,
+  ): Promise<RecommendationExclusionSet> {
+    const rows = await this.dataSource.query<RecommendationExclusionRow[]>(
+      `
+        SELECT DISTINCT
+          game.id AS "gameId",
+          game."igdbId",
+          game."steamAppId",
+          game.title
+        FROM "Game" game
+        WHERE EXISTS (
+            SELECT 1
+            FROM "ArchivePost" post
+            WHERE post."userId" = $1
+              AND post."gameId" = game.id
+          )
+          OR EXISTS (
+            SELECT 1
+            FROM "UserGame" user_game
+            WHERE user_game."userId" = $1
+              AND user_game."gameId" = game.id
+          )
+      `,
+      [userId],
+    );
+
+    return {
+      externalIds: new Set(
+        rows.flatMap((row) => [
+          row.igdbId ? `igdb:${row.igdbId}` : null,
+          row.steamAppId ? `steam:${row.steamAppId}` : null,
+        ]).filter((value): value is string => Boolean(value)),
+      ),
+      gameIds: new Set(
+        rows.map((row) => row.gameId).filter((value): value is string => Boolean(value)),
+      ),
+      titles: new Set(rows.map((row) => this.normalizeTitle(row.title))),
+    };
   }
 
   private async saveLatestRecommendationSync(
@@ -398,20 +487,170 @@ export class AgentService {
     recommendations: AiRecommendationCard[],
   ): AiRecommendationCard[] {
     const seen = new Set<string>();
+    const seriesCounts = new Map<string, number>();
     const unique: AiRecommendationCard[] = [];
 
     for (const recommendation of recommendations) {
-      const key = recommendation.title.toLowerCase();
+      const key = this.normalizeTitle(recommendation.title);
+      const seriesKey = this.seriesKey(recommendation.title);
 
       if (seen.has(key)) {
         continue;
       }
 
+      if (
+        (seriesCounts.get(seriesKey) ?? 0) >= MAX_RECOMMENDATIONS_PER_SERIES
+      ) {
+        continue;
+      }
+
       seen.add(key);
+      seriesCounts.set(seriesKey, (seriesCounts.get(seriesKey) ?? 0) + 1);
       unique.push(recommendation);
     }
 
     return unique;
+  }
+
+  private isRecommendationCandidate(
+    game: AgentToolResult['games'][number],
+    query: string,
+    state: AgentState,
+  ) {
+    if (this.isExcludedExternalGame(game, state.exclusionSet)) {
+      return false;
+    }
+
+    return this.hasReliableCandidateMatch(game, query);
+  }
+
+  private isExcludedExternalGame(
+    game: AgentToolResult['games'][number],
+    exclusionSet: RecommendationExclusionSet,
+  ) {
+    return (
+      exclusionSet.externalIds.has(
+        `${game.externalId.provider}:${game.externalId.id}`,
+      ) || exclusionSet.titles.has(this.normalizeTitle(game.title))
+    );
+  }
+
+  private isExcludedLocalGame(
+    game: LocalGameRow,
+    exclusionSet: RecommendationExclusionSet,
+  ) {
+    return (
+      exclusionSet.gameIds.has(game.id) ||
+      exclusionSet.titles.has(this.normalizeTitle(game.title)) ||
+      Boolean(
+        game.steamAppId &&
+          exclusionSet.externalIds.has(`steam:${game.steamAppId}`),
+      )
+    );
+  }
+
+  private hasReliableCandidateMatch(
+    game: AgentToolResult['games'][number],
+    query: string,
+  ) {
+    const normalizedQuery = this.normalizeTitle(query);
+    const normalizedTitle = this.normalizeTitle(game.title);
+    const normalizedAliases = (game.aliases ?? []).map((alias) =>
+      this.normalizeTitle(alias),
+    );
+    const sourceSlug = game.sourceUrl?.split('/').pop()?.replaceAll('-', ' ');
+    const normalizedSlug = this.normalizeTitle(sourceSlug ?? '');
+
+    // GJC-181: 제목 검색은 이름을 검증하고, 태그 검색은 후보 메타데이터가 그 태그를 설명해야 한다.
+    return (
+      normalizedTitle.includes(normalizedQuery) ||
+      normalizedQuery.includes(normalizedTitle) ||
+      normalizedAliases.some(
+        (alias) =>
+          alias.includes(normalizedQuery) || normalizedQuery.includes(alias),
+      ) ||
+      Boolean(
+        normalizedSlug &&
+          (normalizedSlug.includes(normalizedQuery) ||
+            normalizedQuery.includes(normalizedSlug)),
+      ) ||
+      this.querySupportedByCandidate(query, game)
+    );
+  }
+
+  private querySupportedByCandidate(
+    query: string,
+    game: Pick<
+      AgentToolResult['games'][number],
+      'genres' | 'summary' | 'tags' | 'title'
+    >,
+  ) {
+    const searchableText = [
+      game.title,
+      game.summary,
+      ...game.genres,
+      ...game.tags,
+    ]
+      .filter((value): value is string => Boolean(value))
+      .join(' ')
+      .toLowerCase();
+
+    return query
+      .toLowerCase()
+      .split(/[_\s-]+/)
+      .filter((part) => part.length >= 4)
+      .some((part) => searchableText.includes(part));
+  }
+
+  private tagsSupportedByCandidate(
+    matchedTags: string[],
+    game: Pick<
+      AgentToolResult['games'][number],
+      'genres' | 'summary' | 'tags' | 'title'
+    >,
+  ) {
+    const searchableText = [
+      game.title,
+      game.summary,
+      ...game.genres,
+      ...game.tags,
+    ]
+      .filter((value): value is string => Boolean(value))
+      .join(' ')
+      .toLowerCase();
+
+    return matchedTags.filter((tag) =>
+      tag
+        .toLowerCase()
+        .split(/[_\s-]+/)
+        .filter((part) => part.length >= 4)
+        .some((part) => searchableText.includes(part)),
+    );
+  }
+
+  private buildTitleExclusionSet(ragContext: AiRagAnalysisResponse) {
+    return new Set(
+      ragContext.contextSources
+        .map((source) => source.gameTitle)
+        .filter((title): title is string => Boolean(title))
+        .map((title) => this.normalizeTitle(title)),
+    );
+  }
+
+  private isExcludedTitle(title: string, titles: Set<string>) {
+    return titles.has(this.normalizeTitle(title));
+  }
+
+  private normalizeTitle(title: string) {
+    return title.trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  private seriesKey(title: string) {
+    return this.normalizeTitle(title)
+      .replace(/\b[ivx]+\b$/i, '')
+      .replace(/\b\d+\b$/i, '')
+      .split(/[:\-]/)[0]
+      .trim();
   }
 
   private maxIterations(): number {
