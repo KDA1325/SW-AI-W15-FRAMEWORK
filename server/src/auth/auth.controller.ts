@@ -7,6 +7,7 @@ import {
   Get,
   Patch,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -85,6 +86,27 @@ export class AuthController {
   @Get('steam/profile')
   steamProfile(@Req() req: AuthedRequest) {
     return this.steamService.getLinkedProfile(req.user.userId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('steam/openid')
+  startSteamOpenId(@Res() res: Response) {
+    return res.redirect(this.steamService.buildOpenIdLoginUrl())
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('steam/openid/callback')
+  async steamOpenIdCallback(
+    @Req() req: AuthedRequest,
+    @Query() query: Record<string, unknown>,
+    @Res() res: Response,
+  ) {
+    const result = await this.steamService.linkOpenIdProfile(
+      req.user.userId,
+      query,
+    )
+
+    return res.redirect(this.steamService.profileRedirectUrl(result))
   }
 
   @UseGuards(JwtAuthGuard)

@@ -107,6 +107,7 @@ type SteamProfileResponse = {
   error: string | null
   errorCode:
     | 'missing_credentials'
+    | 'openid_failed'
     | 'profile_not_found'
     | 'unauthorized'
     | 'rate_limited'
@@ -123,12 +124,32 @@ type SteamProfileResponse = {
   steamId: string | null
 }
 
+function apiUrl(path: string) {
+  return new URL(
+    path,
+    api.defaults.baseURL ?? window.location.origin,
+  ).toString()
+}
+
 function Profile() {
   const { refreshUser, user } = useAuth()
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isSteamLoading, setIsSteamLoading] = useState(false)
   const [steamInput, setSteamInput] = useState(user?.steamId ?? '')
-  const [steamMessage, setSteamMessage] = useState<string | null>(null)
+  const [steamMessage, setSteamMessage] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search)
+    const steamStatus = params.get('steam')
+
+    if (steamStatus === 'connected') {
+      return 'STEAM_OPENID_CONNECTED'
+    }
+
+    if (steamStatus === 'failed') {
+      return `STEAM_OPENID_FAILED_${params.get('steam_error') ?? 'UNKNOWN'}`
+    }
+
+    return null
+  })
   const [steamState, setSteamState] = useState<SteamProfileResponse | null>(
     null,
   )
@@ -187,6 +208,10 @@ function Profile() {
     } finally {
       setIsSteamLoading(false)
     }
+  }
+
+  const startSteamOpenIdLink = () => {
+    window.location.href = apiUrl('/auth/steam/openid')
   }
 
   const unlinkSteamProfile = async () => {
@@ -304,6 +329,14 @@ function Profile() {
           </div>
 
           <div className="md:col-span-5 flex flex-col gap-3">
+            <button
+              className="border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] px-4 py-3 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-surface-container-lowest)] hover:text-[var(--gjc-primary)]"
+              onClick={startSteamOpenIdLink}
+              type="button"
+            >
+              STEAM_LOGIN
+            </button>
+
             <div className="flex flex-col sm:flex-row gap-2">
               <input
                 className="min-w-0 flex-1 border-2 border-[var(--gjc-primary)] bg-white px-3 py-2 font-body-md text-sm text-[var(--gjc-primary)] outline-none"

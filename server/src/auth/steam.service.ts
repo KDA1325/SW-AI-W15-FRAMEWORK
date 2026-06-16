@@ -7,6 +7,7 @@ import { User } from './entities/user.entity'
 
 type SteamProfileErrorCode =
   | 'missing_credentials'
+  | 'openid_failed'
   | 'profile_not_found'
   | 'unauthorized'
   | 'rate_limited'
@@ -38,6 +39,13 @@ type SteamProfileResponse = {
   error: string | null
   errorCode: SteamProfileErrorCode | null
   profile: SteamProfile | null
+  steamId: string | null
+}
+
+type SteamOpenIdLinkResponse = {
+  connected: boolean
+  error: string | null
+  errorCode: SteamProfileErrorCode | null
   steamId: string | null
 }
 
@@ -113,6 +121,56 @@ export class SteamService {
     } satisfies SteamProfileResponse
   }
 
+  buildOpenIdLoginUrl() {
+    const returnTo = `${this.serverBaseUrl()}/auth/steam/openid/callback`
+    const params = new URLSearchParams({
+      'openid.claimed_id': 'http://specs.openid.net/auth/2.0/identifier_select',
+      'openid.identity': 'http://specs.openid.net/auth/2.0/identifier_select',
+      'openid.mode': 'checkid_setup',
+      'openid.ns': 'http://specs.openid.net/auth/2.0',
+      'openid.realm': this.serverBaseUrl(),
+      'openid.return_to': returnTo,
+    })
+
+    return `https://steamcommunity.com/openid/login?${params.toString()}`
+  }
+
+  async linkOpenIdProfile(
+    userId: string,
+    query: Record<string, unknown>,
+  ): Promise<SteamOpenIdLinkResponse> {
+    const steamId = await this.verifyOpenIdCallback(query)
+
+    if (!steamId) {
+      return {
+        connected: false,
+        error: 'Steam OpenID verification failed.',
+        errorCode: 'openid_failed',
+        steamId: null,
+      }
+    }
+
+    await this.userRepository.update(userId, { steamId })
+
+    return {
+      connected: true,
+      error: null,
+      errorCode: null,
+      steamId,
+    }
+  }
+
+  profileRedirectUrl(result: SteamOpenIdLinkResponse) {
+    const params = new URLSearchParams()
+    params.set('steam', result.connected ? 'connected' : 'failed')
+
+    if (result.errorCode) {
+      params.set('steam_error', result.errorCode)
+    }
+
+    return `${this.clientBaseUrl()}/profile?${params.toString()}`
+  }
+
   private parseSteamProfileInput(
     rawProfile: string,
   ): { kind: 'steamid'; value: string } | { kind: 'vanity'; value: string } {
@@ -133,6 +191,51 @@ export class SteamService {
     throw new BadRequestException(
       'SteamID64, Steam profile URL, or vanity URL name is required.',
     )
+  }
+
+  private async verifyOpenIdCallback(
+    query: Record<string, unknown>,
+  ): Promise<string | null> {
+    const claimedId = this.stringQueryValue(query['openid.claimed_id'])
+    const steamId = claimedId?.match(
+      /^https?:\/\/steamcommunity\.com\/openid\/id\/(\d{17})$/,
+    )?.[1]
+
+    if (this.stringQueryValue(query['openid.mode']) !== 'id_res' || !steamId) {
+      return null
+    }
+
+    const verificationBody = new URLSearchParams()
+
+    for (const [key, value] of Object.entries(query)) {
+      if (key.startsWith('openid.') && typeof value === 'string') {
+        verificationBody.set(key, value)
+      }
+    }
+
+    // Steam OpenID requires the exact callback payload to be posted back with check_authentication.
+    verificationBody.set('openid.mode', 'check_authentication')
+
+    try {
+      const response = await axios.post<string>(
+        'https://steamcommunity.com/openid/login',
+        verificationBody,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          timeout: 10_000,
+        },
+      )
+
+      return response.data.includes('is_valid:true') ? steamId : null
+    } catch {
+      return null
+    }
+  }
+
+  private stringQueryValue(value: unknown) {
+    return typeof value === 'string' ? value : null
   }
 
   private async resolveVanityUrl(
@@ -286,5 +389,17 @@ export class SteamService {
 
   private apiKey() {
     return this.config.get<string>('STEAM_WEB_API_KEY')?.trim() ?? ''
+  }
+
+  private serverBaseUrl() {
+    return (
+      this.config.get<string>('SERVER_URL')?.trim() || 'http://localhost:3000'
+    ).replace(/\/+$/, '')
+  }
+
+  private clientBaseUrl() {
+    return (
+      this.config.get<string>('CLIENT_URL')?.trim() || 'http://localhost:5173'
+    ).replace(/\/+$/, '')
   }
 }

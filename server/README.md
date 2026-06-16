@@ -28,6 +28,7 @@ Required values:
 | `DATABASE_NAME`               | PostgreSQL database name                                           | `game_archive`             |
 | `JWT_SECRET`                  | Secret key used to sign JWT tokens                                 | Use a long random string   |
 | `JWT_EXPIRES_IN`              | JWT expiration time                                                | `1d`                       |
+| `SERVER_URL`                  | Backend public origin used for Steam OpenID callback URLs          | `http://localhost:3000`    |
 | `CLIENT_URL`                  | Frontend origin allowed by CORS                                    | `http://localhost:5173`    |
 | `DEMO_SEED_ENABLED`           | Enables local demo AI seed data                                    | `true`                     |
 | `DEMO_USER_EMAIL`             | Fixed demo login email                                             | `demo@gaming-journal.club` |
@@ -145,7 +146,7 @@ When `STEAM_WEB_API_KEY` is configured, the server calls Steam Web API `ISteamUs
 
 When the key is missing, the API returns `connected: false`, `errorCode: "missing_credentials"`, and does not store the profile. Vanity URLs also require the key because they must be resolved through `ISteamUser/ResolveVanityURL/v1`.
 
-This is an MVP profile-link feature. It displays and stores a Steam profile identifier, but it does not prove account ownership. Use Steam OpenID in a later auth flow if the app must verify that the logged-in user controls that Steam account.
+`GET /auth/steam/openid` starts the ownership-verified Steam OpenID link flow. The callback posts Steam's signed OpenID payload back to Steam with `check_authentication`, stores the verified SteamID64 on success, and redirects back to `${CLIENT_URL}/profile` with the link result in query parameters.
 
 ### Live Steam Profile Smoke Test
 

@@ -23,8 +23,11 @@ describe('AuthController', () => {
         {
           provide: SteamService,
           useValue: {
+            buildOpenIdLoginUrl: jest.fn(),
             getLinkedProfile: jest.fn(),
+            linkOpenIdProfile: jest.fn(),
             linkProfile: jest.fn(),
+            profileRedirectUrl: jest.fn(),
             unlinkProfile: jest.fn(),
           },
         },
