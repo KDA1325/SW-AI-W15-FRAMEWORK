@@ -19,16 +19,16 @@ cp .env.example .env
 
 Required values:
 
-| Name | Description | Local value |
-| --- | --- | --- |
-| `DATABASE_HOST` | PostgreSQL host | `localhost` |
-| `DATABASE_PORT` | PostgreSQL port | `5432` |
-| `DATABASE_USER` | PostgreSQL user | `game_archive_user` |
-| `DATABASE_PASSWORD` | PostgreSQL password | `game_archive_password` |
-| `DATABASE_NAME` | PostgreSQL database name | `game_archive` |
-| `JWT_SECRET` | Secret key used to sign JWT tokens | Use a long random string |
-| `JWT_EXPIRES_IN` | JWT expiration time | `1d` |
-| `CLIENT_URL` | Frontend origin allowed by CORS | `http://localhost:5173` |
+| Name                | Description                        | Local value              |
+| ------------------- | ---------------------------------- | ------------------------ |
+| `DATABASE_HOST`     | PostgreSQL host                    | `localhost`              |
+| `DATABASE_PORT`     | PostgreSQL port                    | `5432`                   |
+| `DATABASE_USER`     | PostgreSQL user                    | `game_archive_user`      |
+| `DATABASE_PASSWORD` | PostgreSQL password                | `game_archive_password`  |
+| `DATABASE_NAME`     | PostgreSQL database name           | `game_archive`           |
+| `JWT_SECRET`        | Secret key used to sign JWT tokens | Use a long random string |
+| `JWT_EXPIRES_IN`    | JWT expiration time                | `1d`                     |
+| `CLIENT_URL`        | Frontend origin allowed by CORS    | `http://localhost:5173`  |
 
 Do not commit `server/.env`. It can contain secrets such as `JWT_SECRET`.
 
@@ -42,12 +42,12 @@ docker compose up -d
 
 The Docker PostgreSQL settings are defined in `docker-compose.yml`.
 
-| Docker setting | Server env value |
-| --- | --- |
-| `POSTGRES_DB=game_archive` | `DATABASE_NAME=game_archive` |
-| `POSTGRES_USER=game_archive_user` | `DATABASE_USER=game_archive_user` |
-| `POSTGRES_PASSWORD=game_archive_password` | `DATABASE_PASSWORD=game_archive_password` |
-| `5432:5432` | `DATABASE_HOST=localhost`, `DATABASE_PORT=5432` |
+| Docker setting                            | Server env value                                |
+| ----------------------------------------- | ----------------------------------------------- |
+| `POSTGRES_DB=game_archive`                | `DATABASE_NAME=game_archive`                    |
+| `POSTGRES_USER=game_archive_user`         | `DATABASE_USER=game_archive_user`               |
+| `POSTGRES_PASSWORD=game_archive_password` | `DATABASE_PASSWORD=game_archive_password`       |
+| `5432:5432`                               | `DATABASE_HOST=localhost`, `DATABASE_PORT=5432` |
 
 ## Install and Run
 
@@ -94,7 +94,7 @@ JWT settings are configured in `src/auth/auth.module.ts`.
 The current local development setting uses:
 
 ```ts
-synchronize: true
+synchronize: true;
 ```
 
 This lets TypeORM update the local database schema from entity classes during development.
@@ -108,16 +108,16 @@ GJC-63 defines the core data model around users, games, archive posts, comments,
 
 ### Entities
 
-| Entity | Purpose |
-| --- | --- |
-| `User` | Authenticated user profile. Stores email, password hash, nickname, bio, profile image, gamer tags, and optional Steam id. |
-| `Game` | Game master data. Stores external ids, title, image, description, genres, platforms, and store/game tags. |
-| `UserGame` | Join entity between `User` and `Game` with playtime, achievement rate, and last played time. |
-| `ArchivePost` | Unified post table for reviews and journals. `type` is `REVIEW` or `JOURNAL`; `rating` is used only for reviews. |
-| `Comment` | Comment table for archive posts. Supports nested replies through `parentCommentId`. |
-| `AiProfile` | One AI-generated taste profile per user, including play style summary and favorite keywords/genres. |
-| `Recommendation` | Recommended game result for a user, including reason, score, and rank. |
-| `EmbeddingDocument` | RAG source document metadata for games, archive posts, and AI profiles. |
+| Entity              | Purpose                                                                                                                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `User`              | Authenticated user profile. Stores email, password hash, nickname, bio, profile image, gamer tags, and optional Steam id. |
+| `Game`              | Game master data. Stores external ids, title, image, description, genres, platforms, and store/game tags.                 |
+| `UserGame`          | Join entity between `User` and `Game` with playtime, achievement rate, and last played time.                              |
+| `ArchivePost`       | Unified post table for reviews and journals. `type` is `REVIEW` or `JOURNAL`; `rating` is used only for reviews.          |
+| `Comment`           | Comment table for archive posts. Supports nested replies through `parentCommentId`.                                       |
+| `AiProfile`         | One AI-generated taste profile per user, including play style summary and favorite keywords/genres.                       |
+| `Recommendation`    | Recommended game result for a user, including reason, score, and rank.                                                    |
+| `EmbeddingDocument` | RAG source document metadata for games, archive posts, and AI profiles.                                                   |
 
 ### Relationships
 
@@ -139,6 +139,165 @@ EmbeddingDocument sourceType/sourceId -> Game | ArchivePost | AiProfile
 - `EmbeddingDocument.embedding` is not mapped as a TypeORM `@Column` because this project uses PostgreSQL `pgvector`. The `PgvectorSetupService` creates the actual `vector(1536)` column and HNSW index with raw SQL after TypeORM synchronization.
 - User-entered gamer tags are stored on `User.gamerTags`.
 - Store/game tags from Steam are currently stored on `Game.tags` as a `text[]` array. A separate `Tag` entity is not part of the current simplified schema.
+
+## AI Recommendation MVP Contract
+
+GJC-163 fixes the one-day MVP contract for the AI recommendation flow. The contract type lives in `src/ai/recommendation-contract.ts` so later DB, RAG, MCP, Agent, and React work can target one response shape instead of separate mock structures.
+
+### Jira P0 Order
+
+| Order | Issue     | Output                                                     |
+| ----- | --------- | ---------------------------------------------------------- |
+| 1     | `GJC-163` | API contract and sample SYNC response                      |
+| 2     | `GJC-164` | Postgres, pgvector, seed user, seed posts, seed embeddings |
+| 3     | `GJC-80`  | RAG search and taste analysis response                     |
+| 4     | `GJC-83`  | MCP JSON-RPC `search_games` tool using a real game API     |
+| 5     | `GJC-85`  | API key, permission, and error handling strategy           |
+| 6     | `GJC-88`  | Agent loop that combines RAG and MCP tool results          |
+| 7     | `GJC-166` | React recommendation page wired to the SYNC API            |
+| 8     | `GJC-165` | Smoke test and quickstart documentation                    |
+
+### Vertical Flow
+
+```text
+React /recommend SYNC button
+  -> POST /ai/recommendations/sync
+  -> NestJS BFF validates JWT cookie and resolves userId
+  -> FastAPI Agent receives { userId, requestId, forceRefresh, topK }
+  -> RAG reads ArchivePost, Game, AiProfile, and EmbeddingDocument through Postgres pgvector
+  -> MCP JSON-RPC server exposes tools/list and tools/call
+  -> Agent calls search_games through MCP and asks the LLM for the final JSON
+  -> NestJS returns one AiRecommendationSyncResponse to React
+```
+
+### Public NestJS API
+
+`POST /ai/recommendations/sync`
+
+React should call this endpoint with `withCredentials: true`. It should not send `userId`; NestJS must derive the user from the JWT cookie, the same way `PostsController` does.
+
+Request:
+
+```json
+{
+  "forceRefresh": false,
+  "topK": 6
+}
+```
+
+Response fields map directly to the current recommendation page:
+
+| Field              | React section                           | Source                           |
+| ------------------ | --------------------------------------- | -------------------------------- |
+| `preferenceTags`   | `GAMES YOU ENJOY` tag chips             | RAG taste analysis               |
+| `playStyleSummary` | Short explanation near SYNC state       | LLM synthesis                    |
+| `wordCloud`        | `YOUR PLAY STYLE` word cloud            | RAG text mining and LLM cleanup  |
+| `recommendations`  | `RECOMMENDED GAMES` cards               | Agent merged RAG and MCP results |
+| `contextSources`   | Debug or expandable evidence list       | pgvector top-k search            |
+| `pipeline`         | Demo proof that RAG, MCP, and Agent ran | Backend trace                    |
+
+### Internal FastAPI Agent API
+
+`POST /agent/recommendations/sync`
+
+NestJS sends this request to FastAPI after authentication:
+
+```json
+{
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "requestId": "gjc-demo-sync-001",
+  "forceRefresh": false,
+  "topK": 6
+}
+```
+
+### Final SYNC Response Example
+
+```json
+{
+  "requestId": "gjc-demo-sync-001",
+  "userId": "00000000-0000-4000-8000-000000000001",
+  "generatedAt": "2026-06-16T12:00:00.000+09:00",
+  "lastSyncAt": "2026-06-16T12:00:00.000+09:00",
+  "preferenceTags": [
+    { "label": "TACTICAL_RPG", "weight": 0.95, "sourceCount": 4 },
+    { "label": "STORY_DRIVEN", "weight": 0.91, "sourceCount": 5 },
+    { "label": "RETRO_PIXEL", "weight": 0.86, "sourceCount": 3 }
+  ],
+  "playStyleSummary": "You favor deliberate combat, readable systems, and games where repeated failure reveals better strategy rather than pure grind.",
+  "wordCloud": [
+    {
+      "label": "TACTICAL",
+      "weight": 0.95,
+      "sourceCount": 4,
+      "category": "mechanic"
+    },
+    {
+      "label": "NARRATIVE",
+      "weight": 0.91,
+      "sourceCount": 5,
+      "category": "theme"
+    }
+  ],
+  "recommendations": [
+    {
+      "rank": 1,
+      "gameId": null,
+      "externalId": { "provider": "steam", "id": "368340" },
+      "title": "CrossCode",
+      "imageUrl": "https://cdn.akamai.steamstatic.com/steam/apps/368340/header.jpg",
+      "genres": ["Action RPG", "Puzzle"],
+      "platforms": ["PC", "Steam"],
+      "tags": ["Pixel Graphics", "Story Rich", "Action RPG"],
+      "matchScore": 0.93,
+      "matchedTags": ["RETRO_PIXEL", "STORY_DRIVEN", "TACTICAL_RPG"],
+      "reason": "Your journals emphasize precise combat and puzzle-like encounters, which match the action RPG structure and pixel presentation of CrossCode.",
+      "sourceUrl": "https://store.steampowered.com/app/368340"
+    }
+  ],
+  "contextSources": [
+    {
+      "sourceType": "ARCHIVE_POST",
+      "sourceId": "11111111-1111-4111-8111-111111111111",
+      "title": "Boss patterns feel fair when the rules are visible",
+      "gameTitle": "Into the Breach",
+      "excerpt": "I enjoyed how every loss taught me a clearer tactical rule instead of asking for more grinding.",
+      "similarity": 0.89
+    }
+  ],
+  "pipeline": {
+    "rag": { "topK": 6, "sourceCount": 6 },
+    "mcp": {
+      "toolName": "search_games",
+      "provider": "steam",
+      "resultCount": 10
+    },
+    "agent": {
+      "maxIterations": 4,
+      "iterations": 3,
+      "stoppedReason": "completed"
+    }
+  }
+}
+```
+
+### Error Shape
+
+```json
+{
+  "requestId": "gjc-demo-sync-001",
+  "message": "AI recommendation sync failed.",
+  "fallbackAvailable": true
+}
+```
+
+### Implementation Notes For The Next P0 Issues
+
+- `GJC-164` should create a deterministic seed user with id `00000000-0000-4000-8000-000000000001` and enough journal/review rows to produce the sample tags.
+- `GJC-80` should return `preferenceTags`, `playStyleSummary`, `wordCloud`, and `contextSources` before game recommendation cards exist.
+- `GJC-83` should expose at least `tools/list` and `tools/call` over JSON-RPC, with a `search_games` tool returning fields that can fill `AiRecommendationCard`.
+- `GJC-88` should cap the agent loop with `maxIterations`, timeout handling, and a structured fallback that still returns `AiRecommendationErrorResponse`.
+- `GJC-166` should remove the static `recommendationCards`, `wordCloud`, and `tasteTags` arrays from `client/src/pages/Recommend.tsx` and render this API response instead.
 
 ## Useful Commands
 
