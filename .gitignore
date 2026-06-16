@@ -30,6 +30,11 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Understand Anything runtime artifacts
+.understand-anything/tmp/
+.understand-anything/.trash-*/
+.understand-anything/dashboard.*
+
 # OS files
 .DS_Store
 Thumbs.db

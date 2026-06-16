@@ -1,17 +1,27 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "75312d622d37c55af258df43b6b4481a310d035e",
-  "generatedAt": "2026-06-16T18:49:45.330Z",
+  "gitCommitHash": "c32cd3bd6624ec884ae9cb5240d6a964e465657b",
+  "generatedAt": "2026-06-16T19:10:40.720Z",
   "files": {
     ".understand-anything/.understandignore": {
       "filePath": ".understand-anything/.understandignore",
-      "contentHash": "48bc7355c5d7d0d92d4986a74a6f019debbe01252513747618b35fe835d08e12",
+      "contentHash": "f0eb5264c13a8f719d709b53b5a203933f4fa0fddd8e095c22aca7783fe7f43f",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 25,
+      "totalLines": 33,
       "hasStructuralAnalysis": false
+    },
+    ".understand-anything/config.json": {
+      "filePath": ".understand-anything/config.json",
+      "contentHash": "6241daac28ec1ac6166af17c73964fef9fa7e728b98c19706b07b7b8f0712b20",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": true
     },
     "ai-compute/app/__init__.py": {
       "filePath": "ai-compute/app/__init__.py",
@@ -25,7 +35,7 @@
     },
     "ai-compute/app/embedding.py": {
       "filePath": "ai-compute/app/embedding.py",
-      "contentHash": "9ee06e9b5aca4f8f1c653a486e40f5da3ea761421667d20b24e4ced28713ce63",
+      "contentHash": "16cc0d2d8f357d264a6f6b4ccf15336f0197635e1f6096a8d5a28cc497d168e9",
       "functions": [
         {
           "name": "build_demo_embedding",
@@ -58,7 +68,7 @@
           "lineCount": 26
         },
         {
-          "name": "create_openai_embedding",
+          "name": "create_langchain_openai_embedding",
           "params": [
             "text",
             "model",
@@ -66,7 +76,7 @@
           ],
           "returnType": "EmbeddingResult | None",
           "exported": true,
-          "lineCount": 43
+          "lineCount": 34
         }
       ],
       "classes": [
@@ -95,12 +105,6 @@
           "specifiers": [
             "dataclass"
           ]
-        },
-        {
-          "source": "httpx",
-          "specifiers": [
-            "httpx"
-          ]
         }
       ],
       "exports": [
@@ -108,9 +112,9 @@
         "build_demo_embedding",
         "truncate_embedding_input",
         "create_embedding",
-        "create_openai_embedding"
+        "create_langchain_openai_embedding"
       ],
-      "totalLines": 115,
+      "totalLines": 104,
       "hasStructuralAnalysis": true
     },
     "ai-compute/app/main.py": {
@@ -246,22 +250,22 @@
     },
     "ai-compute/README.md": {
       "filePath": "ai-compute/README.md",
-      "contentHash": "3e1b94f8dd0084927c99b88ef90323c9a63629513e3aa95ce026ebc7e8bcd80f",
+      "contentHash": "eaf0ab3f425e053a8f22f2b46a8ea50d1090d7494cbcbb7ca040d3b0c170bab6",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 52,
+      "totalLines": 53,
       "hasStructuralAnalysis": true
     },
     "ai-compute/requirements.txt": {
       "filePath": "ai-compute/requirements.txt",
-      "contentHash": "c6548bf24fd0b033a873b4fb245b200a9186d9ed01e77d7dd838967bcd5d56f1",
+      "contentHash": "7b6ef648d0c22e180f05a12298a72a5b8856a115121c8da7dc8252dc9573f4d8",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 4,
+      "totalLines": 5,
       "hasStructuralAnalysis": false
     },
     "ai-compute/scripts/compare_embed.py": {
@@ -2630,7 +2634,7 @@
     },
     "docs/GJC-78_RAG_TECH_DECISION.md": {
       "filePath": "docs/GJC-78_RAG_TECH_DECISION.md",
-      "contentHash": "920b8e8f44e7727ea3cf131468347fe82156506084a16dd84b771b792cc6045b",
+      "contentHash": "2fd537d81bf4b8e502bd1459dc88e4a9ddf43480e8a7433f59855c7e6e553bd3",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -2900,7 +2904,7 @@
     },
     "GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md": {
       "filePath": "GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md",
-      "contentHash": "434cf6ce960636b0b0a5df0d4f5d7feae7e58497100dd7cca6e17b365c96aab5",
+      "contentHash": "f748f548a417c53fe44be9044329ba7bc64da5c8d80d12dfba5a2f6097f7b334",
       "functions": [],
       "classes": [],
       "imports": [],
@@ -3000,12 +3004,12 @@
     },
     "README.md": {
       "filePath": "README.md",
-      "contentHash": "989b658a27383d0a1659a287e9e4cff35b298c3e102e7092254a3e247a92d2f1",
+      "contentHash": "f5b2e915fa69b74b9655d179a99788fc0a26703c4708b65661d2dc47453cbe4c",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 247,
+      "totalLines": 248,
       "hasStructuralAnalysis": true
     },
     "server/.env.example": {
@@ -3075,12 +3079,12 @@
     },
     "server/README.md": {
       "filePath": "server/README.md",
-      "contentHash": "d99ef6e65d335920fde507dfae4fbb38c7a4993cee4ed808fedeea17ea421cc4",
+      "contentHash": "a0e63972a2918b9a21e535d361c569445217aa04b2ecfd18f699d82b60806eba",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 698,
+      "totalLines": 701,
       "hasStructuralAnalysis": true
     },
     "server/scripts/smoke-ai-compute.js": {

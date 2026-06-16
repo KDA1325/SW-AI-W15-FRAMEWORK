@@ -22,3 +22,11 @@ docs/datasets/
 *.ico
 *.woff
 *.woff2
+.understand-anything/dashboard.*
+.understand-anything/tmp/
+.understand-anything/intermediate/
+.understand-anything/.trash-*/
+.understand-anything/fingerprints.json
+.understand-anything/knowledge-graph.json
+.understand-anything/meta.json
+.understand-anything/*.pending

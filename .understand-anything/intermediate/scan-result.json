@@ -1,11 +1,46 @@
 {
   "scriptCompleted": true,
+  "project": {
+    "name": "Gaming Journal Club",
+    "languages": [
+      "config",
+      "css",
+      "dockerfile",
+      "html",
+      "javascript",
+      "json",
+      "markdown",
+      "python",
+      "txt",
+      "typescript",
+      "unknown",
+      "yaml"
+    ],
+    "frameworks": [
+      "React",
+      "Vite",
+      "NestJS",
+      "FastAPI",
+      "LangChain",
+      "TypeORM",
+      "PostgreSQL pgvector"
+    ],
+    "description": "게임 저널, RAG 기반 추천, MCP 도구 호출, FastAPI LangChain 임베딩 계산을 결합한 React/NestJS MVP입니다.",
+    "analyzedAt": "2026-06-16T19:10:36.710Z",
+    "gitCommitHash": "c32cd3bd6624ec884ae9cb5240d6a964e465657b"
+  },
   "files": [
     {
       "path": ".understand-anything/.understandignore",
       "language": "unknown",
-      "sizeLines": 24,
+      "sizeLines": 32,
       "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/config.json",
+      "language": "json",
+      "sizeLines": 3,
+      "fileCategory": "config"
     },
     {
       "path": "ai-compute/app/__init__.py",
@@ -16,7 +51,7 @@
     {
       "path": "ai-compute/app/embedding.py",
       "language": "python",
-      "sizeLines": 114,
+      "sizeLines": 103,
       "fileCategory": "code"
     },
     {
@@ -40,13 +75,13 @@
     {
       "path": "ai-compute/README.md",
       "language": "markdown",
-      "sizeLines": 51,
+      "sizeLines": 52,
       "fileCategory": "docs"
     },
     {
       "path": "ai-compute/requirements.txt",
       "language": "txt",
-      "sizeLines": 3,
+      "sizeLines": 4,
       "fileCategory": "docs"
     },
     {
@@ -718,7 +753,7 @@
     {
       "path": "README.md",
       "language": "markdown",
-      "sizeLines": 246,
+      "sizeLines": 247,
       "fileCategory": "docs"
     },
     {
@@ -748,7 +783,7 @@
     {
       "path": "server/README.md",
       "language": "markdown",
-      "sizeLines": 697,
+      "sizeLines": 700,
       "fileCategory": "docs"
     },
     {
@@ -1112,27 +1147,27 @@
       "fileCategory": "config"
     }
   ],
-  "totalFiles": 185,
-  "filteredByIgnore": 24,
+  "totalFiles": 186,
+  "filteredByIgnore": 38,
   "estimatedComplexity": "large",
   "stats": {
-    "filesScanned": 185,
+    "filesScanned": 186,
     "byCategory": {
       "code": 98,
+      "config": 11,
       "infra": 2,
       "docs": 42,
-      "markup": 33,
-      "config": 10
+      "markup": 33
     },
     "byLanguage": {
       "unknown": 1,
+      "json": 10,
       "python": 5,
       "dockerfile": 1,
       "markdown": 41,
       "txt": 1,
       "javascript": 5,
       "html": 18,
-      "json": 9,
       "typescript": 87,
       "css": 15,
       "yaml": 1,
@@ -1141,6 +1176,7 @@
   },
   "importMap": {
     ".understand-anything/.understandignore": [],
+    ".understand-anything/config.json": [],
     "ai-compute/app/__init__.py": [],
     "ai-compute/app/embedding.py": [],
     "ai-compute/app/main.py": [
