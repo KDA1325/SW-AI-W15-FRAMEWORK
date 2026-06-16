@@ -15,6 +15,7 @@ export type PostSort = 'latest' | 'oldest' | 'rating'
 type JournalLimit = 5 | 10 | 15
 
 const DEFAULT_REVIEW_SORT: PostSort = 'rating'
+const DEFAULT_REVIEW_LIMIT: JournalLimit = 10
 const DEFAULT_JOURNAL_SORT: PostSort = 'latest'
 const DEFAULT_JOURNAL_LIMIT: JournalLimit = 5
 
@@ -108,12 +109,19 @@ function Journals() {
   const [reviewSort, setReviewSort] = useState<PostSort>(() =>
     parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT),
   )
+  const [reviewPage, setReviewPage] = useState(() => parseJournalPage(searchParams.get('reviewPage')))
   const [journalSort, setJournalSort] = useState<PostSort>(() =>
     parseJournalSort(searchParams.get('journalSort')),
   )
   const [journalLimit, setJournalLimit] = useState<JournalLimit>(() => parseJournalLimit(searchParams.get('limit')))
   const [journalPage, setJournalPage] = useState(() => parseJournalPage(searchParams.get('page')))
   const [journalPageInfo, setJournalPageInfo] = useState({
+    hasNextPage: false,
+    hasPreviousPage: false,
+    total: 0,
+    totalPages: 0,
+  })
+  const [reviewPageInfo, setReviewPageInfo] = useState({
     hasNextPage: false,
     hasPreviousPage: false,
     total: 0,
@@ -131,6 +139,8 @@ function Journals() {
       // 검색어가 있을 때는 q=검색어를 추가해서 서버가 DB에서 제목/본문/게임명 검색을 수행하게 합니다.
       // Build separate query strings because REVIEW_LOGS and JOURNAL_LOGS have different controls.
       const reviewParams = new URLSearchParams({
+        limit: String(DEFAULT_REVIEW_LIMIT),
+        page: String(reviewPage),
         type: 'REVIEW',
         mine: 'true',
         sort: reviewSort,
@@ -153,10 +163,18 @@ function Journals() {
         api.get<PostListResponse>(`/posts?${reviewParams.toString()}`),
         api.get<PostListResponse>(`/posts?${journalParams.toString()}`),
       ])
+      const reviewPageData = reviewResponse.data
       const journalPageData = journalResponse.data
 
-      setReviews(reviewResponse.data.items)
+      setReviews(reviewPageData.items)
       setJournals(journalPageData.items)
+      // GJC-176: REVIEW_LOGS also keeps API pagination metadata so profile-only-looking reviews can be reached here.
+      setReviewPageInfo({
+        hasNextPage: reviewPageData.hasNextPage,
+        hasPreviousPage: reviewPageData.hasPreviousPage,
+        total: reviewPageData.total,
+        totalPages: reviewPageData.totalPages,
+      })
       // The API owns pagination truth, so NEXT/PREV and TOTAL labels do not guess from array length.
       setJournalPageInfo({
         hasNextPage: journalPageData.hasNextPage,
@@ -169,10 +187,13 @@ function Journals() {
         // A shared URL can point past the last page after filters/data change; clamp before rendering a broken page.
         setJournalPage(journalPageData.totalPages)
       }
+      if (reviewPageData.totalPages > 0 && reviewPage > reviewPageData.totalPages) {
+        setReviewPage(reviewPageData.totalPages)
+      }
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
     }
-  }, [journalLimit, journalPage, journalSort, reviewSort, searchQuery])
+  }, [journalLimit, journalPage, journalSort, reviewPage, reviewSort, searchQuery])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -181,6 +202,7 @@ function Journals() {
       setSearchInput(nextSearchQuery)
       setSearchQuery(nextSearchQuery)
       setReviewSort(parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT))
+      setReviewPage(parseJournalPage(searchParams.get('reviewPage')))
       setJournalSort(parseJournalSort(searchParams.get('journalSort')))
       setJournalLimit(parseJournalLimit(searchParams.get('limit')))
       setJournalPage(parseJournalPage(searchParams.get('page')))
@@ -200,6 +222,10 @@ function Journals() {
       nextParams.set('reviewSort', reviewSort)
     }
 
+    if (reviewPage !== 1) {
+      nextParams.set('reviewPage', String(reviewPage))
+    }
+
     if (journalSort !== DEFAULT_JOURNAL_SORT) {
       nextParams.set('journalSort', journalSort)
     }
@@ -216,7 +242,7 @@ function Journals() {
       // Query-backed controls are reflected in the URL so refresh/share preserves the same list.
       setSearchParams(nextParams, { replace: true })
     }
-  }, [journalLimit, journalPage, journalSort, reviewSort, searchParams, searchQuery, setSearchParams])
+  }, [journalLimit, journalPage, journalSort, reviewPage, reviewSort, searchParams, searchQuery, setSearchParams])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -229,6 +255,7 @@ function Journals() {
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       // Search input is debounced before it becomes an API query, so typing does not fire one request per key.
+      setReviewPage(1)
       setJournalPage(1)
       setSearchQuery(searchInput.trim())
     }, 350)
@@ -252,6 +279,7 @@ function Journals() {
     // trim()으로 앞뒤 공백을 제거한 값을 검색어로 확정합니다.
     // 만약 공백만 입력했다면 빈 문자열이 되므로 q를 붙이지 않고 전체 목록을 다시 조회합니다.
     // A new search should always start from the first journal page.
+    setReviewPage(1)
     setJournalPage(1)
     setSearchQuery(searchInput.trim())
   }
@@ -261,6 +289,7 @@ function Journals() {
     setSearchInput('')
     setSearchQuery('')
     setReviewSort(DEFAULT_REVIEW_SORT)
+    setReviewPage(1)
     setJournalSort(DEFAULT_JOURNAL_SORT)
     setJournalLimit(DEFAULT_JOURNAL_LIMIT)
     setJournalPage(1)
@@ -324,7 +353,10 @@ function Journals() {
               <select
                 className="bg-surface-container-low border-2 border-[var(--gjc-primary)] px-2 py-1 text-xs font-ui-button focus:outline-none cursor-pointer uppercase tracking-wider pr-12 transition-colors duration-200"
                 id="review-sort-select"
-                onChange={(event) => setReviewSort(event.target.value as PostSort)}
+                onChange={(event) => {
+                  setReviewPage(1)
+                  setReviewSort(event.target.value as PostSort)
+                }}
                 value={reviewSort}
               >
                 <option value="rating">RATING</option>
@@ -395,6 +427,36 @@ function Journals() {
               </article>
             ))}
           </div>
+          <nav
+            aria-label="Review pagination"
+            className="mt-2 flex flex-col items-center justify-between gap-4 border-t-2 border-[var(--gjc-primary)] pt-6 font-label-caps text-xs uppercase tracking-widest md:flex-row"
+          >
+            <span className="text-secondary">
+              REVIEW_PAGE: {reviewPage} / {Math.max(1, reviewPageInfo.totalPages)} // TOTAL:{' '}
+              {reviewPageInfo.total}
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={!reviewPageInfo.hasPreviousPage}
+                onClick={() => setReviewPage((page) => Math.max(1, page - 1))}
+                type="button"
+              >
+                PREV
+              </button>
+              <span className="border-2 border-[var(--gjc-primary)] bg-surface-container-low px-4 py-2 text-primary">
+                {reviewPage}
+              </span>
+              <button
+                className="border-2 border-[var(--gjc-primary)] bg-surface-container-lowest px-4 py-2 transition-colors enabled:hover:bg-[var(--gjc-primary)] enabled:hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={!reviewPageInfo.hasNextPage}
+                onClick={() => setReviewPage((page) => page + 1)}
+                type="button"
+              >
+                NEXT
+              </button>
+            </div>
+          </nav>
         </section>
 
         <section>
