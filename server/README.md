@@ -40,6 +40,8 @@ Required values:
 | `IGDB_CLIENT_ID`              | Twitch/IGDB Client ID for game metadata search                     | empty                      |
 | `IGDB_CLIENT_SECRET`          | Twitch/IGDB Client Secret for game metadata search                 | empty                      |
 | `STEAM_WEB_API_KEY`           | Steam Web API key for profile and play-history linking             | empty                      |
+| `AGENT_MAX_ITERATIONS`        | Maximum MCP tool calls in one recommendation loop                  | `4`                        |
+| `AGENT_TIMEOUT_MS`            | Maximum local Agent loop duration                                  | `30000`                    |
 | `FASTAPI_AGENT_URL`           | FastAPI Agent base URL                                             | `http://localhost:8000`    |
 | `FASTAPI_AGENT_TIMEOUT_MS`    | NestJS to FastAPI Agent timeout                                    | `30000`                    |
 
@@ -64,7 +66,8 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 | OpenAI RAG embeddings and structured analysis | `OPENAI_API_KEY`, optional model vars               | Uses deterministic demo embeddings and rule-based analysis                                             |
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
 | Steam profile and play history                | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam sync should return a structured missing-credentials or missing-profile error                     |
-| FastAPI Agent loop                            | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | NestJS should return a structured fallback response instead of hanging                                 |
+| Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
+| FastAPI Agent loop                            | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | Reserved for a later service split; NestJS should still return a structured fallback response          |
 
 ### External Failure Mapping
 
@@ -308,6 +311,46 @@ When `IGDB_CLIENT_ID` or `IGDB_CLIENT_SECRET` is missing, the tool returns `isEr
 }
 ```
 
+## AI Recommendation Agent Loop
+
+GJC-88 implements the current MVP recommendation loop inside NestJS:
+
+```text
+POST /ai/recommendations/sync
+```
+
+The route requires the JWT `access_token` cookie and resolves `userId` from the authenticated request. The client may pass:
+
+```json
+{
+  "forceRefresh": true,
+  "topK": 6
+}
+```
+
+The Agent state tracks:
+
+```ts
+type AgentState = {
+  maxIterations: number;
+  recommendations: AiRecommendationCard[];
+  startedAt: number;
+  toolResults: AgentToolResult[];
+  userId: string;
+};
+```
+
+Execution order:
+
+1. Read RAG context with `RagService.analyzeForUser`.
+2. Build search queries from source game titles and top preference tags.
+3. Call the MCP `search_games` tool through JSON-RPC.
+4. Merge and de-duplicate IGDB results into recommendation cards.
+5. Stop after at least 3 recommendations, `AGENT_MAX_ITERATIONS`, or `AGENT_TIMEOUT_MS`.
+6. If IGDB is unavailable, return local DB fallback recommendations so SYNC still produces a usable response.
+
+The FastAPI service described in the original architecture can later host the same loop behind `FASTAPI_AGENT_URL`; the current NestJS implementation keeps the API contract and state transitions testable before that split.
+
 ## Domain Data Model
 
 GJC-63 defines the core data model around users, games, archive posts, comments, AI profiles, recommendations, and embedding documents.
@@ -369,10 +412,11 @@ GJC-163 fixes the one-day MVP contract for the AI recommendation flow. The contr
 React /recommend SYNC button
   -> POST /ai/recommendations/sync
   -> NestJS BFF validates JWT cookie and resolves userId
-  -> FastAPI Agent receives { userId, requestId, forceRefresh, topK }
+  -> NestJS AgentService runs the MVP loop
+  -> Later FastAPI Agent can receive { userId, requestId, forceRefresh, topK }
   -> RAG reads ArchivePost, Game, AiProfile, and EmbeddingDocument through Postgres pgvector
   -> MCP JSON-RPC server exposes tools/list and tools/call
-  -> Agent calls search_games through MCP and asks the LLM for the final JSON
+  -> Agent calls search_games through MCP and normalizes tool/fallback results into final JSON
   -> NestJS returns one AiRecommendationSyncResponse to React
 ```
 
@@ -475,7 +519,7 @@ NestJS sends this request to FastAPI after authentication:
     "rag": { "topK": 6, "sourceCount": 6 },
     "mcp": {
       "toolName": "search_games",
-      "provider": "steam",
+      "provider": "igdb",
       "resultCount": 10
     },
     "agent": {
