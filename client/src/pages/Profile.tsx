@@ -135,7 +135,6 @@ function Profile() {
   const { refreshUser, user } = useAuth()
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isSteamLoading, setIsSteamLoading] = useState(false)
-  const [steamInput, setSteamInput] = useState(user?.steamId ?? '')
   const [steamMessage, setSteamMessage] = useState<string | null>(() => {
     const params = new URLSearchParams(window.location.search)
     const steamStatus = params.get('steam')
@@ -172,7 +171,6 @@ function Profile() {
 
         if (isMounted) {
           setSteamState(response.data)
-          setSteamInput(response.data.steamId ?? user?.steamId ?? '')
         }
       } catch (error) {
         if (isMounted) {
@@ -233,46 +231,6 @@ function Profile() {
     }
   }, [user?.steamId])
 
-  const linkSteamProfile = async () => {
-    setIsSteamLoading(true)
-    setSteamMessage(null)
-
-    try {
-      const response = await api.post<SteamProfileResponse>(
-        '/auth/steam/link',
-        {
-          steamProfile: steamInput,
-        },
-      )
-      setSteamState(response.data)
-
-      // 연결에 성공했을 때만 /auth/me의 steamId도 다시 맞춥니다.
-      if (response.data.connected) {
-        setSteamMessage('STEAM_PROFILE_CONNECTED')
-        await refreshUser()
-        try {
-          const statsResponse =
-            await api.get<SteamStatsResponse>('/auth/steam/stats')
-          setSteamStatsState(statsResponse.data)
-        } catch (error) {
-          setSteamStatsState({
-            connected: false,
-            error: getApiErrorMessage(error, 'STEAM STATS LOAD FAILED'),
-            errorCode: 'external_api_error',
-            stats: null,
-            steamId: response.data.steamId,
-          })
-        }
-      } else {
-        setSteamMessage(response.data.error ?? 'STEAM_PROFILE_NOT_CONNECTED')
-      }
-    } catch (error) {
-      setSteamMessage(getApiErrorMessage(error, 'STEAM PROFILE LINK FAILED'))
-    } finally {
-      setIsSteamLoading(false)
-    }
-  }
-
   const startSteamOpenIdLink = () => {
     window.location.href = apiUrl('/auth/steam/openid')
   }
@@ -285,7 +243,6 @@ function Profile() {
       const response =
         await api.delete<SteamProfileResponse>('/auth/steam/link')
       setSteamState(response.data)
-      setSteamInput('')
       setSteamStatsState({
         connected: false,
         error: null,
@@ -393,20 +350,6 @@ function Profile() {
         </section>
 
         <section className="grid grid-cols-1 md:grid-cols-12 gap-6 border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <div className="md:col-span-4 flex flex-col gap-2">
-            <span className="font-label-caps text-[var(--gjc-secondary)] text-[10px]">
-              STEAM_PROFILE
-            </span>
-            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-[var(--gjc-primary)] uppercase">
-              {steamProfile?.personaName ?? 'NOT_LINKED'}
-            </h2>
-            <span className="font-label-caps text-[10px] text-[var(--gjc-secondary)] uppercase">
-              {steamState?.steamId
-                ? `STEAMID_${steamState.steamId}`
-                : 'STEAMID_EMPTY'}
-            </span>
-          </div>
-
           <div className="md:col-span-3 flex items-center justify-center">
             {steamProfile ? (
               <img
@@ -423,43 +366,16 @@ function Profile() {
             )}
           </div>
 
-          <div className="md:col-span-5 flex flex-col gap-3">
-            <button
-              className="border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] px-4 py-3 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-surface-container-lowest)] hover:text-[var(--gjc-primary)]"
-              onClick={startSteamOpenIdLink}
-              type="button"
-            >
-              STEAM_LOGIN
-            </button>
-
-            <div className="flex flex-col sm:flex-row gap-2">
-              <input
-                className="min-w-0 flex-1 border-2 border-[var(--gjc-primary)] bg-white px-3 py-2 font-body-md text-sm text-[var(--gjc-primary)] outline-none"
-                onChange={(event) => setSteamInput(event.target.value)}
-                placeholder="7656119... / steamcommunity.com/id/name"
-                value={steamInput}
-              />
-              <button
-                className="border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] px-4 py-2 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-surface-container-lowest)] hover:text-[var(--gjc-primary)] disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isSteamLoading || steamInput.trim().length < 2}
-                onClick={linkSteamProfile}
-                type="button"
-              >
-                {isSteamLoading ? 'SYNCING' : 'LINK'}
-              </button>
-              <button
-                className="border-2 border-[var(--gjc-primary)] bg-[var(--gjc-surface-container-lowest)] px-4 py-2 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-primary)] transition-colors hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] disabled:cursor-not-allowed disabled:opacity-40"
-                disabled={isSteamLoading || !steamState?.steamId}
-                onClick={unlinkSteamProfile}
-                type="button"
-              >
-                UNLINK
-              </button>
-            </div>
-
+          <div className="md:col-span-4 flex flex-col gap-2">
+            <span className="font-label-caps text-[var(--gjc-secondary)] text-[10px]">
+              STEAM_PROFILE
+            </span>
+            <h2 className="font-headline-lg-mobile text-headline-lg-mobile text-[var(--gjc-primary)] uppercase">
+              {steamProfile?.personaName ?? 'NOT_LINKED'}
+            </h2>
             {steamProfile?.profileUrl ? (
               <a
-                className="font-label-caps text-[10px] text-[var(--gjc-primary)] uppercase underline"
+                className="font-label-caps text-[10px] text-[var(--gjc-primary)] uppercase !underline"
                 href={steamProfile.profileUrl}
                 rel="noreferrer"
                 target="_blank"
@@ -467,6 +383,24 @@ function Profile() {
                 OPEN_STEAM_PROFILE
               </a>
             ) : null}
+            {/* <span className="font-label-caps text-[10px] text-[var(--gjc-secondary)] uppercase">
+              {steamState?.steamId
+                ? `STEAMID_${steamState.steamId}`
+                : 'STEAMID_EMPTY'}
+            </span> */}
+          </div>
+
+          <div className="md:col-span-5 flex flex-col gap-3">
+            <button
+              className="font-label-caps border-2 border-[var(--gjc-primary)] bg-[var(--gjc-primary)] px-4 py-3 font-ui-button text-xs uppercase tracking-widest text-[var(--gjc-on-primary)] transition-colors hover:bg-[var(--gjc-surface-container-lowest)] hover:text-[var(--gjc-primary)] disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={isSteamLoading}
+              onClick={
+                steamState?.steamId ? unlinkSteamProfile : startSteamOpenIdLink
+              }
+              type="button"
+            >
+              {steamState?.steamId ? 'STEAM_LOGOUT' : 'STEAM_LOGIN'}
+            </button>
 
             {steamMessage ? (
               <p className="font-label-caps text-[10px] uppercase text-[var(--gjc-secondary)]">
