@@ -60,6 +60,7 @@ export type SearchGamesResult = {
     summary: string | null;
     tags: string[];
     title: string;
+    totalRating: number | null;
   }>;
   provider: 'igdb';
 };
@@ -192,6 +193,7 @@ export class IgdbService {
       // GJC-180: themes alone are sparse, so tags also include genres for downstream taste analysis.
       tags: [...new Set([...this.names(game.themes), ...this.names(game.genres)])],
       title: game.name,
+      totalRating: game.total_rating ?? null,
     };
   }
 

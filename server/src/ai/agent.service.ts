@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
+import axios from 'axios';
 import { DataSource } from 'typeorm';
 import {
   AiAgentStoppedReason,
@@ -9,6 +10,7 @@ import {
   AiRagAnalysisResponse,
 } from './recommendation-contract';
 import { AiProfile } from '../auth/entities/aiProfile.entity';
+import { User } from '../auth/entities/user.entity';
 import { McpService } from './mcp.service';
 import { RagService } from './rag.service';
 
@@ -41,6 +43,7 @@ type AgentToolResult = {
     summary: string | null;
     tags: string[];
     title: string;
+    totalRating?: number | null;
   }>;
   provider: 'igdb';
   query: string;
@@ -85,6 +88,22 @@ type RecommendationExclusionSet = {
   titles: Set<string>;
 };
 
+type OpenAiChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+    };
+  }>;
+};
+
+type RecommendationReasonDraft = {
+  reasons?: Array<{
+    rank?: number;
+    reason?: string;
+    title?: string;
+  }>;
+};
+
 @Injectable()
 export class AgentService {
   constructor(
@@ -112,6 +131,7 @@ export class AgentService {
       toolResults: [],
       userId,
     };
+    const nickname = await this.loadUserNickname(userId);
     let usedFallback = false;
 
     for (const query of this.buildSearchQueries(ragContext)) {
@@ -122,7 +142,7 @@ export class AgentService {
       const toolResult = await this.callSearchGamesTool(query, ragContext);
       state.toolResults.push(toolResult);
       state.recommendations.push(
-        ...this.toRecommendations(toolResult, ragContext, state),
+        ...this.toRecommendations(toolResult, ragContext, state, nickname),
       );
       state.recommendations = this.uniqueRecommendations(state.recommendations);
 
@@ -135,7 +155,7 @@ export class AgentService {
       usedFallback = true;
       state.recommendations = this.uniqueRecommendations([
         ...state.recommendations,
-        ...(await this.fallbackRecommendations(ragContext, state)),
+        ...(await this.fallbackRecommendations(ragContext, state, nickname)),
       ]);
     }
 
@@ -150,6 +170,17 @@ export class AgentService {
             : 'fallback';
 
     const now = new Date().toISOString();
+    const rankedRecommendations = state.recommendations
+      .slice(0, MIN_RECOMMENDATION_COUNT)
+      .map((recommendation, index) => ({
+        ...recommendation,
+        rank: index + 1,
+      }));
+    const recommendations = await this.generateRecommendationReasons(
+      rankedRecommendations,
+      ragContext,
+      nickname,
+    );
 
     const response: AiRecommendationSyncResponse = {
       requestId,
@@ -159,12 +190,7 @@ export class AgentService {
       preferenceTags: ragContext.preferenceTags,
       playStyleSummary: ragContext.playStyleSummary,
       wordCloud: ragContext.wordCloud,
-      recommendations: state.recommendations
-        .slice(0, MIN_RECOMMENDATION_COUNT)
-        .map((recommendation, index) => ({
-          ...recommendation,
-          rank: index + 1,
-        })),
+      recommendations,
       contextSources: ragContext.contextSources,
       pipeline: {
         agent: {
@@ -253,6 +279,7 @@ export class AgentService {
     toolResult: AgentToolResult,
     ragContext: AiRagAnalysisResponse,
     state: AgentState,
+    nickname: string,
   ): AiRecommendationCard[] {
     const matchedTags = ragContext.preferenceTags
       .slice(0, 4)
@@ -277,10 +304,11 @@ export class AgentService {
           ),
           platforms: game.platforms,
           rank: state.recommendations.length + index + 1,
-          reason: this.recommendationReason(
+          reason: this.simpleRecommendationReason(
             game.title,
             candidateTags,
-            toolResult.query,
+            nickname,
+            ragContext,
           ),
           sourceUrl: game.sourceUrl,
           tags: game.tags,
@@ -300,6 +328,7 @@ export class AgentService {
   private async fallbackRecommendations(
     ragContext: AiRagAnalysisResponse,
     state: AgentState,
+    nickname: string,
   ): Promise<AiRecommendationCard[]> {
     const localGames = await this.loadUserScopedLocalGames(state.userId);
     const matchedTags = ragContext.preferenceTags
@@ -334,9 +363,12 @@ export class AgentService {
         ),
         platforms: game.platforms,
         rank: state.recommendations.length + index + 1,
-        reason:
-          `이 추천은 현재 사용자의 저널, 리뷰, Steam 플레이 신호를 함께 본 fallback 결과입니다. ` +
-          this.recommendationReason(game.title, candidateTags, game.title),
+        reason: this.simpleRecommendationReason(
+          game.title,
+          candidateTags,
+          nickname,
+          ragContext,
+        ),
         sourceUrl: game.steamAppId
           ? `https://store.steampowered.com/app/${game.steamAppId}`
           : null,
@@ -471,6 +503,200 @@ export class AgentService {
     await repository.save(profile);
   }
 
+  private async generateRecommendationReasons(
+    recommendations: AiRecommendationCard[],
+    ragContext: AiRagAnalysisResponse,
+    nickname: string,
+  ): Promise<AiRecommendationCard[]> {
+    const apiKey = this.config.get<string>('OPENAI_API_KEY');
+
+    if (!apiKey || recommendations.length === 0) {
+      return recommendations;
+    }
+
+    try {
+      const response = await axios.post<OpenAiChatCompletionResponse>(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          messages: [
+            {
+              content:
+                'You write short Korean recommendation comments for a game recommendation UI. Return only JSON. Make each reason distinct, warm, and concise.',
+              role: 'system',
+            },
+            {
+              content: this.recommendationReasonPrompt(
+                recommendations,
+                ragContext,
+                nickname,
+              ),
+              role: 'user',
+            },
+          ],
+          model: this.config.get<string>('OPENAI_CHAT_MODEL') ?? 'gpt-4o-mini',
+          response_format: this.recommendationReasonJsonSchema(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 20000,
+        },
+      );
+      const content = response.data.choices?.[0]?.message?.content;
+
+      if (!content) {
+        return recommendations;
+      }
+
+      const draft = JSON.parse(content) as RecommendationReasonDraft;
+      const reasonsByRank = new Map(
+        (draft.reasons ?? [])
+          .filter(
+            (item): item is { rank: number; reason: string; title?: string } =>
+              typeof item.rank === 'number' &&
+              typeof item.reason === 'string' &&
+              item.reason.trim().length > 0,
+          )
+          .map((item) => [item.rank, item.reason.trim()]),
+      );
+
+      return recommendations.map((recommendation) => ({
+        ...recommendation,
+        reason: reasonsByRank.get(recommendation.rank) ?? recommendation.reason,
+      }));
+    } catch {
+      return recommendations;
+    }
+  }
+
+  private recommendationReasonPrompt(
+    recommendations: AiRecommendationCard[],
+    ragContext: AiRagAnalysisResponse,
+    nickname: string,
+  ): string {
+    const playStyles = ragContext.wordCloud
+      .slice(0, 5)
+      .map((term) => this.toKoreanAnalysisLabel(term.label));
+    const gameElementTags = ragContext.preferenceTags
+      .slice(0, 8)
+      .map((tag) => this.toKoreanAnalysisLabel(tag.label));
+    const cards = recommendations.map((recommendation) => ({
+      genres: recommendation.genres,
+      matchedTags: recommendation.matchedTags.map((tag) =>
+        this.toKoreanAnalysisLabel(tag),
+      ),
+      rank: recommendation.rank,
+      tags: recommendation.tags,
+      title: recommendation.title,
+    }));
+
+    return JSON.stringify({
+      instruction:
+        '각 추천 게임마다 서로 다른 한국어 추천 근거를 작성하세요. 반드시 한 문장으로 쓰고, 70자 이내로 유지하세요. 문장은 "분석 결과 {게임명}은(는) {닉네임}님의 ..." 흐름을 따르되 카드마다 표현을 조금씩 다르게 만드세요. 과장하지 말고 주어진 플레이 성향/게임 요소 태그/장르만 근거로 삼으세요.',
+      nickname,
+      playStyles,
+      gameElementTags,
+      recommendations: cards,
+    });
+  }
+
+  private recommendationReasonJsonSchema() {
+    return {
+      json_schema: {
+        name: 'gjc_recommendation_reasons',
+        schema: {
+          additionalProperties: false,
+          properties: {
+            reasons: {
+              items: {
+                additionalProperties: false,
+                properties: {
+                  rank: { type: 'number' },
+                  reason: { type: 'string' },
+                  title: { type: 'string' },
+                },
+                required: ['rank', 'title', 'reason'],
+                type: 'object',
+              },
+              type: 'array',
+            },
+          },
+          required: ['reasons'],
+          type: 'object',
+        },
+        strict: true,
+      },
+      type: 'json_schema',
+    };
+  }
+
+  private async loadUserNickname(userId: string): Promise<string> {
+    const user = await this.dataSource.getRepository(User).findOne({
+      select: { nickname: true },
+      where: { id: userId },
+    });
+
+    return user?.nickname?.trim() || '플레이어';
+  }
+
+  private simpleRecommendationReason(
+    title: string,
+    matchedTags: string[],
+    nickname: string,
+    ragContext: AiRagAnalysisResponse,
+  ): string {
+    const labels = [
+      ...ragContext.wordCloud.slice(0, 2).map((term) => term.label),
+      ...matchedTags.slice(0, 2),
+      ...ragContext.preferenceTags.slice(0, 2).map((tag) => tag.label),
+    ];
+    const signal = [...new Set(labels)]
+      .slice(0, 3)
+      .map((label) => this.toKoreanAnalysisLabel(label))
+      .join(', ');
+
+    return `분석 결과 ${title}은(는) ${nickname}님의 ${signal || '플레이 성향'}와 잘 맞는 게임이라 추천합니다!`;
+  }
+
+  private toKoreanAnalysisLabel(label: string): string {
+    const normalized = label.trim().replaceAll(' ', '_').toUpperCase();
+    const labels: Record<string, string> = {
+      AESTHETIC_EXPLORER: '심미적 탐험 성향',
+      AESTHETIC_PRESENTATION: '아트와 분위기',
+      ARCHIVE_BASED_PLAYER: '기록 기반 플레이 성향',
+      ATMOSPHERE: '분위기',
+      COOP_TEAMPLAYER: '협동 플레이 성향',
+      COLLECTION: '수집 요소',
+      COLLECTION_COMPLETIONIST: '수집 완성형 플레이',
+      COZY_SIM: '편안한 시뮬레이션 감성',
+      CRAFTING: '제작과 장비 성장',
+      DEDUCTION: '추리 요소',
+      DELIBERATE_PLANNER: '신중한 계획형 플레이',
+      EUREKA_MOMENTS: '깨달음이 있는 퍼즐',
+      FARMING_LOOP: '파밍 루프',
+      GAME_ELEMENTS: '선호 게임 요소',
+      HORROR_ATMOSPHERE: '공포 분위기',
+      HUNTING_LOOP: '사냥과 보스 공략',
+      LOW_PRESSURE_ROUTINE: '부담 없는 반복 플레이',
+      NARRATIVE_ROLEPLAYER: '서사 몰입형 플레이',
+      OPTIMIZATION: '최적화 요소',
+      PIXEL_ART: '픽셀 아트',
+      PROGRAMMING_PUZZLE: '프로그래밍 퍼즐',
+      PUZZLE_SYSTEMS: '퍼즐 시스템',
+      SOLO_PROBLEM_SOLVER: '혼자 문제를 푸는 성향',
+      SPATIAL_REASONING: '공간 추론',
+      STORY_DRIVEN: '스토리 중심 구성',
+      SYSTEM_OPTIMIZER: '시스템 최적화 성향',
+      TACTICAL_COMBAT: '전술 전투',
+      TACTICAL_RPG: '전술 RPG',
+      TANK_ROLE: '탱커 역할 선호',
+    };
+
+    return labels[normalized] ?? normalized.replaceAll('_', ' ');
+  }
+
   private recommendationReason(
     title: string,
     matchedTags: string[],
@@ -522,7 +748,23 @@ export class AgentService {
       return false;
     }
 
-    return this.hasReliableCandidateMatch(game, query);
+    return (
+      this.hasRecommendationGradeMetadata(game) &&
+      this.hasReliableCandidateMatch(game, query)
+    );
+  }
+
+  private hasRecommendationGradeMetadata(game: AgentToolResult['games'][number]) {
+    return (
+      Boolean(game.imageUrl) &&
+      Boolean(game.sourceUrl) &&
+      Boolean(game.summary && game.summary.trim().length >= 60) &&
+      game.genres.length > 0 &&
+      game.platforms.length > 0 &&
+      game.tags.length > 0 &&
+      typeof game.totalRating === 'number' &&
+      game.totalRating >= 65
+    );
   }
 
   private isExcludedExternalGame(
