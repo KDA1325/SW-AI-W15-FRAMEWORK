@@ -42,6 +42,11 @@ function Timeline() {
   // REVIEW: /posts?type=REVIEW 조회
   // JOURNAL: /posts?type=JOURNAL 조회
   const [filter, setFilter] = useState<TimelineFilter>('ALL')
+  const [page, setPage] = useState(1)
+  const [pageInfo, setPageInfo] = useState({
+    hasNextPage: false,
+    total: 0,
+  })
 
   // posts에는 현재 필터 조건에 맞춰 서버에서 받아온 타임라인 카드 목록을 저장합니다.
   // 이전 목업 배열 대신 이 state를 map 해서 화면을 그립니다.
@@ -83,6 +88,7 @@ function Timeline() {
         sort: 'latest',
         // 현재 서버가 허용하는 목록 크기 값이 5, 10, 15라서 10개를 기본 표시 개수로 사용합니다.
         limit: '10',
+        page: String(page),
       })
 
       // ALL은 "전체"라는 UI 상태일 뿐 서버의 ArchivePostType 값은 아닙니다.
@@ -92,14 +98,28 @@ function Timeline() {
       }
 
       const response = await api.get<PostListResponse>(`/posts?${params.toString()}`)
-      setPosts(response.data.items)
+      setPageInfo({
+        hasNextPage: response.data.hasNextPage,
+        total: response.data.total,
+      })
+      // GJC-140: later pages append by id so repeated clicks or overlapping data cannot duplicate cards.
+      setPosts((currentPosts) => {
+        if (page === 1) {
+          return response.data.items
+        }
+
+        const seen = new Set(currentPosts.map((post) => post.id))
+        const nextPosts = response.data.items.filter((post) => !seen.has(post.id))
+
+        return [...currentPosts, ...nextPosts]
+      })
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'TIMELINE LOAD FAILED'))
     } finally {
       // 성공/실패와 상관없이 요청이 끝나면 로딩 표시는 꺼야 합니다.
       setIsLoading(false)
     }
-  }, [filter])
+  }, [filter, page])
 
   // 필터 버튼을 누르면 filter state가 바뀝니다.
   // fetchTimelinePosts는 filter를 의존하고 있으므로, filter가 바뀔 때마다 새 함수로 만들어집니다.
@@ -122,6 +142,12 @@ function Timeline() {
         ? 'bg-[var(--gjc-primary)] text-[var(--gjc-on-primary)]'
         : 'hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)]',
     ].join(' ')
+  const changeFilter = (nextFilter: TimelineFilter) => {
+    setFilter(nextFilter)
+    setPage(1)
+    setPosts([])
+    setFailedImagePostIds(new Set())
+  }
 
   return (
     <PageChrome active="timeline">
@@ -136,7 +162,7 @@ function Timeline() {
             <button
               className={getFilterButtonClass('ALL')}
               id="filter-all"
-              onClick={() => setFilter('ALL')}
+              onClick={() => changeFilter('ALL')}
               type="button"
             >
               ALL
@@ -144,7 +170,7 @@ function Timeline() {
             <button
               className={getFilterButtonClass('REVIEW')}
               id="filter-reviews"
-              onClick={() => setFilter('REVIEW')}
+              onClick={() => changeFilter('REVIEW')}
               type="button"
             >
               REVIEWS
@@ -152,7 +178,7 @@ function Timeline() {
             <button
               className={getFilterButtonClass('JOURNAL')}
               id="filter-journals"
-              onClick={() => setFilter('JOURNAL')}
+              onClick={() => changeFilter('JOURNAL')}
               type="button"
             >
               JOURNALS
@@ -250,6 +276,19 @@ function Timeline() {
               </article>
             )
           })}
+        </div>
+        <div className="flex flex-col items-center gap-3 border-t-2 border-dashed border-primary pt-8">
+          <span className="font-label-caps text-xs uppercase text-secondary">
+            DISPLAYING {posts.length} / {pageInfo.total}
+          </span>
+          <button
+            className="border-2 border-primary bg-surface px-6 py-3 font-ui-button text-xs uppercase tracking-widest transition-colors enabled:hover:bg-primary enabled:hover:text-on-primary disabled:cursor-not-allowed disabled:opacity-40"
+            disabled={isLoading || !pageInfo.hasNextPage}
+            onClick={() => setPage((currentPage) => currentPage + 1)}
+            type="button"
+          >
+            {pageInfo.hasNextPage ? 'LOAD_MORE' : 'END_OF_TIMELINE'}
+          </button>
         </div>
       </main>
     </PageChrome>
