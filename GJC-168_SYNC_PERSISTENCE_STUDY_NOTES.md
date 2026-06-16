@@ -172,7 +172,72 @@ expect(aiProfileRepository.findOne).toHaveBeenCalledWith({
 });
 ```
 
-## 7. 전체 흐름
+## 7. 저장 스냅샷은 렌더링 전에 정규화한다
+
+DB에 저장된 JSON은 시간이 지나며 프론트가 기대하는 최신 응답 타입과 달라질 수 있습니다. 예를 들어 이전 스냅샷에 `pipeline.rag`가 없으면 React가 `syncData.pipeline.rag.sourceCount`를 읽는 순간 런타임 에러가 나고 페이지 전체가 비어 보일 수 있습니다.
+
+그래서 추천 페이지는 API 응답을 바로 상태에 넣지 않고, 먼저 안전한 기본값이 있는 화면용 데이터로 정규화합니다.
+
+```ts
+function normalizeSyncResponse(
+  value: unknown,
+): AiRecommendationSyncResponse | null {
+  if (!isJsonRecord(value)) {
+    return null
+  }
+
+  const preferenceTags = normalizePreferenceTags(value.preferenceTags)
+  const wordCloud = normalizeWordCloud(value.wordCloud)
+  const recommendations = normalizeRecommendations(value.recommendations)
+  const playStyleSummary = readString(value.playStyleSummary)
+
+  if (
+    !playStyleSummary &&
+    preferenceTags.length === 0 &&
+    wordCloud.length === 0 &&
+    recommendations.length === 0
+  ) {
+    return null
+  }
+
+  const pipeline = isJsonRecord(value.pipeline) ? value.pipeline : {}
+  const rag = isJsonRecord(pipeline.rag) ? pipeline.rag : {}
+  const mcp = isJsonRecord(pipeline.mcp) ? pipeline.mcp : {}
+  const agent = isJsonRecord(pipeline.agent) ? pipeline.agent : {}
+
+  // Saved SYNC snapshots may come from an older schema, so the page normalizes them before rendering nested fields.
+  return {
+    contextSources: [],
+    generatedAt: readString(value.generatedAt),
+    lastSyncAt: readString(value.lastSyncAt),
+    pipeline: {
+      agent: {
+        iterations: readNumber(agent.iterations),
+        maxIterations: readNumber(agent.maxIterations),
+        stoppedReason: 'fallback',
+      },
+      mcp: {
+        resultCount: readNumber(mcp.resultCount),
+        toolName: 'search_games',
+      },
+      rag: {
+        sourceCount: readNumber(rag.sourceCount),
+        topK: readNumber(rag.topK),
+      },
+    },
+    playStyleSummary,
+    preferenceTags,
+    recommendations,
+    requestId: readString(value.requestId, 'saved-sync'),
+    userId: readString(value.userId),
+    wordCloud,
+  }
+}
+```
+
+핵심은 서버 타입 선언을 믿는 것과 실제 DB JSON을 믿는 것은 다르다는 점입니다. `unknown`으로 받은 뒤 필요한 배열과 중첩 객체를 검사하면, 손상된 저장 데이터가 있어도 UI는 No data 또는 재동기화 안내 상태로 살아남습니다.
+
+## 8. 전체 흐름
 
 ```text
 사용자가 SYNC_DATA 클릭
