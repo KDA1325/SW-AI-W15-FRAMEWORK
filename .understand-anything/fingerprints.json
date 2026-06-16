@@ -1,0 +1,6355 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "75312d622d37c55af258df43b6b4481a310d035e",
+  "generatedAt": "2026-06-16T18:49:45.330Z",
+  "files": {
+    ".understand-anything/.understandignore": {
+      "filePath": ".understand-anything/.understandignore",
+      "contentHash": "48bc7355c5d7d0d92d4986a74a6f019debbe01252513747618b35fe835d08e12",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "ai-compute/app/__init__.py": {
+      "filePath": "ai-compute/app/__init__.py",
+      "contentHash": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "ai-compute/app/embedding.py": {
+      "filePath": "ai-compute/app/embedding.py",
+      "contentHash": "9ee06e9b5aca4f8f1c653a486e40f5da3ea761421667d20b24e4ced28713ce63",
+      "functions": [
+        {
+          "name": "build_demo_embedding",
+          "params": [
+            "seed_text",
+            "dimensions"
+          ],
+          "returnType": "list[float]",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "truncate_embedding_input",
+          "params": [
+            "text"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "create_embedding",
+          "params": [
+            "text",
+            "model",
+            "dimensions"
+          ],
+          "returnType": "EmbeddingResult",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "create_openai_embedding",
+          "params": [
+            "text",
+            "model",
+            "dimensions"
+          ],
+          "returnType": "EmbeddingResult | None",
+          "exported": true,
+          "lineCount": 43
+        }
+      ],
+      "classes": [
+        {
+          "name": "EmbeddingResult",
+          "methods": [],
+          "properties": [
+            "dimensions",
+            "embedding",
+            "model",
+            "provider"
+          ],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        }
+      ],
+      "exports": [
+        "EmbeddingResult",
+        "build_demo_embedding",
+        "truncate_embedding_input",
+        "create_embedding",
+        "create_openai_embedding"
+      ],
+      "totalLines": 115,
+      "hasStructuralAnalysis": true
+    },
+    "ai-compute/app/main.py": {
+      "filePath": "ai-compute/app/main.py",
+      "contentHash": "768a653414ae5d094a42d5dfc3248df22687d059c698299229c5a1446a342743",
+      "functions": [
+        {
+          "name": "health",
+          "params": [],
+          "returnType": "HealthResponse",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "embed",
+          "params": [
+            "request"
+          ],
+          "returnType": "EmbedResponse",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "fastapi",
+          "specifiers": [
+            "FastAPI"
+          ]
+        },
+        {
+          "source": ".embedding",
+          "specifiers": [
+            "create_embedding"
+          ]
+        },
+        {
+          "source": ".schemas",
+          "specifiers": [
+            "EmbedRequest",
+            "EmbedResponse",
+            "HealthResponse"
+          ]
+        }
+      ],
+      "exports": [
+        "health",
+        "embed"
+      ],
+      "totalLines": 31,
+      "hasStructuralAnalysis": true
+    },
+    "ai-compute/app/schemas.py": {
+      "filePath": "ai-compute/app/schemas.py",
+      "contentHash": "5b5bc826f3e9471af4ba33fb9761fe3991a0000047b5ef40f27fbbe3b35bce14",
+      "functions": [],
+      "classes": [
+        {
+          "name": "HealthResponse",
+          "methods": [],
+          "properties": [
+            "status",
+            "service"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "EmbedRequest",
+          "methods": [],
+          "properties": [
+            "input",
+            "model",
+            "dimensions"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "EmbedResponse",
+          "methods": [],
+          "properties": [
+            "dimensions",
+            "embedding",
+            "model",
+            "provider",
+            "usage"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "typing",
+          "specifiers": [
+            "Literal"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "Field"
+          ]
+        },
+        {
+          "source": ".embedding",
+          "specifiers": [
+            "DEMO_EMBEDDING_DIMENSIONS",
+            "DEMO_EMBEDDING_MODEL"
+          ]
+        }
+      ],
+      "exports": [
+        "HealthResponse",
+        "EmbedRequest",
+        "EmbedResponse"
+      ],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    },
+    "ai-compute/Dockerfile": {
+      "filePath": "ai-compute/Dockerfile",
+      "contentHash": "e1886a87fcdcde9dec1db25937e523646b1b75b099a9e467ed4b317b39bb5647",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "ai-compute/README.md": {
+      "filePath": "ai-compute/README.md",
+      "contentHash": "3e1b94f8dd0084927c99b88ef90323c9a63629513e3aa95ce026ebc7e8bcd80f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": true
+    },
+    "ai-compute/requirements.txt": {
+      "filePath": "ai-compute/requirements.txt",
+      "contentHash": "c6548bf24fd0b033a873b4fb245b200a9186d9ed01e77d7dd838967bcd5d56f1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "ai-compute/scripts/compare_embed.py": {
+      "filePath": "ai-compute/scripts/compare_embed.py",
+      "contentHash": "f23b0fa037063d236d103d00e757b286379c5a885d84da68c65592664d7a64d3",
+      "functions": [
+        {
+          "name": "main",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 45
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "asyncio",
+          "specifiers": [
+            "asyncio"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "app.embedding",
+          "specifiers": [
+            "DEMO_EMBEDDING_DIMENSIONS",
+            "DEMO_EMBEDDING_MODEL",
+            "create_embedding"
+          ]
+        }
+      ],
+      "exports": [
+        "main"
+      ],
+      "totalLines": 62,
+      "hasStructuralAnalysis": true
+    },
+    "client/eslint.config.js": {
+      "filePath": "client/eslint.config.js",
+      "contentHash": "f19395caf80173ffbd41ab74f8eef4fc26c042f84a937de4a6286ec5c13ad401",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@eslint/js",
+          "specifiers": [
+            "js"
+          ]
+        },
+        {
+          "source": "globals",
+          "specifiers": [
+            "globals"
+          ]
+        },
+        {
+          "source": "eslint-plugin-react-hooks",
+          "specifiers": [
+            "reactHooks"
+          ]
+        },
+        {
+          "source": "eslint-plugin-react-refresh",
+          "specifiers": [
+            "reactRefresh"
+          ]
+        },
+        {
+          "source": "typescript-eslint",
+          "specifiers": [
+            "tseslint"
+          ]
+        },
+        {
+          "source": "eslint/config",
+          "specifiers": [
+            "defineConfig",
+            "globalIgnores"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "client/index.html": {
+      "filePath": "client/index.html",
+      "contentHash": "b1273411d10707e316753a2900ba02010bcab8c40283dcc17023ddbe5f5ed39c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 106,
+      "hasStructuralAnalysis": false
+    },
+    "client/package.json": {
+      "filePath": "client/package.json",
+      "contentHash": "fbdff1f8450469d7cbcd82932f18f004851eee33fb002386142002dbbd63a602",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 35,
+      "hasStructuralAnalysis": true
+    },
+    "client/README.md": {
+      "filePath": "client/README.md",
+      "contentHash": "bcbc34e991dc85cc70e272052f322d8085e0b6c3a70098843de0914a3943cbb2",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/api.ts": {
+      "filePath": "client/src/api.ts",
+      "contentHash": "c153518a586119fb5a8e3b3c6175b0208c45b61532146fb32264b909a44deeaf",
+      "functions": [
+        {
+          "name": "getApiErrorMessage",
+          "params": [
+            "error",
+            "fallbackMessage"
+          ],
+          "exported": true,
+          "lineCount": 31
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios"
+          ]
+        }
+      ],
+      "exports": [
+        "api",
+        "getApiErrorMessage"
+      ],
+      "totalLines": 55,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/App.css": {
+      "filePath": "client/src/App.css",
+      "contentHash": "c2571ce7245629994b8adc84f6c48e1920f047a4e7e29c89a4aeb51eeb1b5433",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 185,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/App.tsx": {
+      "filePath": "client/src/App.tsx",
+      "contentHash": "3cff75c7920cc0ca05081bc64d8ce8c6552d4cf39d88b72f3bb5728b38519a2f",
+      "functions": [
+        {
+          "name": "App",
+          "params": [],
+          "exported": false,
+          "lineCount": 26
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Navigate",
+            "Route",
+            "Routes"
+          ]
+        },
+        {
+          "source": "./pages/JournalDetail",
+          "specifiers": [
+            "JournalDetail"
+          ]
+        },
+        {
+          "source": "./pages/Journals",
+          "specifiers": [
+            "Journals"
+          ]
+        },
+        {
+          "source": "./pages/Login",
+          "specifiers": [
+            "Login"
+          ]
+        },
+        {
+          "source": "./pages/Profile",
+          "specifiers": [
+            "Profile"
+          ]
+        },
+        {
+          "source": "./pages/Recommend",
+          "specifiers": [
+            "Recommend"
+          ]
+        },
+        {
+          "source": "./pages/Register",
+          "specifiers": [
+            "Register"
+          ]
+        },
+        {
+          "source": "./pages/ReviewDetail",
+          "specifiers": [
+            "ReviewDetail"
+          ]
+        },
+        {
+          "source": "./pages/Timeline",
+          "specifiers": [
+            "Timeline"
+          ]
+        },
+        {
+          "source": "./pages/WriteJournal",
+          "specifiers": [
+            "WriteJournal"
+          ]
+        },
+        {
+          "source": "./pages/WriteReview",
+          "specifiers": [
+            "WriteReview"
+          ]
+        },
+        {
+          "source": "./auth/ProtectedRoute",
+          "specifiers": [
+            "ProtectedRoute"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/auth/AuthContext.tsx": {
+      "filePath": "client/src/auth/AuthContext.tsx",
+      "contentHash": "43a3ceaabc10e3ca0fdb50b5d6ab06a4c98fa8e7f3bfd8b6ea5d9c01d770f354",
+      "functions": [
+        {
+          "name": "AuthProvider",
+          "params": [
+            "{ children }"
+          ],
+          "exported": true,
+          "lineCount": 115
+        },
+        {
+          "name": "useAuth",
+          "params": [],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "createContext",
+            "useContext",
+            "useEffect",
+            "useMemo",
+            "useRef",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api"
+          ]
+        }
+      ],
+      "exports": [
+        "AuthProvider",
+        "useAuth"
+      ],
+      "totalLines": 188,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/auth/ProtectedRoute.tsx": {
+      "filePath": "client/src/auth/ProtectedRoute.tsx",
+      "contentHash": "5b110e9bf0391f7929210e3aaf58bd0fe53a22a2675256483235159191c40a8f",
+      "functions": [
+        {
+          "name": "ProtectedRoute",
+          "params": [
+            "{ children }"
+          ],
+          "exported": true,
+          "lineCount": 21
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "ReactNode"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Navigate",
+            "useLocation"
+          ]
+        },
+        {
+          "source": "./AuthContext",
+          "specifiers": [
+            "useAuth"
+          ]
+        }
+      ],
+      "exports": [
+        "ProtectedRoute"
+      ],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/components/Header.tsx": {
+      "filePath": "client/src/components/Header.tsx",
+      "contentHash": "8924b76608d58dcc75faf80afed5fd253989a488151766cf4118a748a4658a73",
+      "functions": [
+        {
+          "name": "Header",
+          "params": [
+            "{ active }"
+          ],
+          "exported": false,
+          "lineCount": 66
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link",
+            "useNavigate"
+          ]
+        },
+        {
+          "source": "../auth/AuthContext",
+          "specifiers": [
+            "useAuth"
+          ]
+        },
+        {
+          "source": "../styles/Header.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 89,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/index.css": {
+      "filePath": "client/src/index.css",
+      "contentHash": "7b91f9f01c8bb18f559271f8780ed4310f7d64b68ad1cdd40f727386adae1e0e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 107,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/main.tsx": {
+      "filePath": "client/src/main.tsx",
+      "contentHash": "625856f6540a5dffc70aea8bf5b66f9b4cdee5ba728708bdba09c72753b074bc",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "StrictMode"
+          ]
+        },
+        {
+          "source": "react-dom/client",
+          "specifiers": [
+            "createRoot"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "BrowserRouter"
+          ]
+        },
+        {
+          "source": "./auth/AuthContext",
+          "specifiers": [
+            "AuthProvider"
+          ]
+        },
+        {
+          "source": "./index.css",
+          "specifiers": []
+        },
+        {
+          "source": "./App.tsx",
+          "specifiers": [
+            "App"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/DeleteJournalModal.tsx": {
+      "filePath": "client/src/pages/DeleteJournalModal.tsx",
+      "contentHash": "70cdd0accd8b4f77aeba519e5d07b4cb4a5d709029cc071a118c47e67a7c1ff6",
+      "functions": [
+        {
+          "name": "DeleteJournalModal",
+          "params": [
+            "{ isOpen, post, onClose, onDeleted }"
+          ],
+          "exported": false,
+          "lineCount": 63
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/DeleteReviewModal.tsx": {
+      "filePath": "client/src/pages/DeleteReviewModal.tsx",
+      "contentHash": "1b5dee586beacba4f440b639e4b5fb20cee8319953c4a21c319588069780ea97",
+      "functions": [
+        {
+          "name": "DeleteReviewModal",
+          "params": [
+            "{ isOpen, post, onClose, onDeleted }"
+          ],
+          "exported": false,
+          "lineCount": 64
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 78,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/EditJournalModal.tsx": {
+      "filePath": "client/src/pages/EditJournalModal.tsx",
+      "contentHash": "038aba5d8a0477804ac38dcde2006bb89f6ec7901b81e7db428eabec933ea142",
+      "functions": [
+        {
+          "name": "EditJournalModal",
+          "params": [
+            "{ isOpen, post, onClose, onSaved }"
+          ],
+          "exported": false,
+          "lineCount": 153
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost"
+          ]
+        },
+        {
+          "source": "./gamePlatformOptions",
+          "specifiers": [
+            "GAME_PLATFORM_OPTIONS",
+            "normalizeGamePlatformOption"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 173,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/EditProfileModal.tsx": {
+      "filePath": "client/src/pages/EditProfileModal.tsx",
+      "contentHash": "fff09067f5dc87d11e71f3ad775f8e7c99d59f3ba591cac433fd04dfff86c8cc",
+      "functions": [
+        {
+          "name": "normalizeTagInput",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "EditProfileModal",
+          "params": [
+            "{\r\n  currentUser,\r\n  isOpen,\r\n  onClose,\r\n  onSaved,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 18
+        },
+        {
+          "name": "EditProfileModalContent",
+          "params": [
+            "{\r\n  currentUser,\r\n  onClose,\r\n  onSaved,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 285
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useRef",
+            "useState"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "ChangeEvent",
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./profileImage",
+          "specifiers": [
+            "resolveProfileImageUrl"
+          ]
+        },
+        {
+          "source": "../styles/EditProfileModal.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 343,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/EditReviewModal.tsx": {
+      "filePath": "client/src/pages/EditReviewModal.tsx",
+      "contentHash": "8ee4fb33f610fef3bece088702215e8ac00ec9c47ddf54e150b0981bdb0548e0",
+      "functions": [
+        {
+          "name": "EditReviewModal",
+          "params": [
+            "{ isOpen, post, onClose, onSaved }"
+          ],
+          "exported": false,
+          "lineCount": 160
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost"
+          ]
+        },
+        {
+          "source": "./gamePlatformOptions",
+          "specifiers": [
+            "GAME_PLATFORM_OPTIONS",
+            "normalizeGamePlatformOption"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 180,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/gamePlatformOptions.ts": {
+      "filePath": "client/src/pages/gamePlatformOptions.ts",
+      "contentHash": "b943c80cb6ce7833cfc01b693357e34d54466c9b969d272e89d259c80441ff16",
+      "functions": [
+        {
+          "name": "normalizeGamePlatformOption",
+          "params": [
+            "value"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "GAME_PLATFORM_OPTIONS",
+        "normalizeGamePlatformOption"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/GameSearchInput.tsx": {
+      "filePath": "client/src/pages/GameSearchInput.tsx",
+      "contentHash": "52020ccdcac954af6ebbbfb582d4e29c98b359d9c12c8737557f931f0e9756a6",
+      "functions": [
+        {
+          "name": "releaseYear",
+          "params": [
+            "releaseDate"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "secondaryLine",
+          "params": [
+            "game"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "GameSearchInput",
+          "params": [
+            "{\r\n  inputClassName,\r\n  onChange,\r\n  onSelect,\r\n  placeholder,\r\n  selectedIgdbGameId,\r\n  value,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 136
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 188,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/htmls/DeleteJournalModal.html": {
+      "filePath": "client/src/pages/htmls/DeleteJournalModal.html",
+      "contentHash": "d1a0ae5fb7beb50da554230ee069769b31de6c7743df4ca78ac8a85f4f75a1c3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/DeleteReviewModal.html": {
+      "filePath": "client/src/pages/htmls/DeleteReviewModal.html",
+      "contentHash": "916e5c8c3c278831cbb9b9655c23bea6898162b7132dcd402a45fa490f3c4aa6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/EditJournalModal.html": {
+      "filePath": "client/src/pages/htmls/EditJournalModal.html",
+      "contentHash": "7b276df7c95507ca1b42bbbb064f6cfa0126ca13ab45454e29faaba41e12b1e3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/EditProfileModal.html": {
+      "filePath": "client/src/pages/htmls/EditProfileModal.html",
+      "contentHash": "7bac731202aaa25f6140e163bc306cdc0b3dd27e82752e625d57a9071c0682a9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 66,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/EditReviewModal.html": {
+      "filePath": "client/src/pages/htmls/EditReviewModal.html",
+      "contentHash": "4e2ab84bb2c3548775ba5f0b70ceda81f17d80ff41b57c5c65c4f47d11330fee",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 99,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/JournalDetail.html": {
+      "filePath": "client/src/pages/htmls/JournalDetail.html",
+      "contentHash": "47287cb430738d75985a37d7a237c230a0e12dd40422b30c3d7b62d016b8973b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 216,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/Journals.html": {
+      "filePath": "client/src/pages/htmls/Journals.html",
+      "contentHash": "66b3eb9aeb1630f3af9ec3905da13c137728f9a9b276758e7674ff9d99f30f73",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 668,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/Login.html": {
+      "filePath": "client/src/pages/htmls/Login.html",
+      "contentHash": "26dc9d98f3aff7c4887a7af563b4603a60a87b3a99c6ba79d22449ff6bedaae1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/LoginPendingView.html": {
+      "filePath": "client/src/pages/htmls/LoginPendingView.html",
+      "contentHash": "0549e81b694a60429acfe3386f7d376b15689e1cf48e93c22c3e0d3fbb718c8e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 159,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/Profile.html": {
+      "filePath": "client/src/pages/htmls/Profile.html",
+      "contentHash": "95a36a509bea0e11a3fe7bdd1f286868b7fb2df34a6f42d2631e454cc19e6e27",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 154,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/Recommend.html": {
+      "filePath": "client/src/pages/htmls/Recommend.html",
+      "contentHash": "cfa3a167acc2ffb53e7b7cd924760a3e24bc6a063a033d7503fc8c4c2ae9ba9d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/RecommendAnalyzingModal.html": {
+      "filePath": "client/src/pages/htmls/RecommendAnalyzingModal.html",
+      "contentHash": "c1a67828837904037bade11a807fb55db8afce918f18d44f702af4977dfa2c02",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 4,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/Register.html": {
+      "filePath": "client/src/pages/htmls/Register.html",
+      "contentHash": "33b4863e7ce79de00385dc8dbfbe9f4907c81f54ae59b1117f89d3102b586b10",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 212,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/ReviewDetail.html": {
+      "filePath": "client/src/pages/htmls/ReviewDetail.html",
+      "contentHash": "f25e0e9d61fa48665c318c00dfbaba280ebbf7df0c62875bf64d330ee6eb9dff",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 125,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/Timeline.html": {
+      "filePath": "client/src/pages/htmls/Timeline.html",
+      "contentHash": "29f3bdda7d1063928fdc1d70b6e025e3624be3c22d91fdb8ba501ab5338277c0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 360,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/WriteJournal.html": {
+      "filePath": "client/src/pages/htmls/WriteJournal.html",
+      "contentHash": "3790329659e3220c738ef57842c37f5cd62694d486a906cfaee0aab13895a2d6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 123,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/htmls/WriteReview.html": {
+      "filePath": "client/src/pages/htmls/WriteReview.html",
+      "contentHash": "d2c6c3a01d507c2fa8929762c977e3acad539818b1649997bdaa01c17dba350b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 668,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/pages/JournalDetail.tsx": {
+      "filePath": "client/src/pages/JournalDetail.tsx",
+      "contentHash": "06ff5e847eaf2de64b22ef6fb9a2760cc4385aa8fb0464720ba22588261cf3ab",
+      "functions": [
+        {
+          "name": "formatDate",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getInitials",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "JournalDetail",
+          "params": [],
+          "exported": false,
+          "lineCount": 550
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent",
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link",
+            "useLocation",
+            "useNavigate",
+            "useParams"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "../auth/AuthContext",
+          "specifiers": [
+            "useAuth"
+          ]
+        },
+        {
+          "source": "./DeleteJournalModal",
+          "specifiers": [
+            "DeleteJournalModal"
+          ]
+        },
+        {
+          "source": "./EditJournalModal",
+          "specifiers": [
+            "EditJournalModal"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "./ProfileAvatar",
+          "specifiers": [
+            "ProfileAvatar",
+            "PROFILE_AVATAR_COLOR_IMAGE_CLASS"
+          ]
+        },
+        {
+          "source": "../styles/JournalDetail.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 607,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/Journals.tsx": {
+      "filePath": "client/src/pages/Journals.tsx",
+      "contentHash": "75035d9571dff184ca6aab2030ebcbcee686490fd60626db2abe1462d04eaa8a",
+      "functions": [
+        {
+          "name": "parsePostSort",
+          "params": [
+            "value",
+            "fallback"
+          ],
+          "returnType": "PostSort",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "parseJournalSort",
+          "params": [
+            "value"
+          ],
+          "returnType": "PostSort",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "parseJournalLimit",
+          "params": [
+            "value"
+          ],
+          "returnType": "JournalLimit",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "parseJournalPage",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "paginationWindow",
+          "params": [
+            "currentPage",
+            "totalPages"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "formatDate",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "gameInitials",
+          "params": [
+            "title"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "Journals",
+          "params": [],
+          "exported": false,
+          "lineCount": 568
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent",
+            "useCallback",
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link",
+            "useSearchParams"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./DeleteJournalModal",
+          "specifiers": [
+            "DeleteJournalModal"
+          ]
+        },
+        {
+          "source": "./DeleteReviewModal",
+          "specifiers": [
+            "DeleteReviewModal"
+          ]
+        },
+        {
+          "source": "./EditJournalModal",
+          "specifiers": [
+            "EditJournalModal"
+          ]
+        },
+        {
+          "source": "./EditReviewModal",
+          "specifiers": [
+            "EditReviewModal"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "../styles/Journals.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 670,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/Login.tsx": {
+      "filePath": "client/src/pages/Login.tsx",
+      "contentHash": "bcc400a206c66c654e406b3ae788b15a732ded5fef9872a0f042808254bbcb69",
+      "functions": [
+        {
+          "name": "Login",
+          "params": [],
+          "exported": false,
+          "lineCount": 137
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link",
+            "useNavigate"
+          ]
+        },
+        {
+          "source": "../auth/AuthContext",
+          "specifiers": [
+            "useAuth"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "../styles/login.css",
+          "specifiers": []
+        },
+        {
+          "source": "./LoginPendingView",
+          "specifiers": [
+            "LoginPendingView"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 155,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/LoginPendingView.tsx": {
+      "filePath": "client/src/pages/LoginPendingView.tsx",
+      "contentHash": "ce0acb1de90032752afe20c1fa8e9ccfdab9870f0418e99b8e1c495edc3857f5",
+      "functions": [
+        {
+          "name": "LoginPendingView",
+          "params": [
+            "{ email }"
+          ],
+          "exported": false,
+          "lineCount": 42
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "../styles/loginPendingView.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/PageChrome.tsx": {
+      "filePath": "client/src/pages/PageChrome.tsx",
+      "contentHash": "3dba54eab23d78071b85ee545c4706229dfffa7d88cef8c1091a85427218143f",
+      "functions": [
+        {
+          "name": "PageChrome",
+          "params": [
+            "{ active, children }"
+          ],
+          "exported": false,
+          "lineCount": 33
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "ReactNode"
+          ]
+        },
+        {
+          "source": "../components/Header",
+          "specifiers": [
+            "Header",
+            "NavKey"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 44,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/PostTagInput.tsx": {
+      "filePath": "client/src/pages/PostTagInput.tsx",
+      "contentHash": "3a40c34b88f04e87ede0fc39856f5f02a99ce2725929d5460aefaed74073affe",
+      "functions": [
+        {
+          "name": "normalizePostTagInput",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "PostTagInput",
+          "params": [
+            "{ className = '', onChange, tags }"
+          ],
+          "exported": false,
+          "lineCount": 97
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 121,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/Profile.tsx": {
+      "filePath": "client/src/pages/Profile.tsx",
+      "contentHash": "7b52c3c597b13afff5b269d07d5b95836acffb1626d7ecf10adbe8e5d67e58b5",
+      "functions": [
+        {
+          "name": "apiUrl",
+          "params": [
+            "path"
+          ],
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "formatStatNumber",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "formatPlayHours",
+          "params": [
+            "minutes"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "formatArchiveDate",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "formatRating",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "reviewExcerpt",
+          "params": [
+            "content"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "gameInitials",
+          "params": [
+            "title"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "Profile",
+          "params": [],
+          "exported": false,
+          "lineCount": 437
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "../auth/AuthContext",
+          "specifiers": [
+            "useAuth"
+          ]
+        },
+        {
+          "source": "./EditProfileModal",
+          "specifiers": [
+            "EditProfileModal"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "./ProfileSteamLoadingModal",
+          "specifiers": [
+            "ProfileSteamLoadingModal"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "PostListResponse"
+          ]
+        },
+        {
+          "source": "./profileImage",
+          "specifiers": [
+            "resolveProfileImageUrl"
+          ]
+        },
+        {
+          "source": "../styles/Profile.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 572,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/ProfileAvatar.tsx": {
+      "filePath": "client/src/pages/ProfileAvatar.tsx",
+      "contentHash": "b2bceeaddb96c05c676e78d44febeeea3f6d25805e83c377e118ac38471ce6b6",
+      "functions": [
+        {
+          "name": "ProfileAvatar",
+          "params": [
+            "{\r\n  alt,\r\n  className,\r\n  imageClassName = PROFILE_AVATAR_GRAYSCALE_IMAGE_CLASS,\r\n  profileImageUrl,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./profileImage",
+          "specifiers": [
+            "resolveProfileImageUrl"
+          ]
+        }
+      ],
+      "exports": [
+        "PROFILE_AVATAR_COLOR_IMAGE_CLASS",
+        "PROFILE_AVATAR_GRAYSCALE_HOVER_IMAGE_CLASS",
+        "PROFILE_AVATAR_GRAYSCALE_IMAGE_CLASS"
+      ],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/profileImage.ts": {
+      "filePath": "client/src/pages/profileImage.ts",
+      "contentHash": "641f0accfb8e1114a07a35133a3d651dcb3879e167f8e2f86268168044424942",
+      "functions": [
+        {
+          "name": "resolveProfileImageUrl",
+          "params": [
+            "profileImageUrl"
+          ],
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "DEFAULT_PROFILE_IMAGE_URL",
+        "resolveProfileImageUrl"
+      ],
+      "totalLines": 26,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/ProfileSteamLoadingModal.tsx": {
+      "filePath": "client/src/pages/ProfileSteamLoadingModal.tsx",
+      "contentHash": "d8794d0f14e19030212c222bd6882a4a7f74f6ff35caeaa33d8dfb43becb2ca7",
+      "functions": [
+        {
+          "name": "ProfileSteamLoadingModal",
+          "params": [
+            "{ isOpen }"
+          ],
+          "exported": false,
+          "lineCount": 43
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 50,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/Recommend.tsx": {
+      "filePath": "client/src/pages/Recommend.tsx",
+      "contentHash": "305a119d615e28f711e4563b5fd090408f249d2a0170eced07acfa34ce2f6560",
+      "functions": [
+        {
+          "name": "normalizeLabel",
+          "params": [
+            "label"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "analysisLabelKo",
+          "params": [
+            "label"
+          ],
+          "exported": false,
+          "lineCount": 36
+        },
+        {
+          "name": "recommendationCardTags",
+          "params": [
+            "card"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "formatSyncTime",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "wordStyle",
+          "params": [
+            "word"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "isJsonRecord",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "readString",
+          "params": [
+            "value",
+            "fallback"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "readNumber",
+          "params": [
+            "value",
+            "fallback"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "readStringArray",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "normalizePreferenceTags",
+          "params": [
+            "value"
+          ],
+          "returnType": "AiPreferenceTag[]",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "normalizeWordCloud",
+          "params": [
+            "value"
+          ],
+          "returnType": "AiWordCloudTerm[]",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "normalizeRecommendations",
+          "params": [
+            "value"
+          ],
+          "returnType": "AiRecommendationCard[]",
+          "exported": false,
+          "lineCount": 32
+        },
+        {
+          "name": "normalizeSyncResponse",
+          "params": [
+            "value"
+          ],
+          "returnType": "AiRecommendationSyncResponse | null",
+          "exported": false,
+          "lineCount": 61
+        },
+        {
+          "name": "Recommend",
+          "params": [],
+          "exported": false,
+          "lineCount": 362
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useMemo",
+            "useRef",
+            "useState"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./RecommendAnalyzingModal",
+          "specifiers": [
+            "RecommendAnalyzingModal"
+          ]
+        },
+        {
+          "source": "./RecommendDataNoticeModal",
+          "specifiers": [
+            "RecommendDataNoticeModal",
+            "RecommendArchiveSignalCounts"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "PostListResponse"
+          ]
+        },
+        {
+          "source": "../styles/Profile.css",
+          "specifiers": []
+        },
+        {
+          "source": "../styles/Recommend.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 665,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/RecommendAnalyzingModal.tsx": {
+      "filePath": "client/src/pages/RecommendAnalyzingModal.tsx",
+      "contentHash": "d0ed41ddc372a4dd5bc19722bfc9de1c000570c11fca5e607207afa037bbb66d",
+      "functions": [
+        {
+          "name": "RecommendAnalyzingModal",
+          "params": [
+            "{ isOpen, onClose }"
+          ],
+          "exported": false,
+          "lineCount": 25
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/RecommendDataNoticeModal.tsx": {
+      "filePath": "client/src/pages/RecommendDataNoticeModal.tsx",
+      "contentHash": "9e132a6249e219dad77cefbe8a7d0679b247c4f601c07b555c94badd6e638de4",
+      "functions": [
+        {
+          "name": "formatSignalCount",
+          "params": [
+            "value",
+            "isLoading"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "getSignalRatio",
+          "params": [
+            "totalCount",
+            "target"
+          ],
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "getSignalLabel",
+          "params": [
+            "totalCount",
+            "isLoading"
+          ],
+          "exported": false,
+          "lineCount": 23
+        },
+        {
+          "name": "getSignalHint",
+          "params": [
+            "totalCount",
+            "isLoading"
+          ],
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "RecommendDataNoticeModal",
+          "params": [
+            "{\r\n  archiveSignalCounts,\r\n  isOpen,\r\n  onClose,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 144
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 230,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/Register.tsx": {
+      "filePath": "client/src/pages/Register.tsx",
+      "contentHash": "f5509550371adb20e68862e3c35e5c3a612b537eb18b49098434ec5abcd6c273",
+      "functions": [
+        {
+          "name": "Register",
+          "params": [],
+          "exported": false,
+          "lineCount": 181
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link",
+            "useNavigate"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "../styles/Register.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 199,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/ReviewDetail.tsx": {
+      "filePath": "client/src/pages/ReviewDetail.tsx",
+      "contentHash": "581b4f9d07e041bfc30b34c9371be71a0114bc6219907c450e23ee98af2a0085",
+      "functions": [
+        {
+          "name": "formatDate",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getInitials",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "getStarIcon",
+          "params": [
+            "rating",
+            "index"
+          ],
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "getStarFill",
+          "params": [
+            "rating",
+            "index"
+          ],
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "ReviewDetail",
+          "params": [],
+          "exported": false,
+          "lineCount": 231
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback",
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link",
+            "useLocation",
+            "useNavigate",
+            "useParams"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./DeleteReviewModal",
+          "specifiers": [
+            "DeleteReviewModal"
+          ]
+        },
+        {
+          "source": "./EditReviewModal",
+          "specifiers": [
+            "EditReviewModal"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "./ProfileAvatar",
+          "specifiers": [
+            "ProfileAvatar",
+            "PROFILE_AVATAR_COLOR_IMAGE_CLASS"
+          ]
+        },
+        {
+          "source": "../styles/JournalDetail.css",
+          "specifiers": []
+        }
+      ],
+      "exports": [],
+      "totalLines": 288,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/Timeline.tsx": {
+      "filePath": "client/src/pages/Timeline.tsx",
+      "contentHash": "7361ad3b8b223c9f2c5dd7dbf37aed369cb1112d7e104da364f7147e1feb4806",
+      "functions": [
+        {
+          "name": "formatTimelineDate",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "formatTimelineTime",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getGameInitials",
+          "params": [
+            "title"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "getDetailPath",
+          "params": [
+            "post"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "Timeline",
+          "params": [],
+          "exported": false,
+          "lineCount": 258
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback",
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "./ProfileAvatar",
+          "specifiers": [
+            "ProfileAvatar",
+            "PROFILE_AVATAR_GRAYSCALE_HOVER_IMAGE_CLASS"
+          ]
+        },
+        {
+          "source": "./Journals",
+          "specifiers": [
+            "JournalPost",
+            "PostListResponse"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 299,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/WriteJournal.tsx": {
+      "filePath": "client/src/pages/WriteJournal.tsx",
+      "contentHash": "84921daab484bd26fac2b106de695149a40657d5836b33ccff99d77295e5ed54",
+      "functions": [
+        {
+          "name": "WriteJournal",
+          "params": [],
+          "exported": false,
+          "lineCount": 157
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "useNavigate"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api"
+          ]
+        },
+        {
+          "source": "./GameSearchInput",
+          "specifiers": [
+            "GameSearchInput"
+          ]
+        },
+        {
+          "source": "./gamePlatformOptions",
+          "specifiers": [
+            "GAME_PLATFORM_OPTIONS"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 169,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/pages/WriteReview.tsx": {
+      "filePath": "client/src/pages/WriteReview.tsx",
+      "contentHash": "19d35fdb2628bd512c03ed31a3adb108649d107a092cea9cb9297ecb413bc3b4",
+      "functions": [
+        {
+          "name": "WriteReview",
+          "params": [],
+          "exported": false,
+          "lineCount": 249
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "react-router-dom",
+          "specifiers": [
+            "useNavigate"
+          ]
+        },
+        {
+          "source": "react",
+          "specifiers": [
+            "FormEvent"
+          ]
+        },
+        {
+          "source": "./PageChrome",
+          "specifiers": [
+            "PageChrome"
+          ]
+        },
+        {
+          "source": "../api",
+          "specifiers": [
+            "api",
+            "getApiErrorMessage"
+          ]
+        },
+        {
+          "source": "./GameSearchInput",
+          "specifiers": [
+            "GameSearchInput"
+          ]
+        },
+        {
+          "source": "./gamePlatformOptions",
+          "specifiers": [
+            "GAME_PLATFORM_OPTIONS"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 269,
+      "hasStructuralAnalysis": true
+    },
+    "client/src/styles/EditProfileModal.css": {
+      "filePath": "client/src/styles/EditProfileModal.css",
+      "contentHash": "e5e6400cf72da0d446a01703e72b0e543a479e668ca381cfc5b307249abc1808",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 598,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/Header.css": {
+      "filePath": "client/src/styles/Header.css",
+      "contentHash": "f9c7a4b8fb09e91ee5e4f24510f0992d7be3bb6676cf3135bfee28898ecdfed8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 120,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/JournalDetail.css": {
+      "filePath": "client/src/styles/JournalDetail.css",
+      "contentHash": "2c27cbe0e9e1bb539cec29c4a332b90624bc7f4313fd2969a66f169da26af417",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 39,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/Journals.css": {
+      "filePath": "client/src/styles/Journals.css",
+      "contentHash": "18ea82751c407b485f4287ae0ac5dfa7fb51a6cebe66d50d92b032a7ee3ab641",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 74,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/login.css": {
+      "filePath": "client/src/styles/login.css",
+      "contentHash": "4d07b4dbb1f794619255dcf1fde1bc2c29a7ea97c858bf51aa494dd78dd9ed29",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 343,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/loginPendingView.css": {
+      "filePath": "client/src/styles/loginPendingView.css",
+      "contentHash": "07eb8388a983d136d526f5dc2c7af5124914567a62e70c478c3c417ce21b9339",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 118,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/Profile.css": {
+      "filePath": "client/src/styles/Profile.css",
+      "contentHash": "9e3cad8c00e20b94683210d12db33cdbcc0247a21871f183708d0237f2938384",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 144,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/Recommend.css": {
+      "filePath": "client/src/styles/Recommend.css",
+      "contentHash": "106cf452b943a50fae1d5f30bee8ccf84ccd90f31e49dba6b17445151eaf3972",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 223,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/Register.css": {
+      "filePath": "client/src/styles/Register.css",
+      "contentHash": "b394703b4ddfa821672eaea7d60189127de3b7583a31506de600c0f183616cd8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 314,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/ReviewDetail.css": {
+      "filePath": "client/src/styles/ReviewDetail.css",
+      "contentHash": "e575bfb34f78e0cc62a0b8c1e6a0e6019efb5db24b8f550091230abec3fe12f0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 24,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/Timeline.css": {
+      "filePath": "client/src/styles/Timeline.css",
+      "contentHash": "10a929324c13230f59a1e2a17441ed8b5942d4ec5cfe19b280a65b146c6c2918",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/WriteJournal.css": {
+      "filePath": "client/src/styles/WriteJournal.css",
+      "contentHash": "08faeac07fe66aef272f721664eb9203dfff89facd4414f2a63fd77b6d998322",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 27,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/styles/WriteReview.css": {
+      "filePath": "client/src/styles/WriteReview.css",
+      "contentHash": "4470a6987008df3da30c81ca5aae28e6308e003f859733827fe19ed5a2e161cf",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": false
+    },
+    "client/src/vite-env.d.ts": {
+      "filePath": "client/src/vite-env.d.ts",
+      "contentHash": "424faf9241dd699dda995b367ed36665732da1e6ec1f33b2fd40394488ecac92",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "client/tsconfig.app.json": {
+      "filePath": "client/tsconfig.app.json",
+      "contentHash": "61ab483a94a0556e57ea95cc7353bb07b9f3084c0691364070bbf853910646e8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": true
+    },
+    "client/tsconfig.json": {
+      "filePath": "client/tsconfig.json",
+      "contentHash": "ad28d132ee48d6e23917cf5827cace785d0fc01a44ca68b0dda51cc8c3fd3f52",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 8,
+      "hasStructuralAnalysis": true
+    },
+    "client/tsconfig.node.json": {
+      "filePath": "client/tsconfig.node.json",
+      "contentHash": "e0f1936992f77a707102795e8ea311ae74cb54de87b221bb32b44055af66ff7e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    },
+    "client/vite.config.ts": {
+      "filePath": "client/vite.config.ts",
+      "contentHash": "5eae26f997e22a05b7d984d7e870631fe4f8ca6f97a63c628a5d7724cde4427e",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "vite",
+          "specifiers": [
+            "defineConfig"
+          ]
+        },
+        {
+          "source": "@vitejs/plugin-react",
+          "specifiers": [
+            "react"
+          ]
+        },
+        {
+          "source": "@tailwindcss/vite",
+          "specifiers": [
+            "tailwindcss"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 16,
+      "hasStructuralAnalysis": true
+    },
+    "docker-compose.yml": {
+      "filePath": "docker-compose.yml",
+      "contentHash": "d718600c07d93060a680d0a35c113eb27b730704615f723d84097768e7144ca3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 29,
+      "hasStructuralAnalysis": true
+    },
+    "docs/GJC-78_RAG_TECH_DECISION.md": {
+      "filePath": "docs/GJC-78_RAG_TECH_DECISION.md",
+      "contentHash": "920b8e8f44e7727ea3cf131468347fe82156506084a16dd84b771b792cc6045b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 182,
+      "hasStructuralAnalysis": true
+    },
+    "GJC_173_AI_RECOMMENDATION_SESSION_STUDY_NOTES.md": {
+      "filePath": "GJC_173_AI_RECOMMENDATION_SESSION_STUDY_NOTES.md",
+      "contentHash": "0b20272b4322006d00a571fb0c894c88aae3be1b568a75b4d2116735f32e7f1b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 355,
+      "hasStructuralAnalysis": true
+    },
+    "GJC_ACTIVE_SPRINT_CURRENT_BRANCH_STUDY_NOTES.md": {
+      "filePath": "GJC_ACTIVE_SPRINT_CURRENT_BRANCH_STUDY_NOTES.md",
+      "contentHash": "51b29c6484fbbbee515e7962e87553071874c654f8a43e4bc0f3e6acc2cbb579",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 167,
+      "hasStructuralAnalysis": true
+    },
+    "GJC_ACTIVE_SPRINT_PRIORITY_FIXES_STUDY_NOTES.md": {
+      "filePath": "GJC_ACTIVE_SPRINT_PRIORITY_FIXES_STUDY_NOTES.md",
+      "contentHash": "7a80d080db0e50e7c9b84b148d4027278887f2626fb1942b6cea9b321cc31dff",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 168,
+      "hasStructuralAnalysis": true
+    },
+    "GJC_STEAM_LIVE_PROFILE_STUDY_NOTES.md": {
+      "filePath": "GJC_STEAM_LIVE_PROFILE_STUDY_NOTES.md",
+      "contentHash": "30a1125336e7e61f08c64d01cd38df76a8d111bc476727c778d1a62a5f4649de",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 127,
+      "hasStructuralAnalysis": true
+    },
+    "GJC_STEAM_PROFILE_LINK_STUDY_NOTES.md": {
+      "filePath": "GJC_STEAM_PROFILE_LINK_STUDY_NOTES.md",
+      "contentHash": "11d764f02a145187dc3370ad63cd3d65f306d56a6914876b7eac214f184b4ab5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 203,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-124_TAG_ENTITY_STUDY_NOTES.md": {
+      "filePath": "GJC-124_TAG_ENTITY_STUDY_NOTES.md",
+      "contentHash": "d401c5707e050718d507ff1476402c8bbc9d5d06df142757c46bb4ab9580ef1c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 199,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-125_POST_TAG_INPUT_STUDY_NOTES.md": {
+      "filePath": "GJC-125_POST_TAG_INPUT_STUDY_NOTES.md",
+      "contentHash": "14584cc94c58085eebcdfd5c635167245d692f3761c093cbe266aa8c9a524392",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 209,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-127_POST_LIST_QUERY_API_STUDY_NOTES.md": {
+      "filePath": "GJC-127_POST_LIST_QUERY_API_STUDY_NOTES.md",
+      "contentHash": "cedfd14a157c4d0c314b2f4e10a1ae450cc1b642b5fb3c19619d8969845d4f5f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 187,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-128_JOURNALS_QUERY_CONTROLS_STUDY_NOTES.md": {
+      "filePath": "GJC-128_JOURNALS_QUERY_CONTROLS_STUDY_NOTES.md",
+      "contentHash": "ed4eefbdee43c3c3753a6aafe883655dccffcfb1a266228cfc90ec2304495017",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 111,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-129_URL_QUERY_STATE_STUDY_NOTES.md": {
+      "filePath": "GJC-129_URL_QUERY_STATE_STUDY_NOTES.md",
+      "contentHash": "96a8a1effc3a788c97db804d3f30d82b0de137817b9e20d1aaa648f202fec6a9",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 173,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-163_AI_RECOMMENDATION_CONTRACT_STUDY_NOTES.md": {
+      "filePath": "GJC-163_AI_RECOMMENDATION_CONTRACT_STUDY_NOTES.md",
+      "contentHash": "ede1e2836a67a977e860fc7ad866ad3f950b035f9f4f9becbcfbcc53341ff2ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 190,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-164_DB_PGVECTOR_SEED_STUDY_NOTES.md": {
+      "filePath": "GJC-164_DB_PGVECTOR_SEED_STUDY_NOTES.md",
+      "contentHash": "ed6c0c1a323add13c0c44c1150d38de0d2315ae3fa9b538d1840905a4b02f423",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 209,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-165_MVP_SMOKE_QUICKSTART_STUDY_NOTES.md": {
+      "filePath": "GJC-165_MVP_SMOKE_QUICKSTART_STUDY_NOTES.md",
+      "contentHash": "2563d675d214a620f958a019bfc982f89e2b7cfc0178edf7ca3e9d608af837a5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 136,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-166_REACT_RECOMMENDATION_SYNC_STUDY_NOTES.md": {
+      "filePath": "GJC-166_REACT_RECOMMENDATION_SYNC_STUDY_NOTES.md",
+      "contentHash": "68691d510b8c2cc8503c075eee21610bf383fb296839e8c708cf03cac56b585f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 228,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-167_USER_SCOPED_RECOMMENDATION_STUDY_NOTES.md": {
+      "filePath": "GJC-167_USER_SCOPED_RECOMMENDATION_STUDY_NOTES.md",
+      "contentHash": "6fca34e9220a3c301b42d42d6fb943c96ce4dae123282e19c44dcdc7eaabb0c6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 172,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-168_SYNC_PERSISTENCE_STUDY_NOTES.md": {
+      "filePath": "GJC-168_SYNC_PERSISTENCE_STUDY_NOTES.md",
+      "contentHash": "137a3c2c86dc4304c216dee42b2256fddc39f57654d1dc5042f392ff02ff8bc6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 257,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-169_RECOMMENDATION_CARD_LAYOUT_STUDY_NOTES.md": {
+      "filePath": "GJC-169_RECOMMENDATION_CARD_LAYOUT_STUDY_NOTES.md",
+      "contentHash": "0644485ba124a9ff61399ab76af5c507da9bca6875acb1c894e0ed6f270ecb5e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 122,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-170_PROFILE_ARCHIVE_DB_STUDY_NOTES.md": {
+      "filePath": "GJC-170_PROFILE_ARCHIVE_DB_STUDY_NOTES.md",
+      "contentHash": "e344eaec718880a46faaf0014cb7545dc78cc88de3b6305856d344ad06d895ae",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 186,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-171_IGDB_GAME_SEARCH_STUDY_NOTES.md": {
+      "filePath": "GJC-171_IGDB_GAME_SEARCH_STUDY_NOTES.md",
+      "contentHash": "12f5704a36b57d35288539c3238e3eb31abc1f261b112b011e42b84d5274e0f7",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 193,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-172_DUPLICATE_REVIEW_GUARD_STUDY_NOTES.md": {
+      "filePath": "GJC-172_DUPLICATE_REVIEW_GUARD_STUDY_NOTES.md",
+      "contentHash": "15267f83d1939c39de8ecf0c158946143c2ad7e3a3b06873cd1f4e08a9e93910",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 216,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-182_PERSONA_JOURNAL_QA_MEMO.md": {
+      "filePath": "GJC-182_PERSONA_JOURNAL_QA_MEMO.md",
+      "contentHash": "794bc019e82293bd53cfd98f11abb4574bf0432395881f6fd3958f34d06a5e8f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 39,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-183_FASTAPI_AI_COMPUTE_STUDY_NOTES.md": {
+      "filePath": "GJC-183_FASTAPI_AI_COMPUTE_STUDY_NOTES.md",
+      "contentHash": "5a632607944896a0fd7ecd1becc6227665069f8a54acb3140b32f8fb46c3f523",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 113,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-67_PROFILE_DB_EDIT_STUDY_NOTES.md": {
+      "filePath": "GJC-67_PROFILE_DB_EDIT_STUDY_NOTES.md",
+      "contentHash": "ac11b797db6d3990d1efb373b6556b138b0ca22af07394a363de4aa2d65a0eb4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 288,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-68_STEAM_STATS_PROFILE_STUDY_NOTES.md": {
+      "filePath": "GJC-68_STEAM_STATS_PROFILE_STUDY_NOTES.md",
+      "contentHash": "e809b37e57d1c1879fa21e8ff27515087eeb44b4cf19f16968015a0afa9d0b12",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 219,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-70_JOURNALS_API_INTEGRATION_QA_MEMO.md": {
+      "filePath": "GJC-70_JOURNALS_API_INTEGRATION_QA_MEMO.md",
+      "contentHash": "e7a07ec1420c76e8d9209620b6a8a5620690a332ad4477548103d663a8e20fa0",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-77_TIMELINE_FLOW_QA_MEMO.md": {
+      "filePath": "GJC-77_TIMELINE_FLOW_QA_MEMO.md",
+      "contentHash": "6dad33aebe3edbbe504d1488987de4ce679aac2237535f053a819a9640c8d69e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md": {
+      "filePath": "GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md",
+      "contentHash": "434cf6ce960636b0b0a5df0d4f5d7feae7e58497100dd7cca6e17b365c96aab5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 176,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-80_RAG_CONTEXT_API_STUDY_NOTES.md": {
+      "filePath": "GJC-80_RAG_CONTEXT_API_STUDY_NOTES.md",
+      "contentHash": "64941280e80e767a3318db66aaad01267ef8b3ff01ca4907fa457575126e93e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 278,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-83_IGDB_LIVE_SMOKE_STUDY_NOTES.md": {
+      "filePath": "GJC-83_IGDB_LIVE_SMOKE_STUDY_NOTES.md",
+      "contentHash": "6ba78bda4844ea4dddaf148e19e3e93fa979845c5847e4794cea4c0ac403cb48",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 181,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-83_MCP_IGDB_TOOL_STUDY_NOTES.md": {
+      "filePath": "GJC-83_MCP_IGDB_TOOL_STUDY_NOTES.md",
+      "contentHash": "34d28ac3e8176fbf92fc93d558007291f6870ace7703984219007b4a0a02a0ad",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 224,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-85_API_KEY_ERROR_STRATEGY_STUDY_NOTES.md": {
+      "filePath": "GJC-85_API_KEY_ERROR_STRATEGY_STUDY_NOTES.md",
+      "contentHash": "fb8ba9d18dce71c4e7d2a2e64560e4a34f61fde0dfe99e2079f9acefd9621c4b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 197,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-88_AGENT_RECOMMENDATION_LOOP_STUDY_NOTES.md": {
+      "filePath": "GJC-88_AGENT_RECOMMENDATION_LOOP_STUDY_NOTES.md",
+      "contentHash": "ed43e8a217560d6ea161760dd1fcb5fdd842467f4dae9d51900ab399664b250d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 198,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-93_P2_QA_DEMO_MEMO.md": {
+      "filePath": "GJC-93_P2_QA_DEMO_MEMO.md",
+      "contentHash": "7684544f2e5282ef16ba69569e2504fc8f8d87f4d79c82bbd3ea02b5f6aecd30",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 184,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-93_QA_REGRESSION_STUDY_NOTES.md": {
+      "filePath": "GJC-93_QA_REGRESSION_STUDY_NOTES.md",
+      "contentHash": "98431f8f171dd8e493e52db304bc6dacbedb3cd8a3bc63327657934c027e7842",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 135,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-97_STEAM_OPENID_LINK_STUDY_NOTES.md": {
+      "filePath": "GJC-97_STEAM_OPENID_LINK_STUDY_NOTES.md",
+      "contentHash": "4b694ad7e29505e445f3282c7e49cbd36d68027a7e9c31714775992c597cfd3c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 192,
+      "hasStructuralAnalysis": true
+    },
+    "GJC-99_TIMELINE_GAME_IMAGE_STUDY_NOTES.md": {
+      "filePath": "GJC-99_TIMELINE_GAME_IMAGE_STUDY_NOTES.md",
+      "contentHash": "c358a367994a99d75562b1663d85cbbed41055b5e7cd4f7f4c2d88b405b26a0c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 110,
+      "hasStructuralAnalysis": true
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "989b658a27383d0a1659a287e9e4cff35b298c3e102e7092254a3e247a92d2f1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 247,
+      "hasStructuralAnalysis": true
+    },
+    "server/.env.example": {
+      "filePath": "server/.env.example",
+      "contentHash": "54c3715902d2a2c8e63045b032066b3f83b18069da4f744aa5cccbba378471de",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": true
+    },
+    "server/eslint.config.mjs": {
+      "filePath": "server/eslint.config.mjs",
+      "contentHash": "e94fea27c5d744a435cba627eb7097993c14a66a21f478c3729781bcdf4c8fba",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@eslint/js",
+          "specifiers": [
+            "eslint"
+          ]
+        },
+        {
+          "source": "eslint-plugin-prettier/recommended",
+          "specifiers": [
+            "eslintPluginPrettierRecommended"
+          ]
+        },
+        {
+          "source": "globals",
+          "specifiers": [
+            "globals"
+          ]
+        },
+        {
+          "source": "typescript-eslint",
+          "specifiers": [
+            "tseslint"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 36,
+      "hasStructuralAnalysis": true
+    },
+    "server/nest-cli.json": {
+      "filePath": "server/nest-cli.json",
+      "contentHash": "84dc81177a0db2270bd71242b910f07982c56eec68285694c9cbffc3911912ba",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    },
+    "server/package.json": {
+      "filePath": "server/package.json",
+      "contentHash": "61a17c2e2da42cee746141fc4da574935bbb5e216a2404b5e68408e199c4a77e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 92,
+      "hasStructuralAnalysis": true
+    },
+    "server/README.md": {
+      "filePath": "server/README.md",
+      "contentHash": "d99ef6e65d335920fde507dfae4fbb38c7a4993cee4ed808fedeea17ea421cc4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 698,
+      "hasStructuralAnalysis": true
+    },
+    "server/scripts/smoke-ai-compute.js": {
+      "filePath": "server/scripts/smoke-ai-compute.js",
+      "contentHash": "13fd8eed4c96fbfa702bf5a6d00e3f3dfe57192d086e8d874161dc725bb53338",
+      "functions": [
+        {
+          "name": "buildDemoEmbedding",
+          "params": [
+            "seedText"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": false,
+          "lineCount": 70
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
+    "server/scripts/smoke-mcp-igdb.js": {
+      "filePath": "server/scripts/smoke-mcp-igdb.js",
+      "contentHash": "09e7dd2255757e193f7ba2922cb8a375f575ec935b9c601d20f6b3aa7f92f1b6",
+      "functions": [
+        {
+          "name": "trimTrailingSlash",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "normalizeLimit",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "hasIgdbCredentials",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": false,
+          "lineCount": 98
+        },
+        {
+          "name": "startTemporaryNestServer",
+          "params": [],
+          "exported": false,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 161,
+      "hasStructuralAnalysis": true
+    },
+    "server/scripts/smoke-steam-profile.js": {
+      "filePath": "server/scripts/smoke-steam-profile.js",
+      "contentHash": "aaacce10bd805e17b013d599d3d67f71d985e7beed712faadb43667bc17aed9c",
+      "functions": [
+        {
+          "name": "trimTrailingSlash",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "hasSteamApiKey",
+          "params": [],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "main",
+          "params": [],
+          "exported": false,
+          "lineCount": 80
+        },
+        {
+          "name": "extractCookie",
+          "params": [
+            "setCookieHeader"
+          ],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "assertConnectedSteamProfile",
+          "params": [
+            "response",
+            "label"
+          ],
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "restoreOriginalSteamLink",
+          "params": [
+            "baseUrl",
+            "cookie",
+            "originalSteamId"
+          ],
+          "exported": false,
+          "lineCount": 24
+        },
+        {
+          "name": "reportError",
+          "params": [
+            "error"
+          ],
+          "exported": false,
+          "lineCount": 20
+        },
+        {
+          "name": "startTemporaryNestServer",
+          "params": [],
+          "exported": false,
+          "lineCount": 27
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 209,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/agent.service.spec.ts": {
+      "filePath": "server/src/ai/agent.service.spec.ts",
+      "contentHash": "9aa957b1fc821a144d804c49cb5e6ee827f43aada33393ae98ff3df1c4c94e14",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./agent.service",
+          "specifiers": [
+            "AgentService"
+          ]
+        },
+        {
+          "source": "./recommendation-contract",
+          "specifiers": [
+            "AiRagAnalysisResponse"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 358,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/agent.service.ts": {
+      "filePath": "server/src/ai/agent.service.ts",
+      "contentHash": "01ea31380c53b8f99961836a4330760a53ea55bfc9b920a581f834add46164d1",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AgentService",
+          "methods": [
+            "constructor",
+            "syncRecommendations",
+            "getLatestRecommendations",
+            "buildSearchQueries",
+            "callSearchGamesTool",
+            "toRecommendations",
+            "isMcpToolCallSuccess",
+            "fallbackRecommendations",
+            "loadUserScopedLocalGames",
+            "loadRecommendationExclusionSet",
+            "saveLatestRecommendationSync",
+            "generateRecommendationReasons",
+            "recommendationReasonPrompt",
+            "recommendationReasonJsonSchema",
+            "loadUserNickname",
+            "simpleRecommendationReason",
+            "toKoreanAnalysisLabel",
+            "recommendationReason",
+            "uniqueRecommendations",
+            "isRecommendationCandidate",
+            "hasRecommendationGradeMetadata",
+            "isExcludedExternalGame",
+            "isExcludedLocalGame",
+            "hasReliableCandidateMatch",
+            "querySupportedByCandidate",
+            "tagsSupportedByCandidate",
+            "buildTitleExclusionSet",
+            "isExcludedTitle",
+            "normalizeTitle",
+            "seriesKey",
+            "maxIterations",
+            "timeoutMs",
+            "shouldStop",
+            "timedOut"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 815
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectDataSource"
+          ]
+        },
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "DataSource"
+          ]
+        },
+        {
+          "source": "./recommendation-contract",
+          "specifiers": [
+            "AiAgentStoppedReason",
+            "AiRecommendationCard",
+            "AiRecommendationSyncResponse",
+            "AiRagAnalysisResponse"
+          ]
+        },
+        {
+          "source": "../auth/entities/aiProfile.entity",
+          "specifiers": [
+            "AiProfile"
+          ]
+        },
+        {
+          "source": "../auth/entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        },
+        {
+          "source": "./mcp.service",
+          "specifiers": [
+            "McpService"
+          ]
+        },
+        {
+          "source": "./rag.service",
+          "specifiers": [
+            "RagService"
+          ]
+        }
+      ],
+      "exports": [
+        "AgentService"
+      ],
+      "totalLines": 923,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/ai-compute.client.ts": {
+      "filePath": "server/src/ai/ai-compute.client.ts",
+      "contentHash": "96a518039b7c2a7290eb0a5e0d2d645f54f7f8a57411aecc7d4543bbb3b0f384",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AiComputeClient",
+          "methods": [
+            "constructor",
+            "createEmbedding",
+            "baseUrl",
+            "timeoutMs",
+            "errorMessage"
+          ],
+          "properties": [
+            "logger"
+          ],
+          "exported": true,
+          "lineCount": 80
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable",
+            "Logger"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios"
+          ]
+        },
+        {
+          "source": "./recommendation-contract",
+          "specifiers": [
+            "AiRagEmbeddingProvider"
+          ]
+        }
+      ],
+      "exports": [
+        "AiComputeClient"
+      ],
+      "totalLines": 107,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/ai.module.ts": {
+      "filePath": "server/src/ai/ai.module.ts",
+      "contentHash": "797c4649218b27fe1cb5060a0d557270a0fe8e06bd4f2166020ea2fa8b008c4d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AiModule",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Module"
+          ]
+        },
+        {
+          "source": "./agent.service",
+          "specifiers": [
+            "AgentService"
+          ]
+        },
+        {
+          "source": "./ai-compute.client",
+          "specifiers": [
+            "AiComputeClient"
+          ]
+        },
+        {
+          "source": "./igdb.service",
+          "specifiers": [
+            "IgdbService"
+          ]
+        },
+        {
+          "source": "./mcp.controller",
+          "specifiers": [
+            "McpController"
+          ]
+        },
+        {
+          "source": "./mcp.service",
+          "specifiers": [
+            "McpService"
+          ]
+        },
+        {
+          "source": "./rag.controller",
+          "specifiers": [
+            "RagController"
+          ]
+        },
+        {
+          "source": "./rag.service",
+          "specifiers": [
+            "RagService"
+          ]
+        },
+        {
+          "source": "./recommendations.controller",
+          "specifiers": [
+            "RecommendationsController"
+          ]
+        }
+      ],
+      "exports": [
+        "AiModule"
+      ],
+      "totalLines": 17,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/demo-embedding.ts": {
+      "filePath": "server/src/ai/demo-embedding.ts",
+      "contentHash": "a4bb8404e39c22785aa3001a05cf996b3ce011e2f8ace48d2a97aa85d629a7c4",
+      "functions": [
+        {
+          "name": "buildDemoEmbedding",
+          "params": [
+            "seedText"
+          ],
+          "returnType": "number[]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "toPgVectorLiteral",
+          "params": [
+            "values"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "DEMO_EMBEDDING_DIMENSIONS",
+        "DEMO_EMBEDDING_MODEL",
+        "buildDemoEmbedding",
+        "toPgVectorLiteral"
+      ],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/igdb.service.ts": {
+      "filePath": "server/src/ai/igdb.service.ts",
+      "contentHash": "ca72d21e3df36ee403a36d9e70608091984ff36ca9e6850c272639a4b2e04a91",
+      "functions": [],
+      "classes": [
+        {
+          "name": "IgdbService",
+          "methods": [
+            "constructor",
+            "searchGames",
+            "getAccessToken",
+            "buildGamesQuery",
+            "normalizeLimit",
+            "escapeSearch",
+            "toGameResult",
+            "names",
+            "slugify",
+            "toSafeExternalApiError"
+          ],
+          "properties": [
+            "token"
+          ],
+          "exported": true,
+          "lineCount": 187
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios"
+          ]
+        }
+      ],
+      "exports": [
+        "IgdbService"
+      ],
+      "totalLines": 256,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/mcp.controller.ts": {
+      "filePath": "server/src/ai/mcp.controller.ts",
+      "contentHash": "10a4c66f8751aba31fc96ce5d8b3de703b27cb4aa561bb119e3a53c0cc71c005",
+      "functions": [],
+      "classes": [
+        {
+          "name": "McpController",
+          "methods": [
+            "constructor",
+            "handle"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Body",
+            "Controller",
+            "Post"
+          ]
+        },
+        {
+          "source": "./mcp.service",
+          "specifiers": [
+            "McpService"
+          ]
+        }
+      ],
+      "exports": [
+        "McpController"
+      ],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/mcp.service.ts": {
+      "filePath": "server/src/ai/mcp.service.ts",
+      "contentHash": "5e36cdfafd945ade6992619b6a4b532ce44c7bab7424020261321ac32c462ab2",
+      "functions": [],
+      "classes": [
+        {
+          "name": "McpService",
+          "methods": [
+            "constructor",
+            "handle",
+            "callTool",
+            "parseSearchGamesInput",
+            "searchGamesToolDefinition",
+            "result",
+            "error"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 204
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable"
+          ]
+        },
+        {
+          "source": "./igdb.service",
+          "specifiers": [
+            "IgdbService",
+            "SearchGamesInput"
+          ]
+        }
+      ],
+      "exports": [
+        "McpService"
+      ],
+      "totalLines": 223,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/rag.controller.ts": {
+      "filePath": "server/src/ai/rag.controller.ts",
+      "contentHash": "f9de329df2978c8d8d62bc486066f549951b4f30f665e50bd30efd9e4a616afe",
+      "functions": [],
+      "classes": [
+        {
+          "name": "RagController",
+          "methods": [
+            "constructor",
+            "getContext",
+            "parseTopK"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 25
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Controller",
+            "Get",
+            "Query",
+            "Req",
+            "UseGuards"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Request"
+          ]
+        },
+        {
+          "source": "../auth/guards/jwt-auth.guard",
+          "specifiers": [
+            "JwtAuthGuard"
+          ]
+        },
+        {
+          "source": "./rag.service",
+          "specifiers": [
+            "RagService"
+          ]
+        }
+      ],
+      "exports": [
+        "RagController"
+      ],
+      "totalLines": 40,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/rag.service.spec.ts": {
+      "filePath": "server/src/ai/rag.service.spec.ts",
+      "contentHash": "9e3208ae730a8a8e0642d98156be9c078837ec528754d08fa8f14674a5432fd7",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./rag.service",
+          "specifiers": [
+            "RagService"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 96,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/rag.service.ts": {
+      "filePath": "server/src/ai/rag.service.ts",
+      "contentHash": "ea9e456032aba3b7b02f3e6da1bf43fa09b53ff057da023968afbdcb54dcd5ac",
+      "functions": [],
+      "classes": [
+        {
+          "name": "RagService",
+          "methods": [
+            "constructor",
+            "analyzeForUser",
+            "normalizeTopK",
+            "loadUserArchivePosts",
+            "loadUserGameRecords",
+            "refreshArchiveEmbeddings",
+            "buildArchiveEmbeddingContent",
+            "buildPreferenceQuery",
+            "createEmbedding",
+            "truncateEmbeddingInput",
+            "createDemoEmbedding",
+            "searchContextRows",
+            "createAnalysis",
+            "createOpenAiAnalysis",
+            "analysisPrompt",
+            "analysisJsonSchema",
+            "createFallbackAnalysis",
+            "scoreAnalysisCandidates",
+            "fallbackSummary",
+            "normalizeAnalysis",
+            "normalizeAnalysisLabel",
+            "toContextSource",
+            "toUserGameContextRow",
+            "excerpt",
+            "errorMessage"
+          ],
+          "properties": [
+            "logger"
+          ],
+          "exported": true,
+          "lineCount": 772
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable",
+            "Logger",
+            "Optional"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectDataSource"
+          ]
+        },
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "DataSource"
+          ]
+        },
+        {
+          "source": "./ai-compute.client",
+          "specifiers": [
+            "AiComputeClient"
+          ]
+        },
+        {
+          "source": "./recommendation-contract",
+          "specifiers": [
+            "AiPreferenceTag",
+            "AiRagAnalysisResponse",
+            "AiRagContextSource",
+            "AiRagEmbeddingProvider",
+            "AiWordCloudTerm"
+          ]
+        },
+        {
+          "source": "./demo-embedding",
+          "specifiers": [
+            "buildDemoEmbedding",
+            "DEMO_EMBEDDING_DIMENSIONS",
+            "DEMO_EMBEDDING_MODEL",
+            "toPgVectorLiteral"
+          ]
+        },
+        {
+          "source": "../auth/entities/embeddingDocument.entity",
+          "specifiers": [
+            "EmbeddingDocument",
+            "EmbeddingSourceType"
+          ]
+        }
+      ],
+      "exports": [
+        "RagService"
+      ],
+      "totalLines": 872,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/recommendation-contract.ts": {
+      "filePath": "server/src/ai/recommendation-contract.ts",
+      "contentHash": "c615f596f3069c8e0b8328a2c364f0b899b3aecc3377cebd0c8846881a8a81af",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "AI_RECOMMENDATION_DEMO_USER_ID",
+        "AI_RECOMMENDATION_SYNC_SAMPLE"
+      ],
+      "totalLines": 205,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/ai/recommendations.controller.ts": {
+      "filePath": "server/src/ai/recommendations.controller.ts",
+      "contentHash": "1b103da12f4569ee8f540b255e87baa6fe73c33ce0206910b3458720f73ef811",
+      "functions": [],
+      "classes": [
+        {
+          "name": "RecommendationsController",
+          "methods": [
+            "constructor",
+            "latest",
+            "sync"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Body",
+            "Controller",
+            "Get",
+            "Post",
+            "Req",
+            "UseGuards"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Request"
+          ]
+        },
+        {
+          "source": "../auth/guards/jwt-auth.guard",
+          "specifiers": [
+            "JwtAuthGuard"
+          ]
+        },
+        {
+          "source": "./agent.service",
+          "specifiers": [
+            "AgentService"
+          ]
+        }
+      ],
+      "exports": [
+        "RecommendationsController"
+      ],
+      "totalLines": 38,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/app.controller.spec.ts": {
+      "filePath": "server/src/app.controller.spec.ts",
+      "contentHash": "43750c632fc7f5997ddd690d4c3989443ab29ebd8866ee1fec6f3885834f8054",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@nestjs/testing",
+          "specifiers": [
+            "Test",
+            "TestingModule"
+          ]
+        },
+        {
+          "source": "./app.controller",
+          "specifiers": [
+            "AppController"
+          ]
+        },
+        {
+          "source": "./app.service",
+          "specifiers": [
+            "AppService"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 23,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/app.controller.ts": {
+      "filePath": "server/src/app.controller.ts",
+      "contentHash": "3469c5aa62e1ba5b183d9bb9d40193e91aa761fc5734d332650b0bd49c346266",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AppController",
+          "methods": [
+            "constructor",
+            "getHello"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Controller",
+            "Get"
+          ]
+        },
+        {
+          "source": "./app.service",
+          "specifiers": [
+            "AppService"
+          ]
+        }
+      ],
+      "exports": [
+        "AppController"
+      ],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/app.module.ts": {
+      "filePath": "server/src/app.module.ts",
+      "contentHash": "73ad0f6e24f34d29e684a61955c8ea980b24a2f2d52379ff9be502c607af3557",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AppModule",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Module"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigModule",
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "TypeOrmModule"
+          ]
+        },
+        {
+          "source": "./ai/ai.module",
+          "specifiers": [
+            "AiModule"
+          ]
+        },
+        {
+          "source": "./auth/auth.module",
+          "specifiers": [
+            "AuthModule"
+          ]
+        },
+        {
+          "source": "./database/demo-seed.service",
+          "specifiers": [
+            "DemoSeedService"
+          ]
+        },
+        {
+          "source": "./database/pgvector-setup.service",
+          "specifiers": [
+            "PgvectorSetupService"
+          ]
+        },
+        {
+          "source": "./posts/posts.module",
+          "specifiers": [
+            "PostsModule"
+          ]
+        }
+      ],
+      "exports": [
+        "AppModule"
+      ],
+      "totalLines": 43,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/app.service.ts": {
+      "filePath": "server/src/app.service.ts",
+      "contentHash": "5d4242d50092a353e5ab1f06663a89dbc714c7d9d70072ea03c83c5b14750f05",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AppService",
+          "methods": [
+            "getHello"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable"
+          ]
+        }
+      ],
+      "exports": [
+        "AppService"
+      ],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/auth.controller.spec.ts": {
+      "filePath": "server/src/auth/auth.controller.spec.ts",
+      "contentHash": "84341fe343b5f091ca50e746a9accb5f02560b29419da93579191f1c534b9eb0",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@nestjs/testing",
+          "specifiers": [
+            "Test",
+            "TestingModule"
+          ]
+        },
+        {
+          "source": "./auth.controller",
+          "specifiers": [
+            "AuthController"
+          ]
+        },
+        {
+          "source": "./auth.service",
+          "specifiers": [
+            "AuthService"
+          ]
+        },
+        {
+          "source": "./steam.service",
+          "specifiers": [
+            "SteamService"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 45,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/auth.controller.ts": {
+      "filePath": "server/src/auth/auth.controller.ts",
+      "contentHash": "1def1e372e950038811506e63769bf057ba4ea1fbea6f33bbf78bcea2d691807",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AuthController",
+          "methods": [
+            "constructor",
+            "register",
+            "login",
+            "logout",
+            "me",
+            "updateMe",
+            "updateProfileImage",
+            "steamProfile",
+            "steamStats",
+            "startSteamOpenId",
+            "steamOpenIdCallback",
+            "linkSteamProfile",
+            "unlinkSteamProfile"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 122
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "BadRequestException",
+            "Body",
+            "Controller",
+            "Delete",
+            "Get",
+            "Patch",
+            "Post",
+            "Query",
+            "Req",
+            "Res",
+            "UploadedFile",
+            "UseGuards",
+            "UseInterceptors"
+          ]
+        },
+        {
+          "source": "@nestjs/platform-express",
+          "specifiers": [
+            "FileInterceptor"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Request",
+            "Response"
+          ]
+        },
+        {
+          "source": "./auth.service",
+          "specifiers": [
+            "AuthService"
+          ]
+        },
+        {
+          "source": "./dto/link-steam-profile.dto",
+          "specifiers": [
+            "LinkSteamProfileDto"
+          ]
+        },
+        {
+          "source": "./dto/login.dto",
+          "specifiers": [
+            "LoginDto"
+          ]
+        },
+        {
+          "source": "./dto/register.dto",
+          "specifiers": [
+            "RegisterDto"
+          ]
+        },
+        {
+          "source": "./dto/update-profile.dto",
+          "specifiers": [
+            "UpdateProfileDto"
+          ]
+        },
+        {
+          "source": "./guards/jwt-auth.guard",
+          "specifiers": [
+            "JwtAuthGuard"
+          ]
+        },
+        {
+          "source": "./profile-image",
+          "specifiers": [
+            "isAllowedProfileImageMimeType",
+            "PROFILE_IMAGE_MAX_BYTES",
+            "UploadedProfileImage"
+          ]
+        },
+        {
+          "source": "./steam.service",
+          "specifiers": [
+            "SteamService"
+          ]
+        }
+      ],
+      "exports": [
+        "AuthController"
+      ],
+      "totalLines": 170,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/auth.module.ts": {
+      "filePath": "server/src/auth/auth.module.ts",
+      "contentHash": "1deaf2a2bf47ea8866f35e238b89b09919211ccaf0fc4f5848ef836373183c25",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AuthModule",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Module"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/jwt",
+          "specifiers": [
+            "JwtModule"
+          ]
+        },
+        {
+          "source": "@nestjs/passport",
+          "specifiers": [
+            "PassportModule"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "TypeOrmModule"
+          ]
+        },
+        {
+          "source": "./auth.controller",
+          "specifiers": [
+            "AuthController"
+          ]
+        },
+        {
+          "source": "./auth.service",
+          "specifiers": [
+            "AuthService"
+          ]
+        },
+        {
+          "source": "./entities/aiProfile.entity",
+          "specifiers": [
+            "AiProfile"
+          ]
+        },
+        {
+          "source": "../posts/entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePost"
+          ]
+        },
+        {
+          "source": "../posts/entities/comment.entity",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "./entities/embeddingDocument.entity",
+          "specifiers": [
+            "EmbeddingDocument"
+          ]
+        },
+        {
+          "source": "./entities/game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "./entities/recommendation.entity",
+          "specifiers": [
+            "Recommendation"
+          ]
+        },
+        {
+          "source": "./entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        },
+        {
+          "source": "./entities/userGame.entity",
+          "specifiers": [
+            "UserGame"
+          ]
+        },
+        {
+          "source": "./steam.service",
+          "specifiers": [
+            "SteamService"
+          ]
+        },
+        {
+          "source": "./strategies/jwt.strategy",
+          "specifiers": [
+            "JwtStrategy"
+          ]
+        },
+        {
+          "source": "jsonwebtoken",
+          "specifiers": [
+            "SignOptions"
+          ]
+        }
+      ],
+      "exports": [
+        "AuthModule"
+      ],
+      "totalLines": 78,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/auth.service.spec.ts": {
+      "filePath": "server/src/auth/auth.service.spec.ts",
+      "contentHash": "d6af5ddfd47fb8537a37b4665e20c24e4de0d45fbb5646594a415211e6259994",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "BadRequestException"
+          ]
+        },
+        {
+          "source": "node:fs",
+          "specifiers": [
+            "existsSync"
+          ]
+        },
+        {
+          "source": "node:fs/promises",
+          "specifiers": [
+            "rm"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "./auth.service",
+          "specifiers": [
+            "AuthService"
+          ]
+        },
+        {
+          "source": "./profile-image",
+          "specifiers": [
+            "PROFILE_IMAGE_UPLOAD_DIR"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 122,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/auth.service.ts": {
+      "filePath": "server/src/auth/auth.service.ts",
+      "contentHash": "57a31b44bcacee1df81acef085fbd39271660ac05d8c3a17979db73e94916082",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AuthService",
+          "methods": [
+            "constructor",
+            "register",
+            "login",
+            "me",
+            "updateProfile",
+            "updateProfileImage",
+            "logout",
+            "setCookie",
+            "normalizeGamerTags",
+            "removeUploadedProfileImage",
+            "safeUser"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 317
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "BadRequestException",
+            "ConflictException",
+            "Injectable",
+            "UnauthorizedException"
+          ]
+        },
+        {
+          "source": "node:crypto",
+          "specifiers": [
+            "randomUUID"
+          ]
+        },
+        {
+          "source": "node:fs/promises",
+          "specifiers": [
+            "mkdir",
+            "rm",
+            "writeFile"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "@nestjs/jwt",
+          "specifiers": [
+            "JwtService"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectRepository"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Repository"
+          ]
+        },
+        {
+          "source": "bcrypt",
+          "specifiers": [
+            "* as bcrypt"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Response"
+          ]
+        },
+        {
+          "source": "./entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        },
+        {
+          "source": "./dto/login.dto",
+          "specifiers": [
+            "LoginDto"
+          ]
+        },
+        {
+          "source": "./dto/register.dto",
+          "specifiers": [
+            "RegisterDto"
+          ]
+        },
+        {
+          "source": "./dto/update-profile.dto",
+          "specifiers": [
+            "UpdateProfileDto"
+          ]
+        },
+        {
+          "source": "./profile-image",
+          "specifiers": [
+            "getProfileImageExtension",
+            "PROFILE_IMAGE_MAX_BYTES",
+            "PROFILE_IMAGE_PUBLIC_PATH",
+            "PROFILE_IMAGE_UPLOAD_DIR",
+            "UploadedProfileImage"
+          ]
+        }
+      ],
+      "exports": [
+        "AuthService"
+      ],
+      "totalLines": 376,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/dto/link-steam-profile.dto.ts": {
+      "filePath": "server/src/auth/dto/link-steam-profile.dto.ts",
+      "contentHash": "15906940bcc86a77142f49fae574cd698580e5ecc2c9a4dfbad776ac35998b45",
+      "functions": [],
+      "classes": [
+        {
+          "name": "LinkSteamProfileDto",
+          "methods": [],
+          "properties": [
+            "steamProfile"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "IsString",
+            "MinLength"
+          ]
+        }
+      ],
+      "exports": [
+        "LinkSteamProfileDto"
+      ],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/dto/login.dto.ts": {
+      "filePath": "server/src/auth/dto/login.dto.ts",
+      "contentHash": "d3633f1a6025109174d568cfc6078016f5fc81a5e6b2aecb13e52e64b458b1f4",
+      "functions": [],
+      "classes": [
+        {
+          "name": "LoginDto",
+          "methods": [],
+          "properties": [
+            "email",
+            "password"
+          ],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "IsEmail",
+            "IsString",
+            "MinLength"
+          ]
+        }
+      ],
+      "exports": [
+        "LoginDto"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/dto/register.dto.ts": {
+      "filePath": "server/src/auth/dto/register.dto.ts",
+      "contentHash": "c42a3e4f475e1a0c30d53d4abc90ee6de5e5650cec9fddadaf9f514bb16e1565",
+      "functions": [],
+      "classes": [
+        {
+          "name": "RegisterDto",
+          "methods": [],
+          "properties": [
+            "email",
+            "nickname",
+            "password"
+          ],
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "IsEmail",
+            "IsString",
+            "MinLength"
+          ]
+        }
+      ],
+      "exports": [
+        "RegisterDto"
+      ],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/dto/update-profile.dto.ts": {
+      "filePath": "server/src/auth/dto/update-profile.dto.ts",
+      "contentHash": "bb2ce12c75ee8aff7c01ffd36e12497a2c29dfd7c9284251912b50181c084a03",
+      "functions": [],
+      "classes": [
+        {
+          "name": "UpdateProfileDto",
+          "methods": [],
+          "properties": [
+            "nickname",
+            "bio",
+            "gamerTags"
+          ],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "ArrayMaxSize",
+            "IsArray",
+            "IsOptional",
+            "IsString",
+            "MaxLength",
+            "MinLength"
+          ]
+        }
+      ],
+      "exports": [
+        "UpdateProfileDto"
+      ],
+      "totalLines": 28,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/entities/aiProfile.entity.ts": {
+      "filePath": "server/src/auth/entities/aiProfile.entity.ts",
+      "contentHash": "705af138eeded96092c9694a7129f9635e3f58839fc2b225872f9306bcafd593",
+      "functions": [],
+      "classes": [
+        {
+          "name": "AiProfile",
+          "methods": [],
+          "properties": [
+            "id",
+            "userId",
+            "playStyleSummary",
+            "favoriteKeywords",
+            "favoriteGenres",
+            "lastAnalyzedAt",
+            "lastRecommendationSync",
+            "user",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 43
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "JoinColumn",
+            "OneToOne",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "../../ai/recommendation-contract",
+          "specifiers": [
+            "AiRecommendationSyncResponse"
+          ]
+        },
+        {
+          "source": "./user.entity",
+          "specifiers": [
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "AiProfile"
+      ],
+      "totalLines": 59,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/entities/embeddingDocument.entity.ts": {
+      "filePath": "server/src/auth/entities/embeddingDocument.entity.ts",
+      "contentHash": "18b7d8096c7c4cbe6d2eb1536117a4929e0c22366e1af1dfec96c903e2d2cdb8",
+      "functions": [],
+      "classes": [
+        {
+          "name": "EmbeddingDocument",
+          "methods": [],
+          "properties": [
+            "id",
+            "sourceType",
+            "sourceId",
+            "content",
+            "embedding",
+            "metadata",
+            "createdAt"
+          ],
+          "exported": true,
+          "lineCount": 34
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "PrimaryGeneratedColumn"
+          ]
+        }
+      ],
+      "exports": [
+        "EmbeddingDocument"
+      ],
+      "totalLines": 53,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/entities/game.entity.ts": {
+      "filePath": "server/src/auth/entities/game.entity.ts",
+      "contentHash": "f8fd8abb76cb13b5c89da39c47c184f3813084e675c0df0f5ce28132b76e95c7",
+      "functions": [],
+      "classes": [
+        {
+          "name": "Game",
+          "methods": [],
+          "properties": [
+            "id",
+            "steamAppId",
+            "igdbId",
+            "title",
+            "imageUrl",
+            "description",
+            "genres",
+            "platforms",
+            "tags",
+            "userGames",
+            "archivePosts",
+            "recommendations",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 58
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "OneToMany",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "../../posts/entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePost"
+          ]
+        },
+        {
+          "source": "./recommendation.entity",
+          "specifiers": [
+            "Recommendation"
+          ]
+        },
+        {
+          "source": "./userGame.entity",
+          "specifiers": [
+            "UserGame"
+          ]
+        }
+      ],
+      "exports": [
+        "Game"
+      ],
+      "totalLines": 74,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/entities/recommendation.entity.ts": {
+      "filePath": "server/src/auth/entities/recommendation.entity.ts",
+      "contentHash": "092096808ded04615aa6c88965fcf36b7633d07e01e7bd335329f65edee9d8f3",
+      "functions": [],
+      "classes": [
+        {
+          "name": "Recommendation",
+          "methods": [],
+          "properties": [
+            "id",
+            "userId",
+            "gameId",
+            "reason",
+            "score",
+            "rank",
+            "user",
+            "game",
+            "createdAt"
+          ],
+          "exported": true,
+          "lineCount": 43
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "JoinColumn",
+            "ManyToOne",
+            "PrimaryGeneratedColumn"
+          ]
+        },
+        {
+          "source": "./game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "./user.entity",
+          "specifiers": [
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "Recommendation"
+      ],
+      "totalLines": 58,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/entities/user.entity.ts": {
+      "filePath": "server/src/auth/entities/user.entity.ts",
+      "contentHash": "e9be36610f06fd0168902c48da499815aa877c052e744b94050cdf3c8f4283ee",
+      "functions": [],
+      "classes": [
+        {
+          "name": "User",
+          "methods": [],
+          "properties": [
+            "id",
+            "email",
+            "passwordHash",
+            "nickname",
+            "bio",
+            "profileImageUrl",
+            "gamerTags",
+            "steamId",
+            "userGames",
+            "archivePosts",
+            "comments",
+            "aiProfile",
+            "recommendations",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 67
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "OneToMany",
+            "OneToOne",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "./aiProfile.entity",
+          "specifiers": [
+            "AiProfile"
+          ]
+        },
+        {
+          "source": "../../posts/entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePost"
+          ]
+        },
+        {
+          "source": "../../posts/entities/comment.entity",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "./recommendation.entity",
+          "specifiers": [
+            "Recommendation"
+          ]
+        },
+        {
+          "source": "./userGame.entity",
+          "specifiers": [
+            "UserGame"
+          ]
+        }
+      ],
+      "exports": [
+        "User"
+      ],
+      "totalLines": 86,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/entities/userGame.entity.ts": {
+      "filePath": "server/src/auth/entities/userGame.entity.ts",
+      "contentHash": "97d792f446b2c277b6cd2d5d680a1b0954002677ea3c6e5792caef261903b0cf",
+      "functions": [],
+      "classes": [
+        {
+          "name": "UserGame",
+          "methods": [],
+          "properties": [
+            "id",
+            "userId",
+            "gameId",
+            "totalPlaytimeMinutes",
+            "recentPlaytimeMinutes",
+            "achievementRate",
+            "lastPlayedAt",
+            "user",
+            "game",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 50
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "JoinColumn",
+            "ManyToOne",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "./game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "./user.entity",
+          "specifiers": [
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "UserGame"
+      ],
+      "totalLines": 66,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/guards/jwt-auth.guard.ts": {
+      "filePath": "server/src/auth/guards/jwt-auth.guard.ts",
+      "contentHash": "fc00bc2ccdbdbdc02a45bea052e8a75e2ca53a128379bf8afcc883c454dfb9f5",
+      "functions": [],
+      "classes": [
+        {
+          "name": "JwtAuthGuard",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable"
+          ]
+        },
+        {
+          "source": "@nestjs/passport",
+          "specifiers": [
+            "AuthGuard"
+          ]
+        }
+      ],
+      "exports": [
+        "JwtAuthGuard"
+      ],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/profile-image.ts": {
+      "filePath": "server/src/auth/profile-image.ts",
+      "contentHash": "eafce551acae9e0919cce61f6e7f226d1e8a14ff7673ab8f8f1ac998a1bd72e9",
+      "functions": [
+        {
+          "name": "isAllowedProfileImageMimeType",
+          "params": [
+            "value"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getProfileImageExtension",
+          "params": [
+            "mimetype"
+          ],
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        }
+      ],
+      "exports": [
+        "PROFILE_IMAGE_MAX_BYTES",
+        "PROFILE_IMAGE_PUBLIC_PATH",
+        "PROFILE_IMAGE_UPLOAD_DIR",
+        "isAllowedProfileImageMimeType",
+        "getProfileImageExtension"
+      ],
+      "totalLines": 38,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/steam.service.spec.ts": {
+      "filePath": "server/src/auth/steam.service.spec.ts",
+      "contentHash": "d9541b864017c6c9a8129746dba35e5f6d386e9656a46df5b02cf87e67f99689",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios"
+          ]
+        },
+        {
+          "source": "./steam.service",
+          "specifiers": [
+            "SteamService"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 236,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/steam.service.ts": {
+      "filePath": "server/src/auth/steam.service.ts",
+      "contentHash": "9ae1ac5ba3dca610fe80b7d4931b81b14b033648bcd8f6888569634b6123a358",
+      "functions": [],
+      "classes": [
+        {
+          "name": "SteamService",
+          "methods": [
+            "constructor",
+            "getLinkedProfile",
+            "getLinkedStats",
+            "linkProfile",
+            "unlinkProfile",
+            "buildOpenIdLoginUrl",
+            "linkOpenIdProfile",
+            "profileRedirectUrl",
+            "parseSteamProfileInput",
+            "verifyOpenIdCallback",
+            "stringQueryValue",
+            "resolveVanityUrl",
+            "fetchProfile",
+            "fetchStats",
+            "achievementCandidates",
+            "fetchAchievementSamples",
+            "fetchAchievementSample",
+            "mapWithConcurrency",
+            "toRecentGame",
+            "steamAppIconUrl",
+            "steamFriendCode",
+            "externalError",
+            "apiKey",
+            "serverBaseUrl",
+            "clientBaseUrl"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 595
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "BadRequestException",
+            "Injectable"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectRepository"
+          ]
+        },
+        {
+          "source": "axios",
+          "specifiers": [
+            "axios",
+            "AxiosError"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Repository"
+          ]
+        },
+        {
+          "source": "./entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "SteamService"
+      ],
+      "totalLines": 731,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/auth/strategies/jwt.strategy.ts": {
+      "filePath": "server/src/auth/strategies/jwt.strategy.ts",
+      "contentHash": "440cfef0d13fc16e889d05d005bbf9b4427175db9fd5c73233252be2ba125192",
+      "functions": [
+        {
+          "name": "fromCookie",
+          "params": [
+            "req"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 13
+        }
+      ],
+      "classes": [
+        {
+          "name": "JwtStrategy",
+          "methods": [
+            "constructor",
+            "validate"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 21
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/passport",
+          "specifiers": [
+            "PassportStrategy"
+          ]
+        },
+        {
+          "source": "passport-jwt",
+          "specifiers": [
+            "ExtractJwt",
+            "Strategy"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Request"
+          ]
+        }
+      ],
+      "exports": [
+        "JwtStrategy"
+      ],
+      "totalLines": 57,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/common/filters/http-exception.filter.ts": {
+      "filePath": "server/src/common/filters/http-exception.filter.ts",
+      "contentHash": "a7418d251dee6d8ebbd3ba40d9b346bce7b08770552eb894368a42a89620719c",
+      "functions": [
+        {
+          "name": "isRecord",
+          "params": [
+            "value"
+          ],
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "toStringArray",
+          "params": [
+            "value"
+          ],
+          "returnType": "string[]",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "parseExceptionResponse",
+          "params": [
+            "exceptionResponse",
+            "statusCode"
+          ],
+          "returnType": "Pick<ApiErrorResponse, 'message' | 'errors'>",
+          "exported": false,
+          "lineCount": 36
+        }
+      ],
+      "classes": [
+        {
+          "name": "HttpExceptionFilter",
+          "methods": [
+            "catch"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 35
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "ArgumentsHost",
+            "Catch",
+            "ExceptionFilter",
+            "HttpException",
+            "HttpStatus"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Request",
+            "Response"
+          ]
+        }
+      ],
+      "exports": [
+        "HttpExceptionFilter"
+      ],
+      "totalLines": 118,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/database/demo-seed.service.ts": {
+      "filePath": "server/src/database/demo-seed.service.ts",
+      "contentHash": "c76bbfd2cf2f9e644fe1234fb6072f3259d252bbd1f5f91d7c7aea0afb2da902",
+      "functions": [],
+      "classes": [
+        {
+          "name": "DemoSeedService",
+          "methods": [
+            "constructor",
+            "onApplicationBootstrap",
+            "isSeedEnabled",
+            "seedUser",
+            "seedGames",
+            "seedPosts",
+            "seedAiProfile",
+            "seedUserGames",
+            "seedRecommendations",
+            "seedEmbeddingDocuments",
+            "upsertEmbeddingDocument",
+            "postEmbeddingContent",
+            "gameEmbeddingContent"
+          ],
+          "properties": [
+            "logger"
+          ],
+          "exported": true,
+          "lineCount": 332
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable",
+            "Logger",
+            "OnApplicationBootstrap"
+          ]
+        },
+        {
+          "source": "@nestjs/config",
+          "specifiers": [
+            "ConfigService"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectDataSource"
+          ]
+        },
+        {
+          "source": "bcrypt",
+          "specifiers": [
+            "* as bcrypt"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "DataSource"
+          ]
+        },
+        {
+          "source": "../ai/recommendation-contract",
+          "specifiers": [
+            "AI_RECOMMENDATION_DEMO_USER_ID"
+          ]
+        },
+        {
+          "source": "../ai/demo-embedding",
+          "specifiers": [
+            "buildDemoEmbedding",
+            "DEMO_EMBEDDING_DIMENSIONS",
+            "DEMO_EMBEDDING_MODEL",
+            "toPgVectorLiteral"
+          ]
+        },
+        {
+          "source": "../auth/entities/aiProfile.entity",
+          "specifiers": [
+            "AiProfile"
+          ]
+        },
+        {
+          "source": "../auth/entities/embeddingDocument.entity",
+          "specifiers": [
+            "EmbeddingDocument",
+            "EmbeddingSourceType"
+          ]
+        },
+        {
+          "source": "../auth/entities/game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "../auth/entities/recommendation.entity",
+          "specifiers": [
+            "Recommendation"
+          ]
+        },
+        {
+          "source": "../auth/entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        },
+        {
+          "source": "../auth/entities/userGame.entity",
+          "specifiers": [
+            "UserGame"
+          ]
+        },
+        {
+          "source": "../posts/entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePost",
+            "ArchivePostType"
+          ]
+        },
+        {
+          "source": "./pgvector-setup.service",
+          "specifiers": [
+            "PgvectorSetupService"
+          ]
+        }
+      ],
+      "exports": [
+        "DemoSeedService"
+      ],
+      "totalLines": 479,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/database/pgvector-setup.service.ts": {
+      "filePath": "server/src/database/pgvector-setup.service.ts",
+      "contentHash": "44eaff0db9bf121d2919d27ce3ddc876cb1d87e130986a1a8489066e5e0f7dc6",
+      "functions": [],
+      "classes": [
+        {
+          "name": "PgvectorSetupService",
+          "methods": [
+            "constructor",
+            "onApplicationBootstrap",
+            "ensurePgvector",
+            "runSetup"
+          ],
+          "properties": [
+            "setupPromise"
+          ],
+          "exported": true,
+          "lineCount": 32
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Injectable",
+            "OnApplicationBootstrap"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectDataSource"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "DataSource"
+          ]
+        }
+      ],
+      "exports": [
+        "PgvectorSetupService"
+      ],
+      "totalLines": 38,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/main.ts": {
+      "filePath": "server/src/main.ts",
+      "contentHash": "6f166c2d16eaa9305059cbbf890a43f8b576d3d7b09e679cd160f0e8ac9a58c9",
+      "functions": [
+        {
+          "name": "bootstrap",
+          "params": [],
+          "exported": false,
+          "lineCount": 71
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "ValidationPipe"
+          ]
+        },
+        {
+          "source": "@nestjs/core",
+          "specifiers": [
+            "NestFactory"
+          ]
+        },
+        {
+          "source": "node:path",
+          "specifiers": [
+            "join"
+          ]
+        },
+        {
+          "source": "cookie-parser",
+          "specifiers": [
+            "cookieParser"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "express"
+          ]
+        },
+        {
+          "source": "./app.module",
+          "specifiers": [
+            "AppModule"
+          ]
+        },
+        {
+          "source": "./common/filters/http-exception.filter",
+          "specifiers": [
+            "HttpExceptionFilter"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/dto/create-comment.dto.ts": {
+      "filePath": "server/src/posts/dto/create-comment.dto.ts",
+      "contentHash": "b49971fc993623b7ba8bf2cfd1a2b21416355e1228133c44aa475247d34e4bd2",
+      "functions": [],
+      "classes": [
+        {
+          "name": "CreateCommentDto",
+          "methods": [],
+          "properties": [
+            "content",
+            "parentCommentId"
+          ],
+          "exported": false,
+          "lineCount": 9
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "IsNotEmpty",
+            "IsOptional",
+            "IsString",
+            "IsUUID"
+          ]
+        }
+      ],
+      "exports": [
+        "default"
+      ],
+      "totalLines": 12,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/dto/create-post.dto.ts": {
+      "filePath": "server/src/posts/dto/create-post.dto.ts",
+      "contentHash": "33d715c68b1d8cef42ca07532f139ef7d1aafc1b6dae97e328347e48f2cdb57d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "CreatePostDto",
+          "methods": [],
+          "properties": [
+            "type",
+            "gameTitle",
+            "igdbGameId",
+            "gamePlatform",
+            "title",
+            "content",
+            "rating",
+            "tags"
+          ],
+          "exported": false,
+          "lineCount": 44
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "ArrayMaxSize",
+            "IsArray",
+            "IsEnum",
+            "IsNotEmpty",
+            "IsNumber",
+            "IsOptional",
+            "IsString",
+            "Max",
+            "MaxLength",
+            "Min"
+          ]
+        },
+        {
+          "source": "../entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePostType"
+          ]
+        }
+      ],
+      "exports": [
+        "default"
+      ],
+      "totalLines": 62,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/dto/create-tag.dto.ts": {
+      "filePath": "server/src/posts/dto/create-tag.dto.ts",
+      "contentHash": "1d5fbef95a2ed9cc4a3610480f8330f9319110a724db010185c74a1c9717be18",
+      "functions": [],
+      "classes": [
+        {
+          "name": "CreateTagDto",
+          "methods": [],
+          "properties": [
+            "name"
+          ],
+          "exported": false,
+          "lineCount": 6
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "IsNotEmpty",
+            "IsString",
+            "MaxLength"
+          ]
+        }
+      ],
+      "exports": [
+        "default"
+      ],
+      "totalLines": 9,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/dto/update-comment.dto.ts": {
+      "filePath": "server/src/posts/dto/update-comment.dto.ts",
+      "contentHash": "87315b8d827798b3f32f25a1e0c87cc479552baeda31689ac8a2b9e80c112015",
+      "functions": [],
+      "classes": [
+        {
+          "name": "UpdateCommentDto",
+          "methods": [],
+          "properties": [
+            "content"
+          ],
+          "exported": false,
+          "lineCount": 5
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "IsNotEmpty",
+            "IsString"
+          ]
+        }
+      ],
+      "exports": [
+        "default"
+      ],
+      "totalLines": 13,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/dto/update-post.dto.ts": {
+      "filePath": "server/src/posts/dto/update-post.dto.ts",
+      "contentHash": "41f4b1012c6854b9cffa8f59d20d2f851027db23026c0b074fe36839d1bfcbd8",
+      "functions": [],
+      "classes": [
+        {
+          "name": "UpdatePostDto",
+          "methods": [],
+          "properties": [
+            "gameTitle",
+            "igdbGameId",
+            "gamePlatform",
+            "title",
+            "content",
+            "rating",
+            "tags"
+          ],
+          "exported": false,
+          "lineCount": 49
+        }
+      ],
+      "imports": [
+        {
+          "source": "class-validator",
+          "specifiers": [
+            "ArrayMaxSize",
+            "IsArray",
+            "IsNotEmpty",
+            "IsNumber",
+            "IsOptional",
+            "IsString",
+            "Max",
+            "MaxLength",
+            "Min"
+          ]
+        }
+      ],
+      "exports": [
+        "default"
+      ],
+      "totalLines": 64,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/entities/archivePost.entity.ts": {
+      "filePath": "server/src/posts/entities/archivePost.entity.ts",
+      "contentHash": "382fb0af7adcf7968f4f24c4851a547b4999b639ff6cab022f9fe51147b89586",
+      "functions": [],
+      "classes": [
+        {
+          "name": "ArchivePost",
+          "methods": [],
+          "properties": [
+            "id",
+            "userId",
+            "gameId",
+            "type",
+            "title",
+            "content",
+            "rating",
+            "user",
+            "game",
+            "comments",
+            "tags",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 63
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "Index",
+            "JoinColumn",
+            "JoinTable",
+            "ManyToMany",
+            "ManyToOne",
+            "OneToMany",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "./comment.entity",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "./tag.entity",
+          "specifiers": [
+            "Tag"
+          ]
+        },
+        {
+          "source": "../../auth/entities/game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "../../auth/entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "ArchivePost"
+      ],
+      "totalLines": 96,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/entities/comment.entity.ts": {
+      "filePath": "server/src/posts/entities/comment.entity.ts",
+      "contentHash": "069adeb2010249f5aaeec46015f1ddd747372441ad2d5afaa6013f6212121d2e",
+      "functions": [],
+      "classes": [
+        {
+          "name": "Comment",
+          "methods": [],
+          "properties": [
+            "id",
+            "postId",
+            "userId",
+            "parentCommentId",
+            "content",
+            "post",
+            "user",
+            "parentComment",
+            "replies",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 59
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "JoinColumn",
+            "ManyToOne",
+            "OneToMany",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "./archivePost.entity",
+          "specifiers": [
+            "ArchivePost"
+          ]
+        },
+        {
+          "source": "../../auth/entities/user.entity",
+          "specifiers": [
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "Comment"
+      ],
+      "totalLines": 76,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/entities/tag.entity.ts": {
+      "filePath": "server/src/posts/entities/tag.entity.ts",
+      "contentHash": "b774e9d618d0a0f83593c2ee4f2493e12f7f76de36f4c00526e1a79d9eea9d5d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "Tag",
+          "methods": [],
+          "properties": [
+            "id",
+            "name",
+            "normalizedName",
+            "posts",
+            "createdAt",
+            "updatedAt"
+          ],
+          "exported": true,
+          "lineCount": 22
+        }
+      ],
+      "imports": [
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Column",
+            "CreateDateColumn",
+            "Entity",
+            "Index",
+            "ManyToMany",
+            "PrimaryGeneratedColumn",
+            "UpdateDateColumn"
+          ]
+        },
+        {
+          "source": "./archivePost.entity",
+          "specifiers": [
+            "ArchivePost"
+          ]
+        }
+      ],
+      "exports": [
+        "Tag"
+      ],
+      "totalLines": 37,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/posts.controller.ts": {
+      "filePath": "server/src/posts/posts.controller.ts",
+      "contentHash": "340c91d375a808a650ec1a9e89a8a7067977f928f19115ba39d466383f4ea51d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "PostsController",
+          "methods": [
+            "constructor",
+            "create",
+            "findAll",
+            "searchGames",
+            "checkReviewDuplicate",
+            "listTags",
+            "createTag",
+            "findOne",
+            "createComment",
+            "update",
+            "updateComment",
+            "remove",
+            "removeComment"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 145
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Body",
+            "Controller",
+            "Delete",
+            "Get",
+            "Param",
+            "Patch",
+            "Post",
+            "Query",
+            "Req",
+            "UseGuards"
+          ]
+        },
+        {
+          "source": "express",
+          "specifiers": [
+            "Request"
+          ]
+        },
+        {
+          "source": "../auth/guards/jwt-auth.guard",
+          "specifiers": [
+            "JwtAuthGuard"
+          ]
+        },
+        {
+          "source": "./dto/create-comment.dto",
+          "specifiers": [
+            "CreateCommentDto"
+          ]
+        },
+        {
+          "source": "./dto/create-post.dto",
+          "specifiers": [
+            "CreatePostDto"
+          ]
+        },
+        {
+          "source": "./dto/create-tag.dto",
+          "specifiers": [
+            "CreateTagDto"
+          ]
+        },
+        {
+          "source": "./dto/update-post.dto",
+          "specifiers": [
+            "UpdatePostDto"
+          ]
+        },
+        {
+          "source": "./dto/update-comment.dto",
+          "specifiers": [
+            "UpdateCommentDto"
+          ]
+        },
+        {
+          "source": "./posts.service",
+          "specifiers": [
+            "PostsService"
+          ]
+        }
+      ],
+      "exports": [
+        "PostsController"
+      ],
+      "totalLines": 181,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/posts.module.ts": {
+      "filePath": "server/src/posts/posts.module.ts",
+      "contentHash": "8ad5c67afb2ce18d0eb28bf2adc5c771ab193523ef3e5addd7addfa7d7a2909c",
+      "functions": [],
+      "classes": [
+        {
+          "name": "PostsModule",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 1
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "Module"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "TypeOrmModule"
+          ]
+        },
+        {
+          "source": "../ai/ai.module",
+          "specifiers": [
+            "AiModule"
+          ]
+        },
+        {
+          "source": "./entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePost"
+          ]
+        },
+        {
+          "source": "./entities/comment.entity",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "./entities/tag.entity",
+          "specifiers": [
+            "Tag"
+          ]
+        },
+        {
+          "source": "../auth/entities/game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "./posts.controller",
+          "specifiers": [
+            "PostsController"
+          ]
+        },
+        {
+          "source": "./posts.service",
+          "specifiers": [
+            "PostsService"
+          ]
+        }
+      ],
+      "exports": [
+        "PostsModule"
+      ],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/posts.service.spec.ts": {
+      "filePath": "server/src/posts/posts.service.spec.ts",
+      "contentHash": "2e82bbfa3eaf5a8ae05271df428cc24e9b5c2bd41cebb761b73a9026c0fa4214",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "BadRequestException",
+            "ConflictException"
+          ]
+        },
+        {
+          "source": "./entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePostType"
+          ]
+        },
+        {
+          "source": "./posts.service",
+          "specifiers": [
+            "PostsService"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 700,
+      "hasStructuralAnalysis": true
+    },
+    "server/src/posts/posts.service.ts": {
+      "filePath": "server/src/posts/posts.service.ts",
+      "contentHash": "a5f589c41c6df1810c19526d36420d7391c38f95e8b69b4b17fc8296c0fdfce7",
+      "functions": [],
+      "classes": [
+        {
+          "name": "PostsService",
+          "methods": [
+            "constructor",
+            "create",
+            "findAll",
+            "searchGames",
+            "listTags",
+            "createTag",
+            "checkReviewDuplicate",
+            "findOne",
+            "createComment",
+            "update",
+            "updateComment",
+            "remove",
+            "removeComment",
+            "findOrCreateGame",
+            "findIgdbGameMetadata",
+            "hydrateMissingGameMetadata",
+            "shouldRefreshGameMetadata",
+            "shouldApplyUserGamePlatform",
+            "isGameMissingMetadata",
+            "applyGameMetadata",
+            "applyUserGamePlatform",
+            "normalizeGamePlatform",
+            "normalizeIgdbGameId",
+            "assertReviewNotDuplicated",
+            "findDuplicateReview",
+            "duplicateMatchedBy",
+            "normalizeGameTitle",
+            "findOrCreateTag",
+            "normalizeTagName",
+            "findOrCreateTags",
+            "normalizePostTagNames",
+            "savePostOrConflict",
+            "isUniqueViolation",
+            "findPostOrThrow",
+            "findCommentOrThrow",
+            "assertOwner",
+            "assertCommentOwner",
+            "parseListSort",
+            "parseListType",
+            "parsePositiveNumber",
+            "parseListLimit",
+            "validatePostPayload"
+          ],
+          "properties": [],
+          "exported": false,
+          "lineCount": 937
+        }
+      ],
+      "imports": [
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "BadRequestException",
+            "ConflictException",
+            "ForbiddenException",
+            "Injectable",
+            "NotFoundException"
+          ]
+        },
+        {
+          "source": "@nestjs/typeorm",
+          "specifiers": [
+            "InjectRepository"
+          ]
+        },
+        {
+          "source": "typeorm",
+          "specifiers": [
+            "Brackets",
+            "Repository"
+          ]
+        },
+        {
+          "source": "./dto/create-comment.dto",
+          "specifiers": [
+            "CreateCommentDto"
+          ]
+        },
+        {
+          "source": "./dto/create-post.dto",
+          "specifiers": [
+            "CreatePostDto"
+          ]
+        },
+        {
+          "source": "./dto/update-post.dto",
+          "specifiers": [
+            "UpdatePostDto"
+          ]
+        },
+        {
+          "source": "./dto/update-comment.dto",
+          "specifiers": [
+            "UpdateCommentDto"
+          ]
+        },
+        {
+          "source": "./entities/archivePost.entity",
+          "specifiers": [
+            "ArchivePost",
+            "ArchivePostType"
+          ]
+        },
+        {
+          "source": "./entities/comment.entity",
+          "specifiers": [
+            "Comment"
+          ]
+        },
+        {
+          "source": "./entities/tag.entity",
+          "specifiers": [
+            "Tag"
+          ]
+        },
+        {
+          "source": "../auth/entities/game.entity",
+          "specifiers": [
+            "Game"
+          ]
+        },
+        {
+          "source": "../ai/igdb.service",
+          "specifiers": [
+            "IgdbService"
+          ]
+        }
+      ],
+      "exports": [
+        "default"
+      ],
+      "totalLines": 998,
+      "hasStructuralAnalysis": true
+    },
+    "server/test/app.e2e-spec.ts": {
+      "filePath": "server/test/app.e2e-spec.ts",
+      "contentHash": "191eb3068fadbce18c31e6ffa02ed6ed0cfd133573f23ef361d9ea413539f7e1",
+      "functions": [],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@nestjs/testing",
+          "specifiers": [
+            "Test",
+            "TestingModule"
+          ]
+        },
+        {
+          "source": "@nestjs/common",
+          "specifiers": [
+            "INestApplication"
+          ]
+        },
+        {
+          "source": "supertest",
+          "specifiers": [
+            "request"
+          ]
+        },
+        {
+          "source": "supertest/types",
+          "specifiers": [
+            "App"
+          ]
+        },
+        {
+          "source": "./../src/app.module",
+          "specifiers": [
+            "AppModule"
+          ]
+        }
+      ],
+      "exports": [],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "server/test/jest-e2e.json": {
+      "filePath": "server/test/jest-e2e.json",
+      "contentHash": "e5964a7412493afd594979b94374dd8e5fd87e96d23a514163bdb72198fda0ba",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": true
+    },
+    "server/tsconfig.build.json": {
+      "filePath": "server/tsconfig.build.json",
+      "contentHash": "ef5be6c06c3ac6c3eca6c81885a12d03e33059086b4b275cf39f6e9359965378",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": true
+    },
+    "server/tsconfig.json": {
+      "filePath": "server/tsconfig.json",
+      "contentHash": "ba64f9146668b155320c6f9e2f61e8dc154a2e2f8d1f087bc23045c069252c44",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

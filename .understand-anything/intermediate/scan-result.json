@@ -1,0 +1,1617 @@
+{
+  "scriptCompleted": true,
+  "files": [
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ai-compute/app/__init__.py",
+      "language": "python",
+      "sizeLines": 1,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ai-compute/app/embedding.py",
+      "language": "python",
+      "sizeLines": 114,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ai-compute/app/main.py",
+      "language": "python",
+      "sizeLines": 30,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ai-compute/app/schemas.py",
+      "language": "python",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ai-compute/Dockerfile",
+      "language": "dockerfile",
+      "sizeLines": 12,
+      "fileCategory": "infra"
+    },
+    {
+      "path": "ai-compute/README.md",
+      "language": "markdown",
+      "sizeLines": 51,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ai-compute/requirements.txt",
+      "language": "txt",
+      "sizeLines": 3,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ai-compute/scripts/compare_embed.py",
+      "language": "python",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/eslint.config.js",
+      "language": "javascript",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/index.html",
+      "language": "html",
+      "sizeLines": 105,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/package.json",
+      "language": "json",
+      "sizeLines": 34,
+      "fileCategory": "config"
+    },
+    {
+      "path": "client/README.md",
+      "language": "markdown",
+      "sizeLines": 22,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "client/src/api.ts",
+      "language": "typescript",
+      "sizeLines": 54,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/App.css",
+      "language": "css",
+      "sizeLines": 184,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/App.tsx",
+      "language": "typescript",
+      "sizeLines": 42,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/auth/AuthContext.tsx",
+      "language": "typescript",
+      "sizeLines": 187,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/auth/ProtectedRoute.tsx",
+      "language": "typescript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/components/Header.tsx",
+      "language": "typescript",
+      "sizeLines": 88,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/index.css",
+      "language": "css",
+      "sizeLines": 106,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/main.tsx",
+      "language": "typescript",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/DeleteJournalModal.tsx",
+      "language": "typescript",
+      "sizeLines": 76,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/DeleteReviewModal.tsx",
+      "language": "typescript",
+      "sizeLines": 77,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/EditJournalModal.tsx",
+      "language": "typescript",
+      "sizeLines": 172,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/EditProfileModal.tsx",
+      "language": "typescript",
+      "sizeLines": 342,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/EditReviewModal.tsx",
+      "language": "typescript",
+      "sizeLines": 179,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/gamePlatformOptions.ts",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/GameSearchInput.tsx",
+      "language": "typescript",
+      "sizeLines": 187,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/htmls/DeleteJournalModal.html",
+      "language": "html",
+      "sizeLines": 3,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/DeleteReviewModal.html",
+      "language": "html",
+      "sizeLines": 3,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/EditJournalModal.html",
+      "language": "html",
+      "sizeLines": 28,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/EditProfileModal.html",
+      "language": "html",
+      "sizeLines": 65,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/EditReviewModal.html",
+      "language": "html",
+      "sizeLines": 98,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/JournalDetail.html",
+      "language": "html",
+      "sizeLines": 215,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/Journals.html",
+      "language": "html",
+      "sizeLines": 667,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/Login.html",
+      "language": "html",
+      "sizeLines": 167,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/LoginPendingView.html",
+      "language": "html",
+      "sizeLines": 158,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/Profile.html",
+      "language": "html",
+      "sizeLines": 153,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/Recommend.html",
+      "language": "html",
+      "sizeLines": 167,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/RecommendAnalyzingModal.html",
+      "language": "html",
+      "sizeLines": 3,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/Register.html",
+      "language": "html",
+      "sizeLines": 211,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/ReviewDetail.html",
+      "language": "html",
+      "sizeLines": 124,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/Timeline.html",
+      "language": "html",
+      "sizeLines": 359,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/WriteJournal.html",
+      "language": "html",
+      "sizeLines": 122,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/htmls/WriteReview.html",
+      "language": "html",
+      "sizeLines": 667,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/pages/JournalDetail.tsx",
+      "language": "typescript",
+      "sizeLines": 606,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/Journals.tsx",
+      "language": "typescript",
+      "sizeLines": 669,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/Login.tsx",
+      "language": "typescript",
+      "sizeLines": 154,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/LoginPendingView.tsx",
+      "language": "typescript",
+      "sizeLines": 51,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/PageChrome.tsx",
+      "language": "typescript",
+      "sizeLines": 43,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/PostTagInput.tsx",
+      "language": "typescript",
+      "sizeLines": 120,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/Profile.tsx",
+      "language": "typescript",
+      "sizeLines": 571,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/ProfileAvatar.tsx",
+      "language": "typescript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/profileImage.ts",
+      "language": "typescript",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/ProfileSteamLoadingModal.tsx",
+      "language": "typescript",
+      "sizeLines": 49,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/Recommend.tsx",
+      "language": "typescript",
+      "sizeLines": 664,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/RecommendAnalyzingModal.tsx",
+      "language": "typescript",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/RecommendDataNoticeModal.tsx",
+      "language": "typescript",
+      "sizeLines": 229,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/Register.tsx",
+      "language": "typescript",
+      "sizeLines": 198,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/ReviewDetail.tsx",
+      "language": "typescript",
+      "sizeLines": 287,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/Timeline.tsx",
+      "language": "typescript",
+      "sizeLines": 298,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/WriteJournal.tsx",
+      "language": "typescript",
+      "sizeLines": 168,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/pages/WriteReview.tsx",
+      "language": "typescript",
+      "sizeLines": 268,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/styles/EditProfileModal.css",
+      "language": "css",
+      "sizeLines": 597,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/Header.css",
+      "language": "css",
+      "sizeLines": 119,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/JournalDetail.css",
+      "language": "css",
+      "sizeLines": 38,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/Journals.css",
+      "language": "css",
+      "sizeLines": 73,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/login.css",
+      "language": "css",
+      "sizeLines": 342,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/loginPendingView.css",
+      "language": "css",
+      "sizeLines": 117,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/Profile.css",
+      "language": "css",
+      "sizeLines": 143,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/Recommend.css",
+      "language": "css",
+      "sizeLines": 222,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/Register.css",
+      "language": "css",
+      "sizeLines": 313,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/ReviewDetail.css",
+      "language": "css",
+      "sizeLines": 23,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/Timeline.css",
+      "language": "css",
+      "sizeLines": 24,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/WriteJournal.css",
+      "language": "css",
+      "sizeLines": 26,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/styles/WriteReview.css",
+      "language": "css",
+      "sizeLines": 44,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "client/src/vite-env.d.ts",
+      "language": "typescript",
+      "sizeLines": 1,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/tsconfig.app.json",
+      "language": "json",
+      "sizeLines": 25,
+      "fileCategory": "config"
+    },
+    {
+      "path": "client/tsconfig.json",
+      "language": "json",
+      "sizeLines": 7,
+      "fileCategory": "config"
+    },
+    {
+      "path": "client/tsconfig.node.json",
+      "language": "json",
+      "sizeLines": 24,
+      "fileCategory": "config"
+    },
+    {
+      "path": "client/vite.config.ts",
+      "language": "typescript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "docker-compose.yml",
+      "language": "yaml",
+      "sizeLines": 28,
+      "fileCategory": "infra"
+    },
+    {
+      "path": "docs/GJC-78_RAG_TECH_DECISION.md",
+      "language": "markdown",
+      "sizeLines": 181,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC_173_AI_RECOMMENDATION_SESSION_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 354,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC_ACTIVE_SPRINT_CURRENT_BRANCH_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 166,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC_ACTIVE_SPRINT_PRIORITY_FIXES_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 167,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC_STEAM_LIVE_PROFILE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 126,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC_STEAM_PROFILE_LINK_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 202,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-124_TAG_ENTITY_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 198,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-125_POST_TAG_INPUT_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 208,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-127_POST_LIST_QUERY_API_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 186,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-128_JOURNALS_QUERY_CONTROLS_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 110,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-129_URL_QUERY_STATE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 172,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-163_AI_RECOMMENDATION_CONTRACT_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 189,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-164_DB_PGVECTOR_SEED_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 208,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-165_MVP_SMOKE_QUICKSTART_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 135,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-166_REACT_RECOMMENDATION_SYNC_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 227,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-167_USER_SCOPED_RECOMMENDATION_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 171,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-168_SYNC_PERSISTENCE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 256,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-169_RECOMMENDATION_CARD_LAYOUT_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 121,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-170_PROFILE_ARCHIVE_DB_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 185,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-171_IGDB_GAME_SEARCH_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 192,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-172_DUPLICATE_REVIEW_GUARD_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 215,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-182_PERSONA_JOURNAL_QA_MEMO.md",
+      "language": "markdown",
+      "sizeLines": 38,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-183_FASTAPI_AI_COMPUTE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 112,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-67_PROFILE_DB_EDIT_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 287,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-68_STEAM_STATS_PROFILE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 218,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-70_JOURNALS_API_INTEGRATION_QA_MEMO.md",
+      "language": "markdown",
+      "sizeLines": 29,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-77_TIMELINE_FLOW_QA_MEMO.md",
+      "language": "markdown",
+      "sizeLines": 22,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 175,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-80_RAG_CONTEXT_API_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 277,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-83_IGDB_LIVE_SMOKE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 180,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-83_MCP_IGDB_TOOL_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 223,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-85_API_KEY_ERROR_STRATEGY_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 196,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-88_AGENT_RECOMMENDATION_LOOP_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 197,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-93_P2_QA_DEMO_MEMO.md",
+      "language": "markdown",
+      "sizeLines": 183,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-93_QA_REGRESSION_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 134,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-97_STEAM_OPENID_LINK_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 191,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "GJC-99_TIMELINE_GAME_IMAGE_STUDY_NOTES.md",
+      "language": "markdown",
+      "sizeLines": 109,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "sizeLines": 246,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "server/.env.example",
+      "language": "config",
+      "sizeLines": 31,
+      "fileCategory": "config"
+    },
+    {
+      "path": "server/eslint.config.mjs",
+      "language": "javascript",
+      "sizeLines": 35,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/nest-cli.json",
+      "language": "json",
+      "sizeLines": 8,
+      "fileCategory": "config"
+    },
+    {
+      "path": "server/package.json",
+      "language": "json",
+      "sizeLines": 91,
+      "fileCategory": "config"
+    },
+    {
+      "path": "server/README.md",
+      "language": "markdown",
+      "sizeLines": 697,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "server/scripts/smoke-ai-compute.js",
+      "language": "javascript",
+      "sizeLines": 98,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/scripts/smoke-mcp-igdb.js",
+      "language": "javascript",
+      "sizeLines": 160,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/scripts/smoke-steam-profile.js",
+      "language": "javascript",
+      "sizeLines": 208,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/agent.service.spec.ts",
+      "language": "typescript",
+      "sizeLines": 357,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/agent.service.ts",
+      "language": "typescript",
+      "sizeLines": 922,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/ai-compute.client.ts",
+      "language": "typescript",
+      "sizeLines": 106,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/ai.module.ts",
+      "language": "typescript",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/demo-embedding.ts",
+      "language": "typescript",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/igdb.service.ts",
+      "language": "typescript",
+      "sizeLines": 255,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/mcp.controller.ts",
+      "language": "typescript",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/mcp.service.ts",
+      "language": "typescript",
+      "sizeLines": 222,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/rag.controller.ts",
+      "language": "typescript",
+      "sizeLines": 39,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/rag.service.spec.ts",
+      "language": "typescript",
+      "sizeLines": 95,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/rag.service.ts",
+      "language": "typescript",
+      "sizeLines": 871,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/recommendation-contract.ts",
+      "language": "typescript",
+      "sizeLines": 204,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/ai/recommendations.controller.ts",
+      "language": "typescript",
+      "sizeLines": 37,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/app.controller.spec.ts",
+      "language": "typescript",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/app.controller.ts",
+      "language": "typescript",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/app.module.ts",
+      "language": "typescript",
+      "sizeLines": 42,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/app.service.ts",
+      "language": "typescript",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/auth.controller.spec.ts",
+      "language": "typescript",
+      "sizeLines": 44,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/auth.controller.ts",
+      "language": "typescript",
+      "sizeLines": 169,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/auth.module.ts",
+      "language": "typescript",
+      "sizeLines": 77,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/auth.service.spec.ts",
+      "language": "typescript",
+      "sizeLines": 121,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/auth.service.ts",
+      "language": "typescript",
+      "sizeLines": 375,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/dto/link-steam-profile.dto.ts",
+      "language": "typescript",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/dto/login.dto.ts",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/dto/register.dto.ts",
+      "language": "typescript",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/dto/update-profile.dto.ts",
+      "language": "typescript",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/entities/aiProfile.entity.ts",
+      "language": "typescript",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/entities/embeddingDocument.entity.ts",
+      "language": "typescript",
+      "sizeLines": 52,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/entities/game.entity.ts",
+      "language": "typescript",
+      "sizeLines": 73,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/entities/recommendation.entity.ts",
+      "language": "typescript",
+      "sizeLines": 57,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/entities/user.entity.ts",
+      "language": "typescript",
+      "sizeLines": 85,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/entities/userGame.entity.ts",
+      "language": "typescript",
+      "sizeLines": 65,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/guards/jwt-auth.guard.ts",
+      "language": "typescript",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/profile-image.ts",
+      "language": "typescript",
+      "sizeLines": 37,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/steam.service.spec.ts",
+      "language": "typescript",
+      "sizeLines": 235,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/steam.service.ts",
+      "language": "typescript",
+      "sizeLines": 730,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/auth/strategies/jwt.strategy.ts",
+      "language": "typescript",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/common/filters/http-exception.filter.ts",
+      "language": "typescript",
+      "sizeLines": 117,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/database/demo-seed.service.ts",
+      "language": "typescript",
+      "sizeLines": 478,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/database/pgvector-setup.service.ts",
+      "language": "typescript",
+      "sizeLines": 37,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/main.ts",
+      "language": "typescript",
+      "sizeLines": 97,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/dto/create-comment.dto.ts",
+      "language": "typescript",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/dto/create-post.dto.ts",
+      "language": "typescript",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/dto/create-tag.dto.ts",
+      "language": "typescript",
+      "sizeLines": 8,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/dto/update-comment.dto.ts",
+      "language": "typescript",
+      "sizeLines": 12,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/dto/update-post.dto.ts",
+      "language": "typescript",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/entities/archivePost.entity.ts",
+      "language": "typescript",
+      "sizeLines": 95,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/entities/comment.entity.ts",
+      "language": "typescript",
+      "sizeLines": 75,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/entities/tag.entity.ts",
+      "language": "typescript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/posts.controller.ts",
+      "language": "typescript",
+      "sizeLines": 180,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/posts.module.ts",
+      "language": "typescript",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/posts.service.spec.ts",
+      "language": "typescript",
+      "sizeLines": 699,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/src/posts/posts.service.ts",
+      "language": "typescript",
+      "sizeLines": 997,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/test/app.e2e-spec.ts",
+      "language": "typescript",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "server/test/jest-e2e.json",
+      "language": "json",
+      "sizeLines": 9,
+      "fileCategory": "config"
+    },
+    {
+      "path": "server/tsconfig.build.json",
+      "language": "json",
+      "sizeLines": 4,
+      "fileCategory": "config"
+    },
+    {
+      "path": "server/tsconfig.json",
+      "language": "json",
+      "sizeLines": 24,
+      "fileCategory": "config"
+    }
+  ],
+  "totalFiles": 185,
+  "filteredByIgnore": 24,
+  "estimatedComplexity": "large",
+  "stats": {
+    "filesScanned": 185,
+    "byCategory": {
+      "code": 98,
+      "infra": 2,
+      "docs": 42,
+      "markup": 33,
+      "config": 10
+    },
+    "byLanguage": {
+      "unknown": 1,
+      "python": 5,
+      "dockerfile": 1,
+      "markdown": 41,
+      "txt": 1,
+      "javascript": 5,
+      "html": 18,
+      "json": 9,
+      "typescript": 87,
+      "css": 15,
+      "yaml": 1,
+      "config": 1
+    }
+  },
+  "importMap": {
+    ".understand-anything/.understandignore": [],
+    "ai-compute/app/__init__.py": [],
+    "ai-compute/app/embedding.py": [],
+    "ai-compute/app/main.py": [
+      "ai-compute/app/embedding.py",
+      "ai-compute/app/schemas.py"
+    ],
+    "ai-compute/app/schemas.py": [
+      "ai-compute/app/embedding.py"
+    ],
+    "ai-compute/Dockerfile": [],
+    "ai-compute/README.md": [],
+    "ai-compute/requirements.txt": [],
+    "ai-compute/scripts/compare_embed.py": [
+      "ai-compute/app/embedding.py"
+    ],
+    "client/eslint.config.js": [],
+    "client/index.html": [],
+    "client/package.json": [],
+    "client/README.md": [],
+    "client/src/api.ts": [],
+    "client/src/App.css": [],
+    "client/src/App.tsx": [
+      "client/src/auth/ProtectedRoute.tsx",
+      "client/src/pages/JournalDetail.tsx",
+      "client/src/pages/Journals.tsx",
+      "client/src/pages/Login.tsx",
+      "client/src/pages/Profile.tsx",
+      "client/src/pages/Recommend.tsx",
+      "client/src/pages/Register.tsx",
+      "client/src/pages/ReviewDetail.tsx",
+      "client/src/pages/Timeline.tsx",
+      "client/src/pages/WriteJournal.tsx",
+      "client/src/pages/WriteReview.tsx"
+    ],
+    "client/src/auth/AuthContext.tsx": [
+      "client/src/api.ts"
+    ],
+    "client/src/auth/ProtectedRoute.tsx": [
+      "client/src/auth/AuthContext.tsx"
+    ],
+    "client/src/components/Header.tsx": [
+      "client/src/auth/AuthContext.tsx",
+      "client/src/styles/Header.css"
+    ],
+    "client/src/index.css": [],
+    "client/src/main.tsx": [
+      "client/src/App.tsx",
+      "client/src/auth/AuthContext.tsx",
+      "client/src/index.css"
+    ],
+    "client/src/pages/DeleteJournalModal.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/Journals.tsx"
+    ],
+    "client/src/pages/DeleteReviewModal.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/Journals.tsx"
+    ],
+    "client/src/pages/EditJournalModal.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/gamePlatformOptions.ts",
+      "client/src/pages/Journals.tsx"
+    ],
+    "client/src/pages/EditProfileModal.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/profileImage.ts",
+      "client/src/styles/EditProfileModal.css"
+    ],
+    "client/src/pages/EditReviewModal.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/gamePlatformOptions.ts",
+      "client/src/pages/Journals.tsx"
+    ],
+    "client/src/pages/gamePlatformOptions.ts": [],
+    "client/src/pages/GameSearchInput.tsx": [
+      "client/src/api.ts"
+    ],
+    "client/src/pages/htmls/DeleteJournalModal.html": [],
+    "client/src/pages/htmls/DeleteReviewModal.html": [],
+    "client/src/pages/htmls/EditJournalModal.html": [],
+    "client/src/pages/htmls/EditProfileModal.html": [],
+    "client/src/pages/htmls/EditReviewModal.html": [],
+    "client/src/pages/htmls/JournalDetail.html": [],
+    "client/src/pages/htmls/Journals.html": [],
+    "client/src/pages/htmls/Login.html": [],
+    "client/src/pages/htmls/LoginPendingView.html": [],
+    "client/src/pages/htmls/Profile.html": [],
+    "client/src/pages/htmls/Recommend.html": [],
+    "client/src/pages/htmls/RecommendAnalyzingModal.html": [],
+    "client/src/pages/htmls/Register.html": [],
+    "client/src/pages/htmls/ReviewDetail.html": [],
+    "client/src/pages/htmls/Timeline.html": [],
+    "client/src/pages/htmls/WriteJournal.html": [],
+    "client/src/pages/htmls/WriteReview.html": [],
+    "client/src/pages/JournalDetail.tsx": [
+      "client/src/api.ts",
+      "client/src/auth/AuthContext.tsx",
+      "client/src/pages/DeleteJournalModal.tsx",
+      "client/src/pages/EditJournalModal.tsx",
+      "client/src/pages/Journals.tsx",
+      "client/src/pages/PageChrome.tsx",
+      "client/src/pages/ProfileAvatar.tsx",
+      "client/src/styles/JournalDetail.css"
+    ],
+    "client/src/pages/Journals.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/DeleteJournalModal.tsx",
+      "client/src/pages/DeleteReviewModal.tsx",
+      "client/src/pages/EditJournalModal.tsx",
+      "client/src/pages/EditReviewModal.tsx",
+      "client/src/pages/PageChrome.tsx",
+      "client/src/styles/Journals.css"
+    ],
+    "client/src/pages/Login.tsx": [
+      "client/src/api.ts",
+      "client/src/auth/AuthContext.tsx",
+      "client/src/pages/LoginPendingView.tsx",
+      "client/src/styles/login.css"
+    ],
+    "client/src/pages/LoginPendingView.tsx": [
+      "client/src/styles/loginPendingView.css"
+    ],
+    "client/src/pages/PageChrome.tsx": [
+      "client/src/components/Header.tsx"
+    ],
+    "client/src/pages/PostTagInput.tsx": [],
+    "client/src/pages/Profile.tsx": [
+      "client/src/api.ts",
+      "client/src/auth/AuthContext.tsx",
+      "client/src/pages/EditProfileModal.tsx",
+      "client/src/pages/Journals.tsx",
+      "client/src/pages/PageChrome.tsx",
+      "client/src/pages/profileImage.ts",
+      "client/src/pages/ProfileSteamLoadingModal.tsx",
+      "client/src/styles/Profile.css"
+    ],
+    "client/src/pages/ProfileAvatar.tsx": [
+      "client/src/pages/profileImage.ts"
+    ],
+    "client/src/pages/profileImage.ts": [],
+    "client/src/pages/ProfileSteamLoadingModal.tsx": [],
+    "client/src/pages/Recommend.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/Journals.tsx",
+      "client/src/pages/PageChrome.tsx",
+      "client/src/pages/RecommendAnalyzingModal.tsx",
+      "client/src/pages/RecommendDataNoticeModal.tsx",
+      "client/src/styles/Profile.css",
+      "client/src/styles/Recommend.css"
+    ],
+    "client/src/pages/RecommendAnalyzingModal.tsx": [],
+    "client/src/pages/RecommendDataNoticeModal.tsx": [],
+    "client/src/pages/Register.tsx": [
+      "client/src/api.ts",
+      "client/src/styles/Register.css"
+    ],
+    "client/src/pages/ReviewDetail.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/DeleteReviewModal.tsx",
+      "client/src/pages/EditReviewModal.tsx",
+      "client/src/pages/Journals.tsx",
+      "client/src/pages/PageChrome.tsx",
+      "client/src/pages/ProfileAvatar.tsx",
+      "client/src/styles/JournalDetail.css"
+    ],
+    "client/src/pages/Timeline.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/Journals.tsx",
+      "client/src/pages/PageChrome.tsx",
+      "client/src/pages/ProfileAvatar.tsx"
+    ],
+    "client/src/pages/WriteJournal.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/gamePlatformOptions.ts",
+      "client/src/pages/GameSearchInput.tsx",
+      "client/src/pages/PageChrome.tsx"
+    ],
+    "client/src/pages/WriteReview.tsx": [
+      "client/src/api.ts",
+      "client/src/pages/gamePlatformOptions.ts",
+      "client/src/pages/GameSearchInput.tsx",
+      "client/src/pages/PageChrome.tsx"
+    ],
+    "client/src/styles/EditProfileModal.css": [],
+    "client/src/styles/Header.css": [],
+    "client/src/styles/JournalDetail.css": [],
+    "client/src/styles/Journals.css": [],
+    "client/src/styles/login.css": [],
+    "client/src/styles/loginPendingView.css": [],
+    "client/src/styles/Profile.css": [],
+    "client/src/styles/Recommend.css": [],
+    "client/src/styles/Register.css": [],
+    "client/src/styles/ReviewDetail.css": [],
+    "client/src/styles/Timeline.css": [],
+    "client/src/styles/WriteJournal.css": [],
+    "client/src/styles/WriteReview.css": [],
+    "client/src/vite-env.d.ts": [],
+    "client/tsconfig.app.json": [],
+    "client/tsconfig.json": [],
+    "client/tsconfig.node.json": [],
+    "client/vite.config.ts": [],
+    "docker-compose.yml": [],
+    "docs/GJC-78_RAG_TECH_DECISION.md": [],
+    "GJC_173_AI_RECOMMENDATION_SESSION_STUDY_NOTES.md": [],
+    "GJC_ACTIVE_SPRINT_CURRENT_BRANCH_STUDY_NOTES.md": [],
+    "GJC_ACTIVE_SPRINT_PRIORITY_FIXES_STUDY_NOTES.md": [],
+    "GJC_STEAM_LIVE_PROFILE_STUDY_NOTES.md": [],
+    "GJC_STEAM_PROFILE_LINK_STUDY_NOTES.md": [],
+    "GJC-124_TAG_ENTITY_STUDY_NOTES.md": [],
+    "GJC-125_POST_TAG_INPUT_STUDY_NOTES.md": [],
+    "GJC-127_POST_LIST_QUERY_API_STUDY_NOTES.md": [],
+    "GJC-128_JOURNALS_QUERY_CONTROLS_STUDY_NOTES.md": [],
+    "GJC-129_URL_QUERY_STATE_STUDY_NOTES.md": [],
+    "GJC-163_AI_RECOMMENDATION_CONTRACT_STUDY_NOTES.md": [],
+    "GJC-164_DB_PGVECTOR_SEED_STUDY_NOTES.md": [],
+    "GJC-165_MVP_SMOKE_QUICKSTART_STUDY_NOTES.md": [],
+    "GJC-166_REACT_RECOMMENDATION_SYNC_STUDY_NOTES.md": [],
+    "GJC-167_USER_SCOPED_RECOMMENDATION_STUDY_NOTES.md": [],
+    "GJC-168_SYNC_PERSISTENCE_STUDY_NOTES.md": [],
+    "GJC-169_RECOMMENDATION_CARD_LAYOUT_STUDY_NOTES.md": [],
+    "GJC-170_PROFILE_ARCHIVE_DB_STUDY_NOTES.md": [],
+    "GJC-171_IGDB_GAME_SEARCH_STUDY_NOTES.md": [],
+    "GJC-172_DUPLICATE_REVIEW_GUARD_STUDY_NOTES.md": [],
+    "GJC-182_PERSONA_JOURNAL_QA_MEMO.md": [],
+    "GJC-183_FASTAPI_AI_COMPUTE_STUDY_NOTES.md": [],
+    "GJC-67_PROFILE_DB_EDIT_STUDY_NOTES.md": [],
+    "GJC-68_STEAM_STATS_PROFILE_STUDY_NOTES.md": [],
+    "GJC-70_JOURNALS_API_INTEGRATION_QA_MEMO.md": [],
+    "GJC-77_TIMELINE_FLOW_QA_MEMO.md": [],
+    "GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md": [],
+    "GJC-80_RAG_CONTEXT_API_STUDY_NOTES.md": [],
+    "GJC-83_IGDB_LIVE_SMOKE_STUDY_NOTES.md": [],
+    "GJC-83_MCP_IGDB_TOOL_STUDY_NOTES.md": [],
+    "GJC-85_API_KEY_ERROR_STRATEGY_STUDY_NOTES.md": [],
+    "GJC-88_AGENT_RECOMMENDATION_LOOP_STUDY_NOTES.md": [],
+    "GJC-93_P2_QA_DEMO_MEMO.md": [],
+    "GJC-93_QA_REGRESSION_STUDY_NOTES.md": [],
+    "GJC-97_STEAM_OPENID_LINK_STUDY_NOTES.md": [],
+    "GJC-99_TIMELINE_GAME_IMAGE_STUDY_NOTES.md": [],
+    "README.md": [],
+    "server/.env.example": [],
+    "server/eslint.config.mjs": [],
+    "server/nest-cli.json": [],
+    "server/package.json": [],
+    "server/README.md": [],
+    "server/scripts/smoke-ai-compute.js": [],
+    "server/scripts/smoke-mcp-igdb.js": [
+      "server/src/app.module.ts"
+    ],
+    "server/scripts/smoke-steam-profile.js": [
+      "server/src/app.module.ts"
+    ],
+    "server/src/ai/agent.service.spec.ts": [
+      "server/src/ai/agent.service.ts",
+      "server/src/ai/recommendation-contract.ts"
+    ],
+    "server/src/ai/agent.service.ts": [
+      "server/src/ai/mcp.service.ts",
+      "server/src/ai/rag.service.ts",
+      "server/src/ai/recommendation-contract.ts",
+      "server/src/auth/entities/aiProfile.entity.ts",
+      "server/src/auth/entities/user.entity.ts"
+    ],
+    "server/src/ai/ai-compute.client.ts": [
+      "server/src/ai/recommendation-contract.ts"
+    ],
+    "server/src/ai/ai.module.ts": [
+      "server/src/ai/agent.service.ts",
+      "server/src/ai/ai-compute.client.ts",
+      "server/src/ai/igdb.service.ts",
+      "server/src/ai/mcp.controller.ts",
+      "server/src/ai/mcp.service.ts",
+      "server/src/ai/rag.controller.ts",
+      "server/src/ai/rag.service.ts",
+      "server/src/ai/recommendations.controller.ts"
+    ],
+    "server/src/ai/demo-embedding.ts": [],
+    "server/src/ai/igdb.service.ts": [],
+    "server/src/ai/mcp.controller.ts": [
+      "server/src/ai/mcp.service.ts"
+    ],
+    "server/src/ai/mcp.service.ts": [
+      "server/src/ai/igdb.service.ts"
+    ],
+    "server/src/ai/rag.controller.ts": [
+      "server/src/ai/rag.service.ts",
+      "server/src/auth/guards/jwt-auth.guard.ts"
+    ],
+    "server/src/ai/rag.service.spec.ts": [
+      "server/src/ai/rag.service.ts"
+    ],
+    "server/src/ai/rag.service.ts": [
+      "server/src/ai/ai-compute.client.ts",
+      "server/src/ai/demo-embedding.ts",
+      "server/src/ai/recommendation-contract.ts",
+      "server/src/auth/entities/embeddingDocument.entity.ts"
+    ],
+    "server/src/ai/recommendation-contract.ts": [],
+    "server/src/ai/recommendations.controller.ts": [
+      "server/src/ai/agent.service.ts",
+      "server/src/auth/guards/jwt-auth.guard.ts"
+    ],
+    "server/src/app.controller.spec.ts": [
+      "server/src/app.controller.ts",
+      "server/src/app.service.ts"
+    ],
+    "server/src/app.controller.ts": [
+      "server/src/app.service.ts"
+    ],
+    "server/src/app.module.ts": [
+      "server/src/ai/ai.module.ts",
+      "server/src/auth/auth.module.ts",
+      "server/src/database/demo-seed.service.ts",
+      "server/src/database/pgvector-setup.service.ts",
+      "server/src/posts/posts.module.ts"
+    ],
+    "server/src/app.service.ts": [],
+    "server/src/auth/auth.controller.spec.ts": [
+      "server/src/auth/auth.controller.ts",
+      "server/src/auth/auth.service.ts",
+      "server/src/auth/steam.service.ts"
+    ],
+    "server/src/auth/auth.controller.ts": [
+      "server/src/auth/auth.service.ts",
+      "server/src/auth/dto/link-steam-profile.dto.ts",
+      "server/src/auth/dto/login.dto.ts",
+      "server/src/auth/dto/register.dto.ts",
+      "server/src/auth/dto/update-profile.dto.ts",
+      "server/src/auth/guards/jwt-auth.guard.ts",
+      "server/src/auth/profile-image.ts",
+      "server/src/auth/steam.service.ts"
+    ],
+    "server/src/auth/auth.module.ts": [
+      "server/src/auth/auth.controller.ts",
+      "server/src/auth/auth.service.ts",
+      "server/src/auth/entities/aiProfile.entity.ts",
+      "server/src/auth/entities/embeddingDocument.entity.ts",
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/auth/entities/recommendation.entity.ts",
+      "server/src/auth/entities/user.entity.ts",
+      "server/src/auth/entities/userGame.entity.ts",
+      "server/src/auth/steam.service.ts",
+      "server/src/auth/strategies/jwt.strategy.ts",
+      "server/src/posts/entities/archivePost.entity.ts",
+      "server/src/posts/entities/comment.entity.ts"
+    ],
+    "server/src/auth/auth.service.spec.ts": [
+      "server/src/auth/auth.service.ts",
+      "server/src/auth/profile-image.ts"
+    ],
+    "server/src/auth/auth.service.ts": [
+      "server/src/auth/dto/login.dto.ts",
+      "server/src/auth/dto/register.dto.ts",
+      "server/src/auth/dto/update-profile.dto.ts",
+      "server/src/auth/entities/user.entity.ts",
+      "server/src/auth/profile-image.ts"
+    ],
+    "server/src/auth/dto/link-steam-profile.dto.ts": [],
+    "server/src/auth/dto/login.dto.ts": [],
+    "server/src/auth/dto/register.dto.ts": [],
+    "server/src/auth/dto/update-profile.dto.ts": [],
+    "server/src/auth/entities/aiProfile.entity.ts": [
+      "server/src/ai/recommendation-contract.ts",
+      "server/src/auth/entities/user.entity.ts"
+    ],
+    "server/src/auth/entities/embeddingDocument.entity.ts": [],
+    "server/src/auth/entities/game.entity.ts": [
+      "server/src/auth/entities/recommendation.entity.ts",
+      "server/src/auth/entities/userGame.entity.ts",
+      "server/src/posts/entities/archivePost.entity.ts"
+    ],
+    "server/src/auth/entities/recommendation.entity.ts": [
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/auth/entities/user.entity.ts"
+    ],
+    "server/src/auth/entities/user.entity.ts": [
+      "server/src/auth/entities/aiProfile.entity.ts",
+      "server/src/auth/entities/recommendation.entity.ts",
+      "server/src/auth/entities/userGame.entity.ts",
+      "server/src/posts/entities/archivePost.entity.ts",
+      "server/src/posts/entities/comment.entity.ts"
+    ],
+    "server/src/auth/entities/userGame.entity.ts": [
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/auth/entities/user.entity.ts"
+    ],
+    "server/src/auth/guards/jwt-auth.guard.ts": [],
+    "server/src/auth/profile-image.ts": [],
+    "server/src/auth/steam.service.spec.ts": [
+      "server/src/auth/steam.service.ts"
+    ],
+    "server/src/auth/steam.service.ts": [
+      "server/src/auth/entities/user.entity.ts"
+    ],
+    "server/src/auth/strategies/jwt.strategy.ts": [],
+    "server/src/common/filters/http-exception.filter.ts": [],
+    "server/src/database/demo-seed.service.ts": [
+      "server/src/ai/demo-embedding.ts",
+      "server/src/ai/recommendation-contract.ts",
+      "server/src/auth/entities/aiProfile.entity.ts",
+      "server/src/auth/entities/embeddingDocument.entity.ts",
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/auth/entities/recommendation.entity.ts",
+      "server/src/auth/entities/user.entity.ts",
+      "server/src/auth/entities/userGame.entity.ts",
+      "server/src/database/pgvector-setup.service.ts",
+      "server/src/posts/entities/archivePost.entity.ts"
+    ],
+    "server/src/database/pgvector-setup.service.ts": [],
+    "server/src/main.ts": [
+      "server/src/app.module.ts",
+      "server/src/common/filters/http-exception.filter.ts"
+    ],
+    "server/src/posts/dto/create-comment.dto.ts": [],
+    "server/src/posts/dto/create-post.dto.ts": [
+      "server/src/posts/entities/archivePost.entity.ts"
+    ],
+    "server/src/posts/dto/create-tag.dto.ts": [],
+    "server/src/posts/dto/update-comment.dto.ts": [],
+    "server/src/posts/dto/update-post.dto.ts": [],
+    "server/src/posts/entities/archivePost.entity.ts": [
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/auth/entities/user.entity.ts",
+      "server/src/posts/entities/comment.entity.ts",
+      "server/src/posts/entities/tag.entity.ts"
+    ],
+    "server/src/posts/entities/comment.entity.ts": [
+      "server/src/auth/entities/user.entity.ts",
+      "server/src/posts/entities/archivePost.entity.ts"
+    ],
+    "server/src/posts/entities/tag.entity.ts": [
+      "server/src/posts/entities/archivePost.entity.ts"
+    ],
+    "server/src/posts/posts.controller.ts": [
+      "server/src/auth/guards/jwt-auth.guard.ts",
+      "server/src/posts/dto/create-comment.dto.ts",
+      "server/src/posts/dto/create-post.dto.ts",
+      "server/src/posts/dto/create-tag.dto.ts",
+      "server/src/posts/dto/update-comment.dto.ts",
+      "server/src/posts/dto/update-post.dto.ts",
+      "server/src/posts/posts.service.ts"
+    ],
+    "server/src/posts/posts.module.ts": [
+      "server/src/ai/ai.module.ts",
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/posts/entities/archivePost.entity.ts",
+      "server/src/posts/entities/comment.entity.ts",
+      "server/src/posts/entities/tag.entity.ts",
+      "server/src/posts/posts.controller.ts",
+      "server/src/posts/posts.service.ts"
+    ],
+    "server/src/posts/posts.service.spec.ts": [
+      "server/src/posts/entities/archivePost.entity.ts",
+      "server/src/posts/posts.service.ts"
+    ],
+    "server/src/posts/posts.service.ts": [
+      "server/src/ai/igdb.service.ts",
+      "server/src/auth/entities/game.entity.ts",
+      "server/src/posts/dto/create-comment.dto.ts",
+      "server/src/posts/dto/create-post.dto.ts",
+      "server/src/posts/dto/update-comment.dto.ts",
+      "server/src/posts/dto/update-post.dto.ts",
+      "server/src/posts/entities/archivePost.entity.ts",
+      "server/src/posts/entities/comment.entity.ts",
+      "server/src/posts/entities/tag.entity.ts"
+    ],
+    "server/test/app.e2e-spec.ts": [
+      "server/src/app.module.ts"
+    ],
+    "server/test/jest-e2e.json": [],
+    "server/tsconfig.build.json": [],
+    "server/tsconfig.json": []
+  }
+}

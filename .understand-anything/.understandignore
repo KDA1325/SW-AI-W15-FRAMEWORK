@@ -1,0 +1,24 @@
+# .understandignore - patterns for files/dirs to exclude from analysis
+# Syntax: same as .gitignore.
+
+node_modules/
+server/node_modules/
+client/node_modules/
+ai-compute/.venv/
+.git/
+server/dist/
+client/dist/
+build/
+coverage/
+__pycache__/
+*.py[cod]
+*.lock
+package-lock.json
+docs/datasets/
+*.csv
+*.jsonl
+*.png
+*.svg
+*.ico
+*.woff
+*.woff2
