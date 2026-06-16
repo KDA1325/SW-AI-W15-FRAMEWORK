@@ -1,5 +1,5 @@
 import { type FormEvent, useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import DeleteJournalModal from './DeleteJournalModal'
 import DeleteReviewModal from './DeleteReviewModal'
@@ -13,6 +13,30 @@ type JournalsModal = 'delete-journal' | 'delete-review' | 'edit-journal' | 'edit
 export type PostType = 'REVIEW' | 'JOURNAL'
 export type PostSort = 'latest' | 'oldest' | 'rating'
 type JournalLimit = 5 | 10 | 15
+
+const DEFAULT_REVIEW_SORT: PostSort = 'rating'
+const DEFAULT_JOURNAL_SORT: PostSort = 'latest'
+const DEFAULT_JOURNAL_LIMIT: JournalLimit = 5
+
+function parsePostSort(value: string | null, fallback: PostSort): PostSort {
+  return value === 'latest' || value === 'oldest' || value === 'rating' ? value : fallback
+}
+
+function parseJournalSort(value: string | null): PostSort {
+  return value === 'latest' || value === 'oldest' ? value : DEFAULT_JOURNAL_SORT
+}
+
+function parseJournalLimit(value: string | null): JournalLimit {
+  const parsed = Number(value)
+
+  return parsed === 5 || parsed === 10 || parsed === 15 ? parsed : DEFAULT_JOURNAL_LIMIT
+}
+
+function parseJournalPage(value: string | null) {
+  const parsed = Number(value)
+
+  return Number.isInteger(parsed) && parsed >= 1 ? parsed : 1
+}
 
 export type PostTag = {
   id: string
@@ -58,6 +82,8 @@ function formatDate(value: string) {
 }
 
 function Journals() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const initialSearchQuery = searchParams.get('q')?.trim() ?? ''
   const [activeModal, setActiveModal] = useState<JournalsModal>(null)
   const [reviews, setReviews] = useState<JournalPost[]>([])
   const [journals, setJournals] = useState<JournalPost[]>([])
@@ -68,15 +94,19 @@ function Journals() {
   // - input onChange마다 바로 API를 호출하면 글자 하나 입력할 때마다 서버 요청이 발생합니다.
   // - 그래서 사용자가 엔터를 치거나 SEARCH 버튼을 눌렀을 때만 searchQuery를 갱신합니다.
   // - searchQuery가 바뀌면 fetchPosts가 다시 만들어지고, useEffect가 목록을 다시 불러옵니다.
-  const [searchInput, setSearchInput] = useState('')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [searchInput, setSearchInput] = useState(initialSearchQuery)
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
   const [selectedPost, setSelectedPost] = useState<JournalPost | null>(null)
   // These controls map directly to GET /posts query params.
   // Review cards only need sorting, while journal rows also support page size and page movement.
-  const [reviewSort, setReviewSort] = useState<PostSort>('rating')
-  const [journalSort, setJournalSort] = useState<PostSort>('latest')
-  const [journalLimit, setJournalLimit] = useState<JournalLimit>(5)
-  const [journalPage, setJournalPage] = useState(1)
+  const [reviewSort, setReviewSort] = useState<PostSort>(() =>
+    parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT),
+  )
+  const [journalSort, setJournalSort] = useState<PostSort>(() =>
+    parseJournalSort(searchParams.get('journalSort')),
+  )
+  const [journalLimit, setJournalLimit] = useState<JournalLimit>(() => parseJournalLimit(searchParams.get('limit')))
+  const [journalPage, setJournalPage] = useState(() => parseJournalPage(searchParams.get('page')))
   const [journalPageInfo, setJournalPageInfo] = useState({
     hasNextPage: false,
     hasPreviousPage: false,
@@ -128,10 +158,59 @@ function Journals() {
         total: journalPageData.total,
         totalPages: journalPageData.totalPages,
       })
+
+      if (journalPageData.totalPages > 0 && journalPage > journalPageData.totalPages) {
+        // A shared URL can point past the last page after filters/data change; clamp before rendering a broken page.
+        setJournalPage(journalPageData.totalPages)
+      }
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
     }
   }, [journalLimit, journalPage, journalSort, reviewSort, searchQuery])
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const nextSearchQuery = searchParams.get('q')?.trim() ?? ''
+
+      setSearchInput(nextSearchQuery)
+      setSearchQuery(nextSearchQuery)
+      setReviewSort(parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT))
+      setJournalSort(parseJournalSort(searchParams.get('journalSort')))
+      setJournalLimit(parseJournalLimit(searchParams.get('limit')))
+      setJournalPage(parseJournalPage(searchParams.get('page')))
+    }, 0)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchParams])
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams()
+
+    if (searchQuery) {
+      nextParams.set('q', searchQuery)
+    }
+
+    if (reviewSort !== DEFAULT_REVIEW_SORT) {
+      nextParams.set('reviewSort', reviewSort)
+    }
+
+    if (journalSort !== DEFAULT_JOURNAL_SORT) {
+      nextParams.set('journalSort', journalSort)
+    }
+
+    if (journalLimit !== DEFAULT_JOURNAL_LIMIT) {
+      nextParams.set('limit', String(journalLimit))
+    }
+
+    if (journalPage !== 1) {
+      nextParams.set('page', String(journalPage))
+    }
+
+    if (nextParams.toString() !== searchParams.toString()) {
+      // Query-backed controls are reflected in the URL so refresh/share preserves the same list.
+      setSearchParams(nextParams, { replace: true })
+    }
+  }, [journalLimit, journalPage, journalSort, reviewSort, searchParams, searchQuery, setSearchParams])
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -175,9 +254,9 @@ function Journals() {
     // Reset every query-backed control to its default so the next fetch reproduces the initial list state.
     setSearchInput('')
     setSearchQuery('')
-    setReviewSort('rating')
-    setJournalSort('latest')
-    setJournalLimit(5)
+    setReviewSort(DEFAULT_REVIEW_SORT)
+    setJournalSort(DEFAULT_JOURNAL_SORT)
+    setJournalLimit(DEFAULT_JOURNAL_LIMIT)
     setJournalPage(1)
   }
 
@@ -250,6 +329,11 @@ function Journals() {
           </div>
 
           <div className="flex gap-8 overflow-x-auto pb-12" id="reviews-scroll-container">
+            {reviews.length === 0 ? (
+              <p className="w-full border-2 border-dashed border-primary bg-surface-container-lowest p-6 text-center font-label-caps text-xs uppercase tracking-widest text-secondary">
+                NO_REVIEW_RESULTS
+              </p>
+            ) : null}
             {reviews.map((post) => (
               <article className="group relative w-[320px] flex-shrink-0 cursor-crosshair" key={post.id}>
                 <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden border-2 border-[var(--gjc-primary)] bg-surface-container-high grayscale transition-all duration-300 hover:grayscale-0">
@@ -345,6 +429,11 @@ function Journals() {
           </div>
 
           <div className="flex flex-col gap-6">
+            {journals.length === 0 ? (
+              <p className="border-2 border-dashed border-primary bg-surface-container-lowest p-6 text-center font-label-caps text-xs uppercase tracking-widest text-secondary">
+                NO_JOURNAL_RESULTS
+              </p>
+            ) : null}
             {journals.map((post) => (
               <article className="flex flex-col overflow-hidden border-2 border-[var(--gjc-primary)] md:flex-row" key={post.id}>
                 <div className="flex aspect-square w-full flex-shrink-0 items-center justify-center border-b-2 border-primary bg-surface-dim font-headline-lg text-4xl md:w-48 md:border-b-0 md:border-r-2">
