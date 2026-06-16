@@ -1,0 +1,186 @@
+# Gaming Journal Club
+
+Gaming Journal Club is a retro 8-bit styled game journal and recommendation MVP. Users write game journals and reviews, then run AI SYNC to generate preference tags, a play-style word cloud, and personalized game recommendations.
+
+## Stack
+
+| Layer | Tech |
+| --- | --- |
+| Frontend | React, Vite, TypeScript |
+| Backend API | NestJS |
+| Database | PostgreSQL with pgvector |
+| RAG | NestJS RAG service, pgvector, optional OpenAI embeddings |
+| MCP | JSON-RPC MCP endpoint with `search_games` tool |
+| Agent | NestJS MVP Agent loop with max iterations, timeout, and fallback |
+| External game metadata | IGDB API through MCP |
+
+FastAPI is reserved in the architecture and env contract for a later Agent service split. The current one-day MVP keeps the Agent loop inside NestJS so RAG, MCP, and React can be tested end to end.
+
+## Quickstart
+
+### 1. Start Postgres
+
+Run from the repository root:
+
+```bash
+docker compose up -d
+```
+
+The database container uses `pgvector/pgvector:pg16` and exposes local port `5432`.
+
+### 2. Configure the server
+
+```bash
+cd server
+cp .env.example .env
+```
+
+For the local MVP, the checked-in defaults are enough except `JWT_SECRET`, which should be changed before sharing a deployed environment.
+
+Demo account seeded by the backend:
+
+```text
+email: demo@gaming-journal.club
+password: demo-password
+```
+
+Optional AI/external keys:
+
+| Variable | Purpose | Local fallback |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | Real embeddings and structured RAG analysis | deterministic demo embeddings and rule-based analysis |
+| `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Live IGDB MCP game metadata | MCP returns `missing_credentials`; Agent uses local DB fallback |
+| `STEAM_WEB_API_KEY` | Steam profile/play-history linking | not required for current SYNC demo |
+| `AGENT_MAX_ITERATIONS` | Max MCP calls in one Agent loop | `4` |
+| `AGENT_TIMEOUT_MS` | Max local Agent loop duration | `30000` |
+| `FASTAPI_AGENT_URL` | Later FastAPI Agent service URL | reserved |
+
+### 3. Install dependencies
+
+```bash
+cd server
+npm install
+
+cd ../client
+npm install
+```
+
+### 4. Run the app
+
+Use separate terminals.
+
+Backend:
+
+```bash
+cd server
+npm run start:dev
+```
+
+Frontend:
+
+```bash
+cd client
+npm run dev -- --host 127.0.0.1
+```
+
+Open the Vite URL, usually:
+
+```text
+http://127.0.0.1:5173
+```
+
+If Vite says 5173 is already in use, use the next URL it prints.
+
+## Demo Scenario
+
+1. Open the frontend.
+2. Log in with `demo@gaming-journal.club` / `demo-password`.
+3. Go to `RECOMMEND`.
+4. Click `SYNC_DATA`.
+5. Confirm the page renders:
+   - `YOUR PLAY STYLE` word cloud from RAG analysis.
+   - `GAMES YOU ENJOY` preference tags.
+   - `RECOMMENDED GAMES` cards with title, platform/genre, reason, matched tags, and source link.
+   - `PIPELINE` trace showing RAG, MCP, and Agent values.
+
+## AI Requirement Checklist
+
+| Requirement | MVP implementation | Demo signal |
+| --- | --- | --- |
+| RAG feature | `RagService` reads seeded journals/reviews/profile documents and searches pgvector | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render |
+| MCP feature | `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; `search_games` targets IGDB | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error |
+| AI Agent feature | `AgentService` reads RAG, calls MCP, merges/fallbacks recommendations | `pipeline.agent.iterations`, `maxIterations`, `stoppedReason`, and 3 recommendation cards |
+| Loop guard | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`, fallback recommendations | local smoke shows `agentIterations = 4`, `stoppedReason = fallback` |
+| React integration | `Recommend.tsx` calls `POST /ai/recommendations/sync` | SYNC click renders API data instead of dummy arrays |
+
+## Smoke Test Results
+
+Last recorded smoke test: `2026-06-16` local development environment.
+
+Commands:
+
+```bash
+docker compose ps
+
+cd server
+npm run build
+npm test -- --runInBand
+
+cd ../client
+npm run lint
+npm run build
+```
+
+HTTP SYNC smoke test:
+
+```powershell
+$session = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+Invoke-RestMethod `
+  -Uri 'http://127.0.0.1:3000/auth/login' `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"email":"demo@gaming-journal.club","password":"demo-password"}' `
+  -WebSession $session
+
+$result = Invoke-RestMethod `
+  -Uri 'http://127.0.0.1:3000/ai/recommendations/sync' `
+  -Method Post `
+  -ContentType 'application/json' `
+  -Body '{"forceRefresh":true,"topK":6,"requestId":"manual-smoke"}' `
+  -WebSession $session
+```
+
+Recorded result summary:
+
+```json
+{
+  "recommendations": 3,
+  "first": "CrossCode",
+  "preferenceTags": 6,
+  "wordCloud": 6,
+  "ragSources": 3,
+  "mcpTool": "search_games",
+  "mcpResults": 0,
+  "agentIterations": 4,
+  "stoppedReason": "fallback"
+}
+```
+
+`mcpResults` is `0` in this local smoke test because IGDB credentials are not configured. The MCP tool is still called, reports a structured missing-credentials result, and the Agent returns local fallback recommendations.
+
+## Known Issues
+
+- IGDB live metadata requires `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`. Without them, recommendations still render through local fallback data.
+- FastAPI is not yet a running service in this repo. The current MVP Agent loop is implemented in NestJS, with `FASTAPI_AGENT_URL` kept for the future split.
+- The local NestJS startup may print a pg deprecation warning about concurrent `client.query()` usage. The app still starts and the smoke test passes.
+- In-app browser automation failed in this Codex Windows sandbox with `CreateProcessAsUserW failed: 5`; use the Vite URL manually for visual review.
+
+## Study Notes
+
+- `GJC-163_AI_RECOMMENDATION_CONTRACT_STUDY_NOTES.md`
+- `GJC-164_DB_PGVECTOR_SEED_STUDY_NOTES.md`
+- `GJC-80_RAG_CONTEXT_API_STUDY_NOTES.md`
+- `GJC-83_MCP_IGDB_TOOL_STUDY_NOTES.md`
+- `GJC-85_API_KEY_ERROR_STRATEGY_STUDY_NOTES.md`
+- `GJC-88_AGENT_RECOMMENDATION_LOOP_STUDY_NOTES.md`
+- `GJC-166_REACT_RECOMMENDATION_SYNC_STUDY_NOTES.md`
