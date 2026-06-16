@@ -113,6 +113,8 @@ Optional Steam profile check:
 
 ## AI Requirement Checklist
 
+The detailed RAG technology and data-pipeline decision is documented in [`docs/GJC-78_RAG_TECH_DECISION.md`](docs/GJC-78_RAG_TECH_DECISION.md).
+
 | Requirement        | MVP implementation                                                                           | Demo signal                                                                               |
 | ------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | RAG feature        | `RagService` reads seeded journals/reviews/profile documents and searches pgvector           | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render                     |
@@ -188,6 +190,7 @@ Recorded result summary:
 
 ## Study Notes
 
+- `GJC-78_RAG_TECH_DECISION_STUDY_NOTES.md`
 - `GJC-163_AI_RECOMMENDATION_CONTRACT_STUDY_NOTES.md`
 - `GJC-164_DB_PGVECTOR_SEED_STUDY_NOTES.md`
 - `GJC-80_RAG_CONTEXT_API_STUDY_NOTES.md`

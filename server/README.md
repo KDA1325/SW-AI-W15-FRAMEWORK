@@ -254,6 +254,8 @@ For later MCP/API-key work, game metadata should come from IGDB, while Steam API
 
 ## RAG Context API
 
+The model, LangChain/FastAPI boundary, pgvector table flow, and embedding refresh policy for the RAG MVP are fixed in [`../docs/GJC-78_RAG_TECH_DECISION.md`](../docs/GJC-78_RAG_TECH_DECISION.md).
+
 GJC-80 adds a user-scoped RAG context endpoint:
 
 ```text
