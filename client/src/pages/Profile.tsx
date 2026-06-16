@@ -4,11 +4,9 @@ import { useAuth } from '../auth/AuthContext'
 import EditProfileModal from './EditProfileModal'
 import PageChrome from './PageChrome'
 import type { PostListResponse } from './Journals'
+import { resolveProfileImageUrl } from './profileImage'
 
 import '../styles/Profile.css'
-
-const profileImage =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuB2INfqYDy75U9V3EX90R4EVkkD1_HaUwUv8FtkImhBQBzInCho3Qs90M5KMn8BVDWnL6Q_2wcM3igbt7dpC0WOZ2Iefo5FZGkIbZEnmyB3ByvC98bl--faX-AfhY3_KZkFnbNfai1gnQwDNkE1uA0qo5as3JD8wSdy3a_8pK3ABjd2UXs5dJMuObGcJJYwNU2zGsDgLZladYk41fFUUMwP8JCqBLaZWxmMiS5QaRxzn5WvVInQYKw33pCwk4HUbkQOEdp_Q7Tx7d8y'
 
 const fallbackBio =
   'Retro games, slow criticism, and difficult endings. Recently analyzing logged play data.'
@@ -295,7 +293,7 @@ function Profile() {
             <img
               alt="Pixelated retro monitor portrait"
               className="w-full h-full object-cover filter grayscale contrast-125 mix-blend-multiply opacity-80"
-              src={user?.profileImageUrl ?? profileImage}
+              src={resolveProfileImageUrl(user?.profileImageUrl)}
             />
             <div className="absolute inset-0 border-4 border-[var(--gjc-primary)] m-2 pointer-events-none hidden group-hover:block" />
           </div>

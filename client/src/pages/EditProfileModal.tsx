@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useRef, useState } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import { api, getApiErrorMessage } from '../api'
+import { resolveProfileImageUrl } from './profileImage'
 import '../styles/EditProfileModal.css'
 
 type ProfileUser = {
@@ -17,8 +18,13 @@ type EditProfileModalProps = {
   onSaved: () => Promise<void>
 }
 
-const profileImageUrl =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuB2INfqYDy75U9V3EX90R4EVkkD1_HaUwUv8FtkImhBQBzInCho3Qs90M5KMn8BVDWnL6Q_2wcM3igbt7dpC0WOZ2Iefo5FZGkIbZEnmyB3ByvC98bl--faX-AfhY3_KZkFnbNfai1gnQwDNkE1uA0qo5as3JD8wSdy3a_8pK3ABjd2UXs5dJMuObGcJJYwNU2zGsDgLZladYk41fFUUMwP8JCqBLaZWxmMiS5QaRxzn5WvVInQYKw33pCwk4HUbkQOEdp_Q7Tx7d8y'
+const MAX_PROFILE_IMAGE_FILE_SIZE_BYTES = 2 * 1024 * 1024
+const ALLOWED_PROFILE_IMAGE_TYPES = new Set([
+  'image/gif',
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+])
 
 function normalizeTagInput(value: string) {
   return value
@@ -53,12 +59,17 @@ function EditProfileModalContent({
   onSaved,
 }: Omit<EditProfileModalProps, 'isOpen'>) {
   // The form mounts only while open, so initial state always comes from the latest DB-backed auth user.
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
   const [nickname, setNickname] = useState(currentUser?.nickname ?? 'PLAYER')
   const [bio, setBio] = useState(currentUser?.bio ?? '')
   const [gamerTags, setGamerTags] = useState<string[]>(
     currentUser?.gamerTags ?? [],
   )
   const [newTag, setNewTag] = useState('')
+  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
+  const [profileImagePreviewUrl, setProfileImagePreviewUrl] = useState<
+    string | null
+  >(currentUser?.profileImageUrl ?? null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -80,6 +91,47 @@ function EditProfileModalContent({
     )
   }
 
+  const handleProfileImageChange = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+
+    if (!file) {
+      return
+    }
+
+    setErrorMessage(null)
+
+    if (!ALLOWED_PROFILE_IMAGE_TYPES.has(file.type)) {
+      setErrorMessage('PNG, JPG, WEBP, GIF IMAGE REQUIRED')
+      return
+    }
+
+    if (file.size > MAX_PROFILE_IMAGE_FILE_SIZE_BYTES) {
+      setErrorMessage('PROFILE IMAGE MUST BE 2MB OR LESS')
+      return
+    }
+
+    const reader = new FileReader()
+
+    reader.onload = () => {
+      if (typeof reader.result !== 'string') {
+        setErrorMessage('PROFILE IMAGE PREVIEW FAILED')
+        return
+      }
+
+      setProfileImageFile(file)
+      setProfileImagePreviewUrl(reader.result)
+    }
+
+    reader.onerror = () => {
+      setErrorMessage('PROFILE IMAGE PREVIEW FAILED')
+    }
+
+    reader.readAsDataURL(file)
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setIsSaving(true)
@@ -91,6 +143,14 @@ function EditProfileModalContent({
         gamerTags,
         nickname,
       })
+
+      if (profileImageFile) {
+        const formData = new FormData()
+        formData.append('profileImage', profileImageFile)
+
+        await api.post('/auth/me/profile-image', formData)
+      }
+
       await onSaved()
       onClose()
     } catch (error) {
@@ -132,11 +192,19 @@ function EditProfileModalContent({
                     <img
                       alt="Current Profile Picture"
                       className="w-full h-full object-cover filter grayscale contrast-125"
-                      src={currentUser?.profileImageUrl ?? profileImageUrl}
+                      src={resolveProfileImageUrl(profileImagePreviewUrl)}
                     />
                   </div>
+                  <input
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    className="hidden"
+                    onChange={handleProfileImageChange}
+                    ref={fileInputRef}
+                    type="file"
+                  />
                   <button
                     className="bg-transparent text-primary px-4 py-2 border border-primary border-dashed hover:bg-primary hover:text-on-primary transition-all group"
+                    onClick={() => fileInputRef.current?.click()}
                     type="button"
                   >
                     <span className="font-label-caps text-[12px] flex items-center gap-2">
@@ -147,6 +215,11 @@ function EditProfileModalContent({
                     </span>
                   </button>
                 </div>
+                {profileImageFile ? (
+                  <p className="font-label-caps text-[12px] text-secondary uppercase">
+                    SELECTED: {profileImageFile.name}
+                  </p>
+                ) : null}
               </div>
 
               <div className="relative">
