@@ -17,6 +17,7 @@ describe('AuthController', () => {
             login: jest.fn(),
             logout: jest.fn(),
             me: jest.fn(),
+            updateProfile: jest.fn(),
           },
         },
         {

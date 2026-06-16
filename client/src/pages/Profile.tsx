@@ -9,8 +9,8 @@ import '../styles/Profile.css'
 const profileImage =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuB2INfqYDy75U9V3EX90R4EVkkD1_HaUwUv8FtkImhBQBzInCho3Qs90M5KMn8BVDWnL6Q_2wcM3igbt7dpC0WOZ2Iefo5FZGkIbZEnmyB3ByvC98bl--faX-AfhY3_KZkFnbNfai1gnQwDNkE1uA0qo5as3JD8wSdy3a_8pK3ABjd2UXs5dJMuObGcJJYwNU2zGsDgLZladYk41fFUUMwP8JCqBLaZWxmMiS5QaRxzn5WvVInQYKw33pCwk4HUbkQOEdp_Q7Tx7d8y'
 
-const editIcon =
-  'https://lh3.googleusercontent.com/aida/AP1WRLsSTNtuQ7h1VU8TpNNl_4p2wG2th7UobNdrCFuDPkANbYeoq0wvUhiBCZ8Tf-sJCQU1yy0x61qPVv6ng0yhquEuRpxtyEtqafwKWOirfsBCEefADv5gJfuXcv9XKFQ6Kp39wnK8iPJKRVFPhxP6xZJEg1oINdgTUF0IERUliw4P1_xBFe_8vQxADtNr14TV2r81dvOtEgT4EqyTCmKVtAM_V4R8IBdURPOu2E77th_NpxvJkXddWU3YY_g'
+const fallbackBio =
+  'Retro games, slow criticism, and difficult endings. Recently analyzing logged play data.'
 
 const coverImages = [
   'https://lh3.googleusercontent.com/aida-public/AB6AXuAspADwKDJ6DvPCJ3GhUPZadfHCjAIhcYp_cYZeQEhNQbSDN5XM24GdRqMY_7hPbAKQArEi5g_237tI41rLd8MJ9rihg7TTlEPqTOw6XY03gyTysuoC7Lp_t3kgpwZF7pj869dqx_DLY6q5c6mQzMXIEevrmAMKm78e2uPTV9vdrcgdAIImWbI6dxYmfLwDXoTEp9dO1wREBf9wsAuy8NXQPuQ681-5pnCwG1PZq-ifmx-oFfOGfgsiYby-4U3CnmToYHCH3-X7BR4a',
@@ -208,6 +208,7 @@ function Profile() {
   }
 
   const steamProfile = steamState?.profile
+  const gamerTags = user?.gamerTags?.length ? user.gamerTags : ['NO_TAGS']
 
   return (
     <PageChrome active="profile">
@@ -217,7 +218,7 @@ function Profile() {
             <img
               alt="Pixelated retro monitor portrait"
               className="w-full h-full object-cover filter grayscale contrast-125 mix-blend-multiply opacity-80"
-              src={profileImage}
+              src={user?.profileImageUrl ?? profileImage}
             />
             <div className="absolute inset-0 border-4 border-[var(--gjc-primary)] m-2 pointer-events-none hidden group-hover:block" />
           </div>
@@ -231,7 +232,7 @@ function Profile() {
               </div>
               <div className="flex items-center gap-2">
                 <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-[var(--gjc-primary)]">
-                  {user?.nickname ?? 'PLAYER'}
+                  {user?.nickname || 'PLAYER'}
                 </h1>
                 <button
                   className="w-5 h-5 flex items-center justify-center bg-transparent border-none hover:opacity-70 active:scale-95 transition-all duration-100"
@@ -239,11 +240,9 @@ function Profile() {
                   title="Edit Profile"
                   type="button"
                 >
-                  <img
-                    alt="Edit Icon"
-                    className="w-full h-full object-contain grayscale contrast-125"
-                    src={editIcon}
-                  />
+                  <span className="material-symbols-outlined text-xl text-[var(--gjc-primary)]">
+                    edit_square
+                  </span>
                 </button>
               </div>
             </div>
@@ -253,8 +252,7 @@ function Profile() {
                 SYSTEM_BIO
               </span>
               <p className="font-body-md text-[var(--gjc-on-surface)] leading-relaxed">
-                Retro games, slow criticism, and difficult endings. Recently
-                analyzing logged play data.
+                {user?.bio ?? fallbackBio}
                 <span className="animate-pulse">_</span>
               </p>
             </div>
@@ -262,16 +260,14 @@ function Profile() {
 
           <div className="col-span-1 md:col-span-6 flex flex-col justify-center items-end gap-4 relative overflow-hidden">
             <div className="relative z-10 flex flex-col items-end gap-2 text-right">
-              {['# HARDCORE_GAMER', '# NARRATIVE_FOCUSED', '# CRPG_MANIA'].map(
-                (tag) => (
-                  <span
-                    className="font-headline-lg-mobile text-headline-lg-mobile text-[var(--gjc-primary)] hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] px-2 transition-colors inline-block"
-                    key={tag}
-                  >
-                    {tag}
-                  </span>
-                ),
-              )}
+              {gamerTags.map((tag) => (
+                <span
+                  className="font-headline-lg-mobile text-headline-lg-mobile text-[var(--gjc-primary)] hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] px-2 transition-colors inline-block"
+                  key={tag}
+                >
+                  #{tag}
+                </span>
+              ))}
             </div>
           </div>
         </section>
@@ -468,8 +464,10 @@ function Profile() {
       </main>
 
       <EditProfileModal
+        currentUser={user}
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
+        onSaved={refreshUser}
       />
     </PageChrome>
   )

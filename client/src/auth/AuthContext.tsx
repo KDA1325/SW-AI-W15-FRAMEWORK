@@ -24,9 +24,12 @@ import {
 import { api } from '../api'
 
 type User = {
+  bio: string | null
   id: string
   email: string
+  gamerTags: string[]
   nickname: string
+  profileImageUrl: string | null
   steamId: string | null
 }
 

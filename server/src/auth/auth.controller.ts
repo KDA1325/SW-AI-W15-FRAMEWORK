@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Post,
   Req,
   Res,
@@ -21,6 +22,7 @@ import { AuthService } from './auth.service'
 import { LinkSteamProfileDto } from './dto/link-steam-profile.dto'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
+import { UpdateProfileDto } from './dto/update-profile.dto'
 
 // 로그인한 사용자만 접근할 수 있게 막는 Guard입니다.
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
@@ -71,6 +73,12 @@ export class AuthController {
   me(@Req() req: AuthedRequest) {
     // Guard와 Strategy를 통과하면 req.user.userId를 사용할 수 있습니다.
     return this.authService.me(req.user.userId)
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  updateMe(@Req() req: AuthedRequest, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(req.user.userId, dto)
   }
 
   @UseGuards(JwtAuthGuard)

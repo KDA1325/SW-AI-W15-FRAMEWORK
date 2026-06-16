@@ -4,6 +4,7 @@
 
 // import에 하나씩 넣는 것과 ,로 여러 개 한 번에 넣는 것 차이 -> 그냥 취향 차이, 둘 다 가능
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -38,6 +39,7 @@ import { LoginDto } from './dto/login.dto'
 
 // 회원가입 요청 데이터 타입입니다.
 import { RegisterDto } from './dto/register.dto'
+import { UpdateProfileDto } from './dto/update-profile.dto'
 
 // @Injectable()을 붙이면 NestJS가 AuthService를 서비스로 관리합니다.
 // 안 붙이면? -> NestJS가 이 클래스를 인식하지 못해서 DI(의존성 주입)도 안 되고, 다른 서비스나 컨트롤러에서 주입받아 사용할 수도 없음
@@ -179,6 +181,38 @@ export class AuthService {
     return this.safeUser(user)
   }
 
+  async updateProfile(userId: string, dto: UpdateProfileDto) {
+    const user = await this.userRepository.findOneBy({ id: userId })
+
+    if (!user) {
+      throw new UnauthorizedException()
+    }
+
+    if (dto.nickname !== undefined) {
+      const trimmedNickname = dto.nickname.trim()
+
+      if (trimmedNickname.length < 2) {
+        throw new BadRequestException('닉네임은 2글자 이상이어야 합니다.')
+      }
+
+      user.nickname = trimmedNickname
+    }
+
+    if (dto.bio !== undefined) {
+      const trimmedBio = dto.bio.trim()
+      user.bio = trimmedBio.length > 0 ? trimmedBio : null
+    }
+
+    if (dto.gamerTags !== undefined) {
+      // Gamer tags are user-facing badges, so normalize them once before saving and rendering.
+      user.gamerTags = this.normalizeGamerTags(dto.gamerTags)
+    }
+
+    const savedUser = await this.userRepository.save(user)
+
+    return this.safeUser(savedUser)
+  }
+
   // 로그아웃 로직입니다.
   // 쿠키를 이 아래에서 만드는 데 로그아웃 로직이 먼저 나와도 되나
   // -> AuthService 클래스 안에서 메서드의 순서는 크게 중요하지 않음
@@ -243,12 +277,29 @@ export class AuthService {
     })
   }
 
+  private normalizeGamerTags(tags: string[]) {
+    const normalizedTags = tags
+      .map((tag) =>
+        tag
+          .trim()
+          .replace(/^#+/, '')
+          .replace(/[\s-]+/g, '_')
+          .toUpperCase(),
+      )
+      .filter((tag) => tag.length > 0)
+
+    return [...new Set(normalizedTags)].slice(0, 6)
+  }
+
   // 프론트엔드로 보내도 되는 사용자 정보만 골라서 반환합니다.
   private safeUser(user: User) {
     return {
+      bio: user.bio,
       id: user.id,
       email: user.email,
+      gamerTags: user.gamerTags,
       nickname: user.nickname,
+      profileImageUrl: user.profileImageUrl,
       steamId: user.steamId,
     }
   }
