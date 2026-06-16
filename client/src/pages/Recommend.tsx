@@ -69,18 +69,6 @@ type AiRecommendationSyncResponse = {
 
 type JsonRecord = Record<string, unknown>
 
-const wordPositions = [
-  { left: '13%', top: '18%' },
-  { left: '35%', top: '24%' },
-  { right: '15%', top: '17%' },
-  { left: '17%', top: '42%' },
-  { right: '17%', top: '43%' },
-  { left: '37%', top: '58%' },
-  { left: '14%', top: '70%' },
-  { right: '23%', top: '72%' },
-  { left: '44%', top: '78%' },
-]
-
 function normalizeLabel(label: string) {
   return label.replaceAll('_', ' ').toUpperCase()
 }
@@ -105,14 +93,12 @@ function formatSyncTime(value: string | null) {
   return `${year}. ${month}. ${day} ${hour}:${minute}`
 }
 
-function wordStyle(word: AiWordCloudTerm, index: number) {
-  const position = wordPositions[index % wordPositions.length]
-  const fontSize = `${1.15 + Math.min(word.weight, 1) * 2.5}rem`
+function wordStyle(word: AiWordCloudTerm) {
+  const fontSize = `${0.95 + Math.min(word.weight, 1) * 1.9}rem`
   const color =
     word.category === 'mood' ? 'var(--gjc-secondary)' : 'var(--gjc-primary)'
 
   return {
-    ...position,
     color,
     fontSize,
   }
@@ -283,7 +269,7 @@ function Recommend() {
   const syncRequestIdRef = useRef(0)
 
   const visibleWords = useMemo(
-    () => syncData?.wordCloud.slice(0, wordPositions.length) ?? [],
+    () => syncData?.wordCloud.slice(0, 16) ?? [],
     [syncData],
   )
   const visibleTags = useMemo(
@@ -466,17 +452,20 @@ function Recommend() {
             <p className="font-label-caps text-label-caps mb-8 text-[var(--gjc-secondary)]">
               (BASED ON ACHIEVEMENTS, RATINGS, AND JOURNAL LOGS)
             </p>
-            <div className="bg-[var(--gjc-surface-container-lowest)] p-8 flex items-center justify-center min-h-[300px] relative overflow-hidden border-2 border-[var(--gjc-primary)]">
+            <div className="bg-[var(--gjc-surface-container-lowest)] p-8 flex items-center justify-center min-h-[300px] border-2 border-[var(--gjc-primary)]">
               {visibleWords.length > 0 ? (
-                visibleWords.map((word, index) => (
+                // GJC-179: word cloud terms stay in flow, while source weight only changes visual emphasis.
+                <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-4 text-center">
+                  {visibleWords.map((word) => (
                   <span
-                    className="absolute font-headline-lg font-bold uppercase leading-none"
+                    className="font-headline-lg font-bold uppercase leading-none"
                     key={`${word.label}-${word.category}`}
-                    style={wordStyle(word, index)}
+                    style={wordStyle(word)}
                   >
                     {normalizeLabel(word.label)}
                   </span>
-                ))
+                  ))}
+                </div>
               ) : (
                 <span className="font-label-caps text-xs text-[var(--gjc-secondary)] uppercase">
                   NO_STYLE_DATA

@@ -496,7 +496,7 @@ export class RagService {
                 required: ['label', 'weight', 'sourceCount', 'category'],
                 type: 'object',
               },
-              maxItems: 12,
+              maxItems: 18,
               type: 'array',
             },
           },
@@ -616,7 +616,7 @@ export class RagService {
       weight: item.weight,
     }));
 
-    const wordCloud = fallback.slice(0, 12).map((item) => ({
+    const wordCloud = fallback.slice(0, 18).map((item) => ({
       category: item.category,
       label: item.label.replaceAll('_', ' '),
       sourceCount: item.sourceCount,
@@ -652,7 +652,7 @@ export class RagService {
         ? analysis.preferenceTags.slice(0, 10)
         : [],
       wordCloud: Array.isArray(analysis.wordCloud)
-        ? analysis.wordCloud.slice(0, 12)
+        ? analysis.wordCloud.slice(0, 18)
         : [],
     };
   }
