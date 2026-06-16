@@ -8,6 +8,7 @@ import { User } from './entities/user.entity'
 type SteamProfileErrorCode =
   | 'missing_credentials'
   | 'openid_failed'
+  | 'private_profile'
   | 'profile_not_found'
   | 'unauthorized'
   | 'rate_limited'
@@ -62,6 +63,75 @@ type SteamSummaryResponse = {
   }
 }
 
+type SteamOwnedGame = {
+  appid: number
+  img_icon_url?: string
+  name?: string
+  playtime_2weeks?: number
+  playtime_forever?: number
+}
+
+type SteamOwnedGamesResponse = {
+  response?: {
+    game_count?: number
+    games?: SteamOwnedGame[]
+  }
+}
+
+type SteamRecentlyPlayedResponse = {
+  response?: {
+    games?: SteamOwnedGame[]
+    total_count?: number
+  }
+}
+
+type SteamPlayerAchievement = {
+  achieved?: number
+}
+
+type SteamPlayerAchievementsResponse = {
+  playerstats?: {
+    achievements?: SteamPlayerAchievement[]
+    error?: string
+    success?: boolean
+  }
+}
+
+type SteamAchievementSample = {
+  appId: number
+  name: string
+  total: number
+  unlocked: number
+}
+
+type SteamRecentGame = {
+  appId: number
+  imageUrl: string | null
+  name: string
+  playtimeMinutes: number
+  totalPlaytimeMinutes: number
+}
+
+type SteamStats = {
+  achievementGamesChecked: number
+  achievementsTotal: number
+  achievementsUnlocked: number
+  friendCode: string | null
+  ownedGamesCount: number
+  recentGames: SteamRecentGame[]
+  recentPlaytimeMinutes: number
+  recentWindowDays: number
+  recentWindowLabel: 'STEAM_2W_FALLBACK'
+}
+
+type SteamStatsResponse = {
+  connected: boolean
+  error: string | null
+  errorCode: SteamProfileErrorCode | null
+  stats: SteamStats | null
+  steamId: string | null
+}
+
 @Injectable()
 export class SteamService {
   constructor(
@@ -84,6 +154,22 @@ export class SteamService {
     }
 
     return this.fetchProfile(user.steamId)
+  }
+
+  async getLinkedStats(userId: string): Promise<SteamStatsResponse> {
+    const user = await this.userRepository.findOneBy({ id: userId })
+
+    if (!user?.steamId) {
+      return {
+        connected: false,
+        error: null,
+        errorCode: null,
+        stats: null,
+        steamId: null,
+      }
+    }
+
+    return this.fetchStats(user.steamId)
   }
 
   async linkProfile(
@@ -344,6 +430,216 @@ export class SteamService {
         profile: null,
         steamId,
       }
+    }
+  }
+
+  private async fetchStats(steamId: string): Promise<SteamStatsResponse> {
+    const apiKey = this.apiKey()
+
+    if (!apiKey) {
+      return {
+        connected: false,
+        error:
+          'STEAM_WEB_API_KEY is missing. Add the key before loading Steam stats.',
+        errorCode: 'missing_credentials',
+        stats: null,
+        steamId,
+      }
+    }
+
+    try {
+      const [ownedResponse, recentResponse] = await Promise.all([
+        axios.get<SteamOwnedGamesResponse>(
+          'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/',
+          {
+            params: {
+              include_appinfo: true,
+              include_played_free_games: true,
+              key: apiKey,
+              steamid: steamId,
+            },
+            timeout: 10_000,
+          },
+        ),
+        axios.get<SteamRecentlyPlayedResponse>(
+          'https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/',
+          {
+            params: {
+              count: 5,
+              key: apiKey,
+              steamid: steamId,
+            },
+            timeout: 10_000,
+          },
+        ),
+      ])
+
+      const ownedPayload = ownedResponse.data.response
+
+      if (
+        !ownedPayload ||
+        (!Array.isArray(ownedPayload.games) &&
+          typeof ownedPayload.game_count !== 'number')
+      ) {
+        return {
+          connected: false,
+          error: 'Steam game details are private or unavailable.',
+          errorCode: 'private_profile',
+          stats: null,
+          steamId,
+        }
+      }
+
+      const ownedGames = ownedPayload.games ?? []
+      const recentSourceGames = recentResponse.data.response?.games ?? []
+      const recentGames = recentSourceGames.map((game) =>
+        this.toRecentGame(game),
+      )
+      const achievementSamples = await this.fetchAchievementSamples(
+        steamId,
+        apiKey,
+        this.achievementCandidates(recentSourceGames, ownedGames),
+      )
+
+      return {
+        connected: true,
+        error: null,
+        errorCode: null,
+        stats: {
+          achievementGamesChecked: achievementSamples.length,
+          achievementsTotal: achievementSamples.reduce(
+            (sum, sample) => sum + sample.total,
+            0,
+          ),
+          achievementsUnlocked: achievementSamples.reduce(
+            (sum, sample) => sum + sample.unlocked,
+            0,
+          ),
+          friendCode: this.steamFriendCode(steamId),
+          ownedGamesCount: ownedPayload.game_count ?? ownedGames.length,
+          recentGames,
+          recentPlaytimeMinutes: recentGames.reduce(
+            (sum, game) => sum + game.playtimeMinutes,
+            0,
+          ),
+          recentWindowDays: 14,
+          recentWindowLabel: 'STEAM_2W_FALLBACK',
+        },
+        steamId,
+      }
+    } catch (error) {
+      return {
+        ...this.externalError(error),
+        connected: false,
+        stats: null,
+        steamId,
+      }
+    }
+  }
+
+  private achievementCandidates(
+    recentGames: SteamOwnedGame[],
+    ownedGames: SteamOwnedGame[],
+  ) {
+    const byAppId = new Map<number, SteamOwnedGame>()
+
+    for (const game of [...recentGames, ...ownedGames]) {
+      if (!byAppId.has(game.appid)) {
+        byAppId.set(game.appid, game)
+      }
+    }
+
+    // Achievement lookups require one AppID at a time, so cap the sample to keep the profile request responsive.
+    return [...byAppId.values()]
+      .filter((game) => (game.playtime_forever ?? 0) > 0)
+      .sort(
+        (left, right) =>
+          (right.playtime_2weeks ?? 0) - (left.playtime_2weeks ?? 0) ||
+          (right.playtime_forever ?? 0) - (left.playtime_forever ?? 0),
+      )
+      .slice(0, 5)
+  }
+
+  private async fetchAchievementSamples(
+    steamId: string,
+    apiKey: string,
+    games: SteamOwnedGame[],
+  ) {
+    const samples = await Promise.all(
+      games.map((game) => this.fetchAchievementSample(steamId, apiKey, game)),
+    )
+
+    return samples.filter((sample): sample is SteamAchievementSample =>
+      Boolean(sample),
+    )
+  }
+
+  private async fetchAchievementSample(
+    steamId: string,
+    apiKey: string,
+    game: SteamOwnedGame,
+  ): Promise<SteamAchievementSample | null> {
+    try {
+      const response = await axios.get<SteamPlayerAchievementsResponse>(
+        'https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/',
+        {
+          params: {
+            appid: game.appid,
+            key: apiKey,
+            l: 'en',
+            steamid: steamId,
+          },
+          timeout: 10_000,
+        },
+      )
+      const achievements = response.data.playerstats?.achievements
+
+      if (!Array.isArray(achievements) || achievements.length === 0) {
+        return null
+      }
+
+      return {
+        appId: game.appid,
+        name: game.name ?? `APP_${game.appid}`,
+        total: achievements.length,
+        unlocked: achievements.filter((achievement) => achievement.achieved)
+          .length,
+      }
+    } catch {
+      return null
+    }
+  }
+
+  private toRecentGame(game: SteamOwnedGame): SteamRecentGame {
+    return {
+      appId: game.appid,
+      imageUrl: this.steamAppIconUrl(game.appid, game.img_icon_url),
+      name: game.name ?? `APP_${game.appid}`,
+      playtimeMinutes: game.playtime_2weeks ?? 0,
+      totalPlaytimeMinutes: game.playtime_forever ?? 0,
+    }
+  }
+
+  private steamAppIconUrl(appId: number, iconHash: string | undefined) {
+    if (!iconHash) {
+      return null
+    }
+
+    return `https://media.steampowered.com/steamcommunity/public/images/apps/${appId}/${iconHash}.jpg`
+  }
+
+  private steamFriendCode(steamId: string) {
+    try {
+      // The profile UI shows the account-id portion because Steam's friend-code screens use that shorter identifier.
+      const accountId = BigInt(steamId) - 76561197960265728n
+
+      if (accountId <= 0n) {
+        return steamId
+      }
+
+      return accountId.toString()
+    } catch {
+      return steamId
     }
   }
 

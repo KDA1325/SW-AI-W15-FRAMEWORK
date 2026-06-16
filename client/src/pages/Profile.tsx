@@ -108,6 +108,7 @@ type SteamProfileResponse = {
   errorCode:
     | 'missing_credentials'
     | 'openid_failed'
+    | 'private_profile'
     | 'profile_not_found'
     | 'unauthorized'
     | 'rate_limited'
@@ -124,11 +125,56 @@ type SteamProfileResponse = {
   steamId: string | null
 }
 
+type SteamStatsResponse = {
+  connected: boolean
+  error: string | null
+  errorCode:
+    | 'missing_credentials'
+    | 'openid_failed'
+    | 'private_profile'
+    | 'profile_not_found'
+    | 'unauthorized'
+    | 'rate_limited'
+    | 'network_error'
+    | 'external_api_error'
+    | null
+  stats: {
+    achievementGamesChecked: number
+    achievementsTotal: number
+    achievementsUnlocked: number
+    friendCode: string | null
+    ownedGamesCount: number
+    recentGames: {
+      appId: number
+      imageUrl: string | null
+      name: string
+      playtimeMinutes: number
+      totalPlaytimeMinutes: number
+    }[]
+    recentPlaytimeMinutes: number
+    recentWindowDays: number
+    recentWindowLabel: 'STEAM_2W_FALLBACK'
+  } | null
+  steamId: string | null
+}
+
 function apiUrl(path: string) {
   return new URL(
     path,
     api.defaults.baseURL ?? window.location.origin,
   ).toString()
+}
+
+function formatStatNumber(value: number | null | undefined) {
+  return typeof value === 'number' ? value.toLocaleString('en-US') : '--'
+}
+
+function formatPlayHours(minutes: number | null | undefined) {
+  if (typeof minutes !== 'number') {
+    return '--'
+  }
+
+  return `${Math.round(minutes / 60)}H`
 }
 
 function Profile() {
@@ -153,6 +199,8 @@ function Profile() {
   const [steamState, setSteamState] = useState<SteamProfileResponse | null>(
     null,
   )
+  const [steamStatsState, setSteamStatsState] =
+    useState<SteamStatsResponse | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -172,6 +220,24 @@ function Profile() {
           setSteamMessage(
             getApiErrorMessage(error, 'STEAM PROFILE LOAD FAILED'),
           )
+        }
+      }
+
+      try {
+        const response = await api.get<SteamStatsResponse>('/auth/steam/stats')
+
+        if (isMounted) {
+          setSteamStatsState(response.data)
+        }
+      } catch (error) {
+        if (isMounted) {
+          setSteamStatsState({
+            connected: false,
+            error: getApiErrorMessage(error, 'STEAM STATS LOAD FAILED'),
+            errorCode: 'external_api_error',
+            stats: null,
+            steamId: user?.steamId ?? null,
+          })
         }
       }
     }
@@ -200,6 +266,19 @@ function Profile() {
       if (response.data.connected) {
         setSteamMessage('STEAM_PROFILE_CONNECTED')
         await refreshUser()
+        try {
+          const statsResponse =
+            await api.get<SteamStatsResponse>('/auth/steam/stats')
+          setSteamStatsState(statsResponse.data)
+        } catch (error) {
+          setSteamStatsState({
+            connected: false,
+            error: getApiErrorMessage(error, 'STEAM STATS LOAD FAILED'),
+            errorCode: 'external_api_error',
+            stats: null,
+            steamId: response.data.steamId,
+          })
+        }
       } else {
         setSteamMessage(response.data.error ?? 'STEAM_PROFILE_NOT_CONNECTED')
       }
@@ -223,6 +302,13 @@ function Profile() {
         await api.delete<SteamProfileResponse>('/auth/steam/link')
       setSteamState(response.data)
       setSteamInput('')
+      setSteamStatsState({
+        connected: false,
+        error: null,
+        errorCode: null,
+        stats: null,
+        steamId: null,
+      })
       setSteamMessage('STEAM_PROFILE_DISCONNECTED')
       await refreshUser()
     } catch (error) {
@@ -233,6 +319,30 @@ function Profile() {
   }
 
   const steamProfile = steamState?.profile
+  const steamStats = steamStatsState?.stats
+  const steamStatsUnavailable =
+    steamStatsState?.error ??
+    (steamState?.steamId ? 'STEAM_STATS_PENDING' : 'LINK_STEAM_FIRST')
+  const ownedGamesCount = formatStatNumber(steamStats?.ownedGamesCount)
+  const achievementsUnlocked = formatStatNumber(
+    steamStats?.achievementsUnlocked,
+  )
+  const achievementsTotal = formatStatNumber(steamStats?.achievementsTotal)
+  const achievementGamesChecked = formatStatNumber(
+    steamStats?.achievementGamesChecked,
+  )
+  const recentPlayHours = formatPlayHours(steamStats?.recentPlaytimeMinutes)
+  const recentTopGame =
+    steamStats?.recentGames[0]?.name ?? steamStatsUnavailable
+  // Steam's public recent-play endpoint exposes a two-week window, so the UI labels that fallback explicitly.
+  const recentWindowLabel = steamStats
+    ? steamStats.recentWindowDays === 14
+      ? '2W PLAY'
+      : 'WEEK PLAY'
+    : 'STEAM PLAY'
+  const friendCode = steamStats?.friendCode
+    ? `#${steamStats.friendCode}`
+    : '----'
   const gamerTags = user?.gamerTags?.length ? user.gamerTags : ['NO_TAGS']
 
   return (
@@ -384,6 +494,12 @@ function Profile() {
                 {steamState.errorCode}
               </span>
             ) : null}
+
+            {steamStatsState?.error ? (
+              <p className="font-label-caps text-[10px] uppercase text-[var(--gjc-secondary)]">
+                STEAM_STATS: {steamStatsState.error}
+              </p>
+            ) : null}
           </div>
         </section>
 
@@ -395,11 +511,11 @@ function Profile() {
               GAMES
             </span>
             <span className="font-headline-xl text-headline-xl group-hover:hidden">
-              142
+              {ownedGamesCount}
             </span>
             <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-[16px] text-center leading-tight">
-              OWNED GAMES: 142 <br />
-              RATED GAMES: 87
+              OWNED GAMES: {ownedGamesCount} <br />
+              SOURCE: STEAM API
             </span>
           </div>
           <div className="p-6 flex flex-col items-center justify-center hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all step-transition group cursor-default relative hover:z-10 hover:scale-105 hover:ring-4 hover:ring-[var(--gjc-primary)]">
@@ -407,35 +523,35 @@ function Profile() {
               ACHIEVEMENTS
             </span>
             <span className="font-headline-xl text-headline-xl group-hover:hidden">
-              120
+              {achievementsUnlocked}
             </span>
             <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-[16px] text-center leading-tight">
-              120 ACHIEVEMENTS <br />
-              ACROSS 34 GAMES
+              {achievementsUnlocked} / {achievementsTotal} <br />
+              CHECKED {achievementGamesChecked} GAMES
             </span>
           </div>
           <div className="p-6 flex flex-col items-center justify-center hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-all step-transition group cursor-default relative hover:z-10 hover:scale-105 hover:ring-4 hover:ring-[var(--gjc-primary)]">
             <span className="font-label-caps text-[var(--gjc-secondary)] group-hover:text-[var(--gjc-surface-dim)] transition-colors duration-100 group-hover:hidden mb-2">
-              WEEK PLAY
+              {recentWindowLabel}
             </span>
             <span className="hidden group-hover:block font-label-caps text-[var(--gjc-surface-dim)] transition-colors duration-100">
               RECENT GAME
             </span>
             <span className="font-headline-xl text-headline-xl group-hover:hidden">
-              34H
+              {recentPlayHours}
             </span>
             <span className="hidden group-hover:flex font-[DotGothic16,sans-serif] text-center leading-tight uppercase text-[16px]">
-              SHADOWS OF AETERNA
+              {recentTopGame}
               <br />
-              ...
+              STEAM 2W FALLBACK
             </span>
           </div>
           <div className="p-6 flex flex-col items-center justify-center gap-2 hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)] transition-colors group cursor-default">
             <span className="font-label-caps text-[var(--gjc-secondary)] group-hover:text-[var(--gjc-surface-dim)]">
               GAMER ID
             </span>
-            <span className="font-headline-xl text-headline-xl text-[24px]">
-              #9904A
+            <span className="font-headline-xl text-[clamp(14px,2vw,24px)] break-all text-center leading-tight">
+              {friendCode}
             </span>
           </div>
         </section>

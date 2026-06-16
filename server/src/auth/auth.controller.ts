@@ -89,6 +89,12 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('steam/stats')
+  steamStats(@Req() req: AuthedRequest) {
+    return this.steamService.getLinkedStats(req.user.userId)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get('steam/openid')
   startSteamOpenId(@Res() res: Response) {
     return res.redirect(this.steamService.buildOpenIdLoginUrl())
