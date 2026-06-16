@@ -7,11 +7,11 @@ import {
   ConflictException,
   Injectable,
   UnauthorizedException,
-} from '@nestjs/common';
+} from '@nestjs/common'
 
 // JWT 토큰을 만들기 위한 NestJS 서비스입니다.
-import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt'
+import { InjectRepository } from '@nestjs/typeorm'
 //'@nestjs/typeorm'과 typeorm 차이 -> '@nestjs/typeorm'은 NestJS에서 TypeORM을 사용할 때 필요한 모듈과 데코레이터를 제공하는 패키지
 // 반면, 'typeorm'은 TypeORM 자체 라이브러리로, 데이터베이스와 상호작용하는 기능을 제공
 // NestJS에서는 '@nestjs/typeorm'을 통해 TypeORM의 Repository를 주입받아 사용할 수 있음
@@ -19,25 +19,25 @@ import { InjectRepository } from '@nestjs/typeorm';
 // '@nestjs/typeorm'을 통해 TypeORM의 Repository를 주입받아 사용할 수 있는데 typeorm을 또 가져오는 이유 -> Repository 타입을 사용하기 위해서
 // 왜? import { Repository } from '@nestjs/typeorm';하면 안 됨?
 // -> '@nestjs/typeorm'에서 Repository 타입을 가져오는 것도 가능하지만, 공식 문서에서는 TypeORM의 Repository 타입을 직접 가져와서 사용하는 것을 권장하기 때문에 typeorm에서 Repository를 가져오는 것이 일반적
-import { Repository } from 'typeorm';
+import { Repository } from 'typeorm'
 
 // bcrypt는 비밀번호를 안전하게 암호화하고 비교하기 위한 라이브러리입니다.
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt'
 
 // Express의 Response 타입입니다.
 // 쿠키를 응답에 저장하거나 삭제할 때 사용합니다.
-import { Response } from 'express';
+import { Response } from 'express'
 
 // DB에서 가져온 사용자 객체의 타입으로 사용합니다.
-import { User } from './entities/user.entity';
+import { User } from './entities/user.entity'
 
 // 로그인 요청 데이터 타입입니다.
 // dto에서 요청 데이터 타입은 가져오는데 응답 데이터 타입은 안 가져오는 이유
 // -> 응답 데이터는 보통 DB에서 가져온 엔티티 객체에서 필요한 정보만 골라서 반환하기 때문에, DTO로 따로 정의하지 않는 경우가 많습니다.
-import { LoginDto } from './dto/login.dto';
+import { LoginDto } from './dto/login.dto'
 
 // 회원가입 요청 데이터 타입입니다.
-import { RegisterDto } from './dto/register.dto';
+import { RegisterDto } from './dto/register.dto'
 
 // @Injectable()을 붙이면 NestJS가 AuthService를 서비스로 관리합니다.
 // 안 붙이면? -> NestJS가 이 클래스를 인식하지 못해서 DI(의존성 주입)도 안 되고, 다른 서비스나 컨트롤러에서 주입받아 사용할 수도 없음
@@ -74,13 +74,13 @@ export class AuthService {
       // email 컬럼이 dto.email과 일치하는 레코드를 찾음
       // 레코드 = DB 테이블의 한 줄, 객체 하나라고 생각하면 됨
       email: dto.email,
-    });
+    })
 
     // 2. 이미 같은 이메일이 있으면 회원가입을 막습니다.
     // existingUser는 true, false가 아니라 User 객체이거나 null
     // if(existingUser) => existingUser가 null이 아니면(이미 같은 이메일이 있으면) 회원가입을 막는다
     if (existingUser) {
-      throw new ConflictException('이미 가입된 이메일입니다.');
+      throw new ConflictException('이미 가입된 이메일입니다.')
     }
 
     // 3. 비밀번호 암호화
@@ -88,17 +88,17 @@ export class AuthService {
     // 12는 salt rounds라고 부르는 암호화 강도입니다.
     // 암호화 하는 이유 => DB에 비밀번호를 평문으로 저장하면 보안에 매우 취약하기 때문
     // 해커가 DB를 탈취하더라도 암호화된 비밀번호는 원래 비밀번호를 알아내기 어렵게 만들어줍니다.
-    const passwordHash = await bcrypt.hash(dto.password, 12);
+    const passwordHash = await bcrypt.hash(dto.password, 12)
 
     // 4. 새 사용자 객체 생성 및 DB 저장 (create 후 save 진행)
     const newUser = this.userRepository.create({
       email: dto.email,
       nickname: dto.nickname,
       passwordHash,
-    });
+    })
 
     // save()는 DB에 저장하는 메서드 -> 저장된 객체를 반환
-    const user = await this.userRepository.save(newUser);
+    const user = await this.userRepository.save(newUser)
 
     // 5. 쿠키 설정 및 반환
     // 회원가입 성공 후 바로 로그인 상태로 만들기 위해 JWT 쿠키를 저장합니다.
@@ -107,13 +107,13 @@ export class AuthService {
     // 이후 클라이언트는 해당 쿠키를 저장하고, 같은 도메인으로 요청을 보낼 때마다 자동으로 쿠키를 포함시켜서 서버로 보냄
     // 쿠키는 세션 관리, 사용자 인증, 사용자 선호도 저장 등 다양한 용도로 사용
     // 따라서 쿠키는 캐시 데이터와는 다르며, 주로 상태 유지와 인증에 사용됨
-    this.setCookie(res, user);
+    this.setCookie(res, user)
 
     // 6. passwordHash를 제외한 안전한 사용자 정보만 응답합니다.
     // 쿠키도 응답? -> 쿠키는 응답 헤더에 Set-Cookie로 포함되어서 클라이언트로 전달됨
     // 서버에서 클라이언트로 사용자 정보를 왜 응답?
     // -> 회원가입이나 로그인 후에 클라이언트가 사용자 정보를 화면에 표시하거나, 애플리케이션 상태를 업데이트할 때 필요하기 때문
-    return this.safeUser(user);
+    return this.safeUser(user)
   }
 
   // 로그인 로직
@@ -121,13 +121,13 @@ export class AuthService {
     // 1. 이메일로 사용자 조회
     // email은 schema.prisma에서 @unique로 설정했기 때문에 findUnique로 조회할 수 있습니다.
     // 사용자가 없으면 null이 반환됩니다.
-    const user = await this.userRepository.findOneBy({ email: dto.email });
+    const user = await this.userRepository.findOneBy({ email: dto.email })
 
     // 2. 사용자가 없으면 로그인 실패입니다.
     if (!user) {
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 올바르지 않습니다.',
-      );
+      )
     }
 
     // 3. 사용자가 입력한 비밀번호와 DB에 저장된 암호화 비밀번호를 비교
@@ -136,20 +136,20 @@ export class AuthService {
     // bcrypt.compare() 함수는 이 과정을 처리하여, 입력된 비밀번호를 암호화된 형태로 변환한 후 DB에 저장된 암호화된 비밀번호와 비교하여 일치 여부를 반환
     // 따라서 사용자가 올바른 비밀번호를 입력하면 로그인에 성공
     // 난 맞게 잘 입력했는데 bcrypt가 고장나서 로그인 못할 수도 있나 -> bcrypt 라이브러리가 제대로 설치되고 작동한다면 그런 일은 거의 없지만, 만약 bcrypt에 문제가 생긴다면 로그인 과정에서 오류가 발생할 수 있음
-    const isPasswordOk = await bcrypt.compare(dto.password, user.passwordHash);
+    const isPasswordOk = await bcrypt.compare(dto.password, user.passwordHash)
 
     // 4. 비밀번호가 틀리면 로그인 실패입니다.
     if (!isPasswordOk) {
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 올바르지 않습니다.',
-      );
+      )
     }
 
     // 5. 로그인 성공 시 JWT 쿠키를 저장합니다.
-    this.setCookie(res, user);
+    this.setCookie(res, user)
 
     // 6. 안전한 사용자 정보만 응답합니다.
-    return this.safeUser(user);
+    return this.safeUser(user)
   }
 
   // 현재 로그인한 사용자 정보를 가져오는 로직입니다.
@@ -170,13 +170,13 @@ export class AuthService {
     // 로그인 과정에서 JWT 토큰을 만들어서 쿠키에 저장하는 이유는, 사용자가 로그인한 상태를 유지하기 위해서임
     // 캐시와는 다른 개념이라고 했으니까 속도와는 관계가 없나
     // -> 맞음 JWT 토큰을 쿠키에 저장하는 것은 사용자의 로그인 상태를 유지하기 위한 방법이지, 캐시처럼 속도를 높이는 방법은 아님
-    const user = await this.userRepository.findOneBy({ id: userId });
+    const user = await this.userRepository.findOneBy({ id: userId })
 
     // 사용자가 없으면 인증 실패로 처리합니다.
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException()
     }
-    return this.safeUser(user);
+    return this.safeUser(user)
   }
 
   // 로그아웃 로직입니다.
@@ -201,16 +201,16 @@ export class AuthService {
       sameSite: 'lax',
       secure: false,
       path: '/',
-    });
+    })
 
-    return { ok: true };
+    return { ok: true }
   }
 
   // JWT를 만들고 브라우저 쿠키에 저장하는 private 메서드입니다.
   // private은 이 클래스 내부에서만 사용할 수 있다는 뜻입니다.
   private setCookie(res: Response, user: User) {
     // 로그인한 사용자를 증명할 JWT 토큰을 만드는 코드입니다.
-    const token = this.jwt.sign({ sub: user.id, email: user.email });
+    const token = this.jwt.sign({ sub: user.id, email: user.email })
 
     // access_token이라는 이름의 쿠키에 JWT를 저장합니다.
     res.cookie('access_token', token, {
@@ -240,7 +240,7 @@ export class AuthService {
       // -> 사용자가 API 요청을 보낼 때마다 서버가 새 JWT 만들어서 쿠키 다시 내려주는 방식으로 구현하면 사용자가 계속 활동하는 동안 로그인 시간이 밀림
       // 혹은 Access Token + Refresh token 방식으로 구현하면 Access Token 만료되면 Refresh token으로 새 access token 발급받음
       maxAge: 1000 * 60 * 60 * 24,
-    });
+    })
   }
 
   // 프론트엔드로 보내도 되는 사용자 정보만 골라서 반환합니다.
@@ -249,6 +249,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
-    };
+      steamId: user.steamId,
+    }
   }
 }

@@ -4,15 +4,15 @@ Gaming Journal Club is a retro 8-bit styled game journal and recommendation MVP.
 
 ## Stack
 
-| Layer | Tech |
-| --- | --- |
-| Frontend | React, Vite, TypeScript |
-| Backend API | NestJS |
-| Database | PostgreSQL with pgvector |
-| RAG | NestJS RAG service, pgvector, optional OpenAI embeddings |
-| MCP | JSON-RPC MCP endpoint with `search_games` tool |
-| Agent | NestJS MVP Agent loop with max iterations, timeout, and fallback |
-| External game metadata | IGDB API through MCP |
+| Layer                  | Tech                                                             |
+| ---------------------- | ---------------------------------------------------------------- |
+| Frontend               | React, Vite, TypeScript                                          |
+| Backend API            | NestJS                                                           |
+| Database               | PostgreSQL with pgvector                                         |
+| RAG                    | NestJS RAG service, pgvector, optional OpenAI embeddings         |
+| MCP                    | JSON-RPC MCP endpoint with `search_games` tool                   |
+| Agent                  | NestJS MVP Agent loop with max iterations, timeout, and fallback |
+| External game metadata | IGDB API through MCP                                             |
 
 FastAPI is reserved in the architecture and env contract for a later Agent service split. The current one-day MVP keeps the Agent loop inside NestJS so RAG, MCP, and React can be tested end to end.
 
@@ -46,14 +46,14 @@ password: demo-password
 
 Optional AI/external keys:
 
-| Variable | Purpose | Local fallback |
-| --- | --- | --- |
-| `OPENAI_API_KEY` | Real embeddings and structured RAG analysis | deterministic demo embeddings and rule-based analysis |
-| `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Live IGDB MCP game metadata | MCP returns `missing_credentials`; Agent uses local DB fallback |
-| `STEAM_WEB_API_KEY` | Steam profile/play-history linking | not required for current SYNC demo |
-| `AGENT_MAX_ITERATIONS` | Max MCP calls in one Agent loop | `4` |
-| `AGENT_TIMEOUT_MS` | Max local Agent loop duration | `30000` |
-| `FASTAPI_AGENT_URL` | Later FastAPI Agent service URL | reserved |
+| Variable                               | Purpose                                     | Local fallback                                                  |
+| -------------------------------------- | ------------------------------------------- | --------------------------------------------------------------- |
+| `OPENAI_API_KEY`                       | Real embeddings and structured RAG analysis | deterministic demo embeddings and rule-based analysis           |
+| `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET` | Live IGDB MCP game metadata                 | MCP returns `missing_credentials`; Agent uses local DB fallback |
+| `STEAM_WEB_API_KEY`                    | Steam profile/play-history linking          | not required for current SYNC demo                              |
+| `AGENT_MAX_ITERATIONS`                 | Max MCP calls in one Agent loop             | `4`                                                             |
+| `AGENT_TIMEOUT_MS`                     | Max local Agent loop duration               | `30000`                                                         |
+| `FASTAPI_AGENT_URL`                    | Later FastAPI Agent service URL             | reserved                                                        |
 
 ### 3. Install dependencies
 
@@ -103,15 +103,24 @@ If Vite says 5173 is already in use, use the next URL it prints.
    - `RECOMMENDED GAMES` cards with title, platform/genre, reason, matched tags, and source link.
    - `PIPELINE` trace showing RAG, MCP, and Agent values.
 
+Optional Steam profile check:
+
+1. Go to `PROFILE`.
+2. Paste a SteamID64 or Steam profile URL in `STEAM_PROFILE`.
+3. Click `LINK`.
+4. With `STEAM_WEB_API_KEY` configured, confirm the Steam avatar, persona name, and profile link render.
+5. Without `STEAM_WEB_API_KEY`, confirm the panel shows `missing_credentials` instead of breaking the page.
+
 ## AI Requirement Checklist
 
-| Requirement | MVP implementation | Demo signal |
-| --- | --- | --- |
-| RAG feature | `RagService` reads seeded journals/reviews/profile documents and searches pgvector | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render |
-| MCP feature | `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; `search_games` targets IGDB | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error |
-| AI Agent feature | `AgentService` reads RAG, calls MCP, merges/fallbacks recommendations | `pipeline.agent.iterations`, `maxIterations`, `stoppedReason`, and 3 recommendation cards |
-| Loop guard | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`, fallback recommendations | local smoke shows `agentIterations = 4`, `stoppedReason = fallback` |
-| React integration | `Recommend.tsx` calls `POST /ai/recommendations/sync` | SYNC click renders API data instead of dummy arrays |
+| Requirement        | MVP implementation                                                                           | Demo signal                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| RAG feature        | `RagService` reads seeded journals/reviews/profile documents and searches pgvector           | `pipeline.rag.sourceCount > 0`, word cloud and preference tags render                     |
+| MCP feature        | `POST /mcp` implements JSON-RPC `tools/list` and `tools/call`; `search_games` targets IGDB   | `pipeline.mcp.toolName = search_games`; missing IGDB keys return structured error         |
+| AI Agent feature   | `AgentService` reads RAG, calls MCP, merges/fallbacks recommendations                        | `pipeline.agent.iterations`, `maxIterations`, `stoppedReason`, and 3 recommendation cards |
+| Loop guard         | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`, fallback recommendations                         | local smoke shows `agentIterations = 4`, `stoppedReason = fallback`                       |
+| React integration  | `Recommend.tsx` calls `POST /ai/recommendations/sync`                                        | SYNC click renders API data instead of dummy arrays                                       |
+| Steam profile link | `Profile.tsx` calls `GET/POST/DELETE /auth/steam/*`; server calls Steam `GetPlayerSummaries` | Profile panel shows linked Steam profile or structured missing-credentials state          |
 
 ## Smoke Test Results
 
@@ -171,6 +180,8 @@ Recorded result summary:
 ## Known Issues
 
 - IGDB live metadata requires `IGDB_CLIENT_ID` and `IGDB_CLIENT_SECRET`. Without them, recommendations still render through local fallback data.
+- Steam live profile display requires `STEAM_WEB_API_KEY`. Without it, the profile page shows a structured `missing_credentials` state.
+- The current Steam link MVP stores a SteamID64 after API lookup, but does not prove ownership of the Steam account. Add Steam OpenID before using this as account verification.
 - FastAPI is not yet a running service in this repo. The current MVP Agent loop is implemented in NestJS, with `FASTAPI_AGENT_URL` kept for the future split.
 - The local NestJS startup may print a pg deprecation warning about concurrent `client.query()` usage. The app still starts and the smoke test passes.
 - In-app browser automation failed in this Codex Windows sandbox with `CreateProcessAsUserW failed: 5`; use the Vite URL manually for visual review.

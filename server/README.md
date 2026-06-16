@@ -65,7 +65,7 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 | --------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | OpenAI RAG embeddings and structured analysis | `OPENAI_API_KEY`, optional model vars               | Uses deterministic demo embeddings and rule-based analysis                                             |
 | IGDB MCP game metadata                        | `IGDB_CLIENT_ID`, `IGDB_CLIENT_SECRET`              | `search_games` returns `isError: true`, `errorCode: "missing_credentials"`, and an empty `games` array |
-| Steam profile and play history                | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam sync should return a structured missing-credentials or missing-profile error                     |
+| Steam profile link                            | `STEAM_WEB_API_KEY`, user `steamId`/`DEMO_STEAM_ID` | Steam profile link returns a structured missing-credentials or missing-profile error                   |
 | Recommendation Agent loop                     | `AGENT_MAX_ITERATIONS`, `AGENT_TIMEOUT_MS`          | Stops the MCP loop and returns local fallback recommendations instead of hanging                       |
 | FastAPI Agent loop                            | `FASTAPI_AGENT_URL`, `FASTAPI_AGENT_TIMEOUT_MS`     | Reserved for a later service split; NestJS should still return a structured fallback response          |
 
@@ -106,6 +106,46 @@ GJC-85 defines the MVP security rules for LLM, MCP, IGDB, Steam, and FastAPI Age
 ```
 
 This lets the Agent continue with a fallback plan instead of crashing the full SYNC flow.
+
+## Steam Profile Link API
+
+The profile page can link a Steam profile through the authenticated NestJS API.
+
+```text
+GET /auth/steam/profile
+POST /auth/steam/link
+DELETE /auth/steam/link
+```
+
+`POST /auth/steam/link` accepts a SteamID64, a `steamcommunity.com/profiles/<steamid>` URL, or a `steamcommunity.com/id/<vanity>` URL:
+
+```json
+{
+  "steamProfile": "76561198000000000"
+}
+```
+
+When `STEAM_WEB_API_KEY` is configured, the server calls Steam Web API `ISteamUser/GetPlayerSummaries/v2`, stores the verified SteamID64 on `User.steamId`, and returns a display profile:
+
+```json
+{
+  "connected": true,
+  "steamId": "76561198000000000",
+  "profile": {
+    "steamId": "76561198000000000",
+    "personaName": "PLAYER",
+    "profileUrl": "https://steamcommunity.com/profiles/76561198000000000/",
+    "avatarUrl": "https://...",
+    "visibilityState": 3
+  },
+  "error": null,
+  "errorCode": null
+}
+```
+
+When the key is missing, the API returns `connected: false`, `errorCode: "missing_credentials"`, and does not store the profile. Vanity URLs also require the key because they must be resolved through `ISteamUser/ResolveVanityURL/v1`.
+
+This is an MVP profile-link feature. It displays and stores a Steam profile identifier, but it does not prove account ownership. Use Steam OpenID in a later auth flow if the app must verify that the logged-in user controls that Steam account.
 
 ## Start PostgreSQL
 
@@ -169,7 +209,7 @@ JWT settings are configured in `src/auth/auth.module.ts`.
 The current local development setting uses:
 
 ```ts
-synchronize: true;
+synchronize: true
 ```
 
 This lets TypeORM update the local database schema from entity classes during development.
@@ -332,12 +372,12 @@ The Agent state tracks:
 
 ```ts
 type AgentState = {
-  maxIterations: number;
-  recommendations: AiRecommendationCard[];
-  startedAt: number;
-  toolResults: AgentToolResult[];
-  userId: string;
-};
+  maxIterations: number
+  recommendations: AiRecommendationCard[]
+  startedAt: number
+  toolResults: AgentToolResult[]
+  userId: string
+}
 ```
 
 Execution order:

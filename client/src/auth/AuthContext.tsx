@@ -1,50 +1,58 @@
 // react에서 자주 쓰는 기능 함수를 꺼내오는 import
-// 클래스라기보단 대부분 Hook 또는 API 함수 
+// 클래스라기보단 대부분 Hook 또는 API 함수
 // useState: 컴포넌트 안에서 상태값을 만들 때 사용
 // -> const [count, setCount] = useState(0)
 // count: 현재 값
-// setCount: 값을 바꾸는 함수 -> 값이 바뀌면 화면이 다시 렌더링 된다 
+// setCount: 값을 바꾸는 함수 -> 값이 바뀌면 화면이 다시 렌더링 된다
 // useEffect: 렌더링 이후 실행할 작업을 등록할 때 사용 ex) API 호출, 이벤트 리스너 등록, 타이머 설정 ...
 // useEffect(() => {}, [])
-// -> [] = 처음 한 번만 실행이라는 뜻 
+// -> [] = 처음 한 번만 실행이라는 뜻
 // useMemo: 계산 결과를 기억해두고, 필요한 경우에만 다시 계산 -> 성능 최적화용(캐싱)
-// const ㅇㅇ = useMemo(() => {}, [data]) -> data가 바뀔 때마다 다시 계산한다는 의미 
-// createContext: 여러 컴포넌트가 공통으로 사용할 값을 담는 Context를 만듦 
-// ex) 로그인 사용자 정보, 테마, 언어 설정 등 전역에 가까운 값 
-// useContext: createContext로 만든 값을 컴포넌트 안에서 꺼내 쓸 때 사용 
+// const ㅇㅇ = useMemo(() => {}, [data]) -> data가 바뀔 때마다 다시 계산한다는 의미
+// createContext: 여러 컴포넌트가 공통으로 사용할 값을 담는 Context를 만듦
+// ex) 로그인 사용자 정보, 테마, 언어 설정 등 전역에 가까운 값
+// useContext: createContext로 만든 값을 컴포넌트 안에서 꺼내 쓸 때 사용
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { api } from '../api'
 
 type User = {
   id: string
   email: string
   nickname: string
+  steamId: string | null
 }
 
 // 그럼 이건 인증과 관련해서 전역에서 공유하며 사용할 값을 저장하는 거겠지
-// -> 앱 어디서든 꺼내 쓸 수 있는 인증 관련 상태와 함수 묶음 
+// -> 앱 어디서든 꺼내 쓸 수 있는 인증 관련 상태와 함수 묶음
 type AuthContextValue = {
   user: User | null // 현재 로그인한 사용자 정보, 로그인 하지 않았으면 null
-  isLoading: boolean // 현재 인증 정보를 확인 중인지 ex) 앱이 처음 켜졌을 때 서버에 로그인 되어 있는지 확인 중 등 
+  isLoading: boolean // 현재 인증 정보를 확인 중인지 ex) 앱이 처음 켜졌을 때 서버에 로그인 되어 있는지 확인 중 등
   isAuthenticated: boolean // 로그인 여부 -> User가 있으면 true, 없으면 false
   refreshUser: () => Promise<void> // 현재 로그인한 사용자 정보를 다시 가져오는 함수 -> 내 정보 API 호출, 성공하면 user 업데이트, 실패하면 user를 null로 변경 등의 역할
-  logout: () => Promise<void> // 로그아웃 함수 -> 로그아웃 API 호출, 토큰/세션 제거, user를 null로 변경, 로그인 페이지로 이동 
+  logout: () => Promise<void> // 로그아웃 함수 -> 로그아웃 API 호출, 토큰/세션 제거, user를 null로 변경, 로그인 페이지로 이동
 }
 
-// AuthContextValue 값을 담는 Context를 만듦 
+// AuthContextValue 값을 담는 Context를 만듦
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 // export: 이 파일 밖에서도 이 함수/변수/타입을 가져다 쓸 수 있게 공개한다는 뜻
 // -> 이게 붙은 함수/변수/타입을 다른 파일에서 import 할 수 있다 = import { AuthProvider } from './AuthProvider'
-// export function AuthProvider -> named export -> import할 때 AuthProvider로 이름을 맞춰줘야 함 
-// export default AuthProvider -> default export -> 가져오는 쪽에서 이름을 마음대로 붙일 수 있음 -> import MyProvider도 가능 
+// export function AuthProvider -> named export -> import할 때 AuthProvider로 이름을 맞춰줘야 함
+// export default AuthProvider -> default export -> 가져오는 쪽에서 이름을 마음대로 붙일 수 있음 -> import MyProvider도 가능
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    // user라는 상태값을 만듦
-    //-> user 상태값을 바꾸는 함수 이름을 setUser로 지음 -> 초기값 null 
+  // user라는 상태값을 만듦
+  //-> user 상태값을 바꾸는 함수 이름을 setUser로 지음 -> 초기값 null
   const [user, setUser] = useState<User | null>(null)
-  
-  // isLoading이라는 상태값을 만들어서 setIsLoading라는 이름의 함수로 isLoading 값을 바꿀 수 있게 함 
+
+  // isLoading이라는 상태값을 만들어서 setIsLoading라는 이름의 함수로 isLoading 값을 바꿀 수 있게 함
   // 초기값 true -> isLoading은 나중에 refreshUser()가 끝나면 false로 바뀜
   const [isLoading, setIsLoading] = useState(true)
 
@@ -114,12 +122,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // AuthProvider가 처음 화면에 나타날 때 한 번만 실행됨
   // 앱을 새로고침해도 로그인 상태가 유지되는지 확인하기 위해 refreshUser를 호출
   // []: 의존성 배열 -> 이 컴포넌트가 처음 렌더링된 뒤에만 실행하고 그 뒤엔 다시 실행하지 말라는 명령
-  // [user]: user가 바뀔 때마다 실행하라는 명령 
+  // [user]: user가 바뀔 때마다 실행하라는 명령
   // AuthProvider는 UI가 없음 -> 렌더링 결과:<AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  // -> 화면에 버튼이나 글자를 그리는 게 아니라, children(=App)을 감싸서 context 값 공급 
+  // -> 화면에 버튼이나 글자를 그리는 게 아니라, children(=App)을 감싸서 context 값 공급
   // => 눈에 보이는 UI가 아니라, App 전체에 로그인 정보를 공급하는 컴포넌트
   // => 렌더링 된다 = React가 그 컴포넌트 함수를 실행해서 무엇을 반환하는지 확인한다(!= 화면을 그린다)
-  // => 새로고침 -> AuthProvider 새로 마운트 -> useEffect 실행 -> 새로고침 될 때 한번씩 실행 
+  // => 새로고침 -> AuthProvider 새로 마운트 -> useEffect 실행 -> 새로고침 될 때 한번씩 실행
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       void refreshUser()
@@ -160,9 +168,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export function useAuth() {
   // 가장 가까운 AuthContext.Provider가 공급한 value를 가져옴
   // 가장 가까운 AuthContext.Provider = 컴포넌트 트리에서 현재 컴포넌트를 감싸고 있는 Provider들 중 제일 안쪽 Provider
-  // -> 인증 context에선 App만 감싸는 식이라 provider 중첩할 일이 별로 없어서 제일 안쪽 provider라는 게 딱히 없는데,  
-  // 다른 페이지를 감싸거나 하는 context라면 provider가 a 값을 반환하게 할 수도 있고, b 값을 반환하게 할 수도 있고 
-  // 이런 식으로 다른 변수를 가져오게 provider 중첩해서 사용하는 경우가 있기 때문에 제일 안쪽 Provider 라는 개념이 있는 것 
+  // -> 인증 context에선 App만 감싸는 식이라 provider 중첩할 일이 별로 없어서 제일 안쪽 provider라는 게 딱히 없는데,
+  // 다른 페이지를 감싸거나 하는 context라면 provider가 a 값을 반환하게 할 수도 있고, b 값을 반환하게 할 수도 있고
+  // 이런 식으로 다른 변수를 가져오게 provider 중첩해서 사용하는 경우가 있기 때문에 제일 안쪽 Provider 라는 개념이 있는 것
   const context = useContext(AuthContext)
 
   if (!context) {
