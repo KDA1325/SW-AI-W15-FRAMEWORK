@@ -13,17 +13,18 @@ const preferenceScale = {
   LIKE: {
     label: 'positive_preference',
     scores: [0.78, 0.84, 0.9, 0.95],
-    reviewRatings: [4.2, 4.5, 4.8, 5.0],
+    // GJC-173: review ratings use only half-star steps so imported persona data matches the UI scale.
+    reviewRatings: [4.0, 4.5, 5.0, 4.5],
   },
   MIXED: {
     label: 'mixed_preference',
     scores: [0.08, 0.18, 0.28],
-    reviewRatings: [3.0, 3.2, 3.5],
+    reviewRatings: [2.5, 3.0, 3.5],
   },
   DISLIKE: {
     label: 'negative_preference',
     scores: [-0.72, -0.66, -0.58],
-    reviewRatings: [1.4, 1.8, 2.2],
+    reviewRatings: [1.5, 2.0, 2.5],
   },
 };
 
@@ -235,8 +236,8 @@ const profiles = [
       e('Helldivers 2', 'helldivers-2', 'LIKE', ['Shooter'], ['Co-op', 'Multiplayer'], '아군 오폭까지 웃음으로 바뀌는 협동 긴장감이 좋다', '난도가 오르면 장비 조합 책임이 커진다', ['COOP', 'PVE', 'CHAOTIC_TEAMPLAY']),
       e('Monster Hunter: World', 'monster-hunter-world', 'LIKE', ['RPG', 'Adventure'], ['Single player', 'Co-op'], '파티가 역할을 나눠 대형 몬스터를 쓰러뜨리는 순간이 좋다', '준비 시간이 길 때가 있다', ['COOP', 'BOSS_HUNT', 'GEAR_PROGRESSION']),
       e('Final Fantasy XIV', 'final-fantasy-xiv', 'LIKE', ['RPG'], ['MMO', 'Multiplayer'], '레이드 콜과 직업 역할이 커뮤니티 플레이로 이어진다', '일정 맞추기는 부담이 된다', ['MMORPG', 'RAID', 'SOCIAL_PLAY']),
-      e('Dead by Daylight', 'dead-by-daylight', 'LIKE', ['Horror', 'Strategy'], ['Multiplayer'], '생존자와 살인마의 심리전이 매 판 다르게 터진다', '매칭 밸런스에 기분이 좌우된다', ['ASYMMETRIC_MULTIPLAYER', 'HORROR', 'MINDGAME']),
-      e('Sea of Thieves', 'sea-of-thieves', 'LIKE', ['Adventure'], ['Multiplayer'], '선원 역할과 즉흥 사건이 친구들과 이야기거리를 만든다', '목표 없이 떠돌면 늘어진다', ['COOP', 'SANDBOX', 'SOCIAL_ADVENTURE']),
+      e('Dead by Daylight', 'dead-by-daylight', 'MIXED', ['Horror', 'Strategy'], ['Multiplayer'], '생존자와 살인마의 심리전이 매 판 다르게 터진다', '매칭 밸런스에 기분이 좌우된다', ['ASYMMETRIC_MULTIPLAYER', 'HORROR', 'MINDGAME']),
+      e('Sea of Thieves', 'sea-of-thieves', 'MIXED', ['Adventure'], ['Multiplayer'], '선원 역할과 즉흥 사건이 친구들과 이야기거리를 만든다', '목표 없이 떠돌면 늘어진다', ['COOP', 'SANDBOX', 'SOCIAL_ADVENTURE']),
       e('Minecraft', 'minecraft', 'LIKE', ['Simulator', 'Adventure'], ['Single player', 'Multiplayer'], '서버에서 건축과 탐험을 나누면 오래 가는 공동 목표가 생긴다', '혼자 하면 동기가 빠르게 줄어든다', ['SANDBOX', 'COOP_BUILDING', 'CREATIVE']),
       e('The Witness', 'the-witness', 'DISLIKE', ['Puzzle', 'Adventure'], ['Single player'], '퍼즐 설계는 정교하다', '혼자 조용히 고민하는 구조라 팀 콜의 재미가 없다', ['SINGLE_PLAYER_ONLY', 'PUZZLE', 'LOW_SOCIAL_LOOP']),
       e('Firewatch', 'firewatch', 'DISLIKE', ['Adventure'], ['Single player'], '대화와 분위기는 좋다', '한 번 보고 끝나는 서사형 경험이라 반복 멀티 동기가 약하다', ['WALKING_SIM', 'NARRATIVE', 'LOW_REPLAYABILITY']),
@@ -280,8 +281,8 @@ const profiles = [
       e('The Evil Within', 'the-evil-within', 'LIKE', ['Horror', 'Shooter'], ['Single player'], '탄약 부족과 기괴한 장면 전환이 불안하다', '난도가 튈 때 공포보다 짜증이 앞선다', ['SURVIVAL_HORROR', 'LIMITED_RESOURCES', 'BODY_HORROR']),
       e('Phasmophobia', 'phasmophobia', 'LIKE', ['Horror', 'Simulator'], ['Co-op', 'Multiplayer'], '친구들과 증거를 모을수록 공포와 웃음이 같이 생긴다', '솔로보다 협동일 때 훨씬 좋다', ['COOP_HORROR', 'GHOST_HUNTING', 'VOICE_COMMS']),
       e('Visage', 'visage', 'LIKE', ['Horror', 'Adventure'], ['Single player'], '집 안의 초자연 현상이 심리적으로 압박한다', '퍼즐 동선이 불친절해 흐름이 끊길 수 있다', ['PSYCHOLOGICAL_HORROR', 'HAUNTED_HOUSE', 'DREAD']),
-      e('Layers of Fear', 'layers-of-fear', 'LIKE', ['Horror', 'Adventure'], ['Single player'], '방이 뒤틀리는 연출과 예술가의 광기가 분위기를 만든다', '직접적인 위협은 적다', ['PSYCHOLOGICAL_HORROR', 'WALKING_SIM', 'ATMOSPHERE']),
-      e('Until Dawn', 'until-dawn', 'LIKE', ['Horror', 'Adventure'], ['Single player'], '선택과 생존 여부가 슬래셔 영화처럼 긴장된다', 'QTE 실패가 억울하게 느껴질 때가 있다', ['INTERACTIVE_DRAMA', 'SLASHER', 'CHOICES_MATTER']),
+      e('Layers of Fear', 'layers-of-fear', 'MIXED', ['Horror', 'Adventure'], ['Single player'], '방이 뒤틀리는 연출과 예술가의 광기가 분위기를 만든다', '직접적인 위협은 적다', ['PSYCHOLOGICAL_HORROR', 'WALKING_SIM', 'ATMOSPHERE']),
+      e('Until Dawn', 'until-dawn', 'MIXED', ['Horror', 'Adventure'], ['Single player'], '선택과 생존 여부가 슬래셔 영화처럼 긴장된다', 'QTE 실패가 억울하게 느껴질 때가 있다', ['INTERACTIVE_DRAMA', 'SLASHER', 'CHOICES_MATTER']),
       e('Little Nightmares', 'little-nightmares', 'MIXED', ['Horror', 'Platform'], ['Single player'], '작은 몸으로 거대한 위협을 피하는 비주얼이 훌륭하다', '플랫폼 조작 실패가 공포 몰입을 끊는다', ['CREEPY', 'PLATFORM_PUZZLE', 'ATMOSPHERE']),
       e('Alan Wake 2', 'alan-wake-2', 'MIXED', ['Horror', 'Adventure'], ['Single player'], '수사와 메타 서사가 강한 불안을 만든다', '퍼즐과 전투 리듬이 취향보다 느릴 때가 있다', ['PSYCHOLOGICAL_HORROR', 'NARRATIVE', 'INVESTIGATION']),
       e('Stardew Valley', 'stardew-valley', 'DISLIKE', ['RPG', 'Simulator'], ['Single player', 'Co-op'], '농사와 마을 관계는 편안하다', '긴장과 위협이 거의 없어 공포 취향 데이터에는 약하게 잡힌다', ['COZY_LOOP', 'FARMING', 'LOW_TENSION']),

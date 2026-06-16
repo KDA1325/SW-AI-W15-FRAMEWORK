@@ -34,9 +34,9 @@
   },
   "post_count": 20,
   "counts_by_signal": {
-    "LIKE": 16,
-    "DISLIKE": 3,
-    "MIXED": 1
+    "LIKE": 14,
+    "MIXED": 3,
+    "DISLIKE": 3
   },
   "counts_by_type": {
     "JOURNAL": 7,
@@ -88,7 +88,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 4.8
+      "rating": 5
     },
     {
       "type": "JOURNAL",
@@ -119,7 +119,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 4.2
+      "rating": 4
     },
     {
       "type": "REVIEW",
@@ -166,7 +166,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 5
+      "rating": 4.5
     },
     {
       "type": "REVIEW",
@@ -182,7 +182,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 4.2
+      "rating": 4
     },
     {
       "type": "JOURNAL",
@@ -213,7 +213,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 4.8
+      "rating": 5
     },
     {
       "type": "REVIEW",
@@ -229,7 +229,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 5
+      "rating": 4.5
     },
     {
       "type": "JOURNAL",
@@ -250,8 +250,8 @@
       "type": "REVIEW",
       "gameTitle": "Dead by Daylight",
       "gamePlatform": "PC",
-      "title": "리뷰 - Dead by Daylight에서 찾은 오래 붙잡을 이유",
-      "content": "Dead by Daylight을 플레이하는 동안 급하게 몰아치는 느낌보다 스스로 목표를 정하는 감각이 컸다. 생존자와 살인마의 심리전이 매 판 다르게 터진다는 점 때문에 다시 켜고 싶은 마음이 생겼고, MULTIPLAYER, COOP, PVP 성향을 잘 설명한다.",
+      "title": "리뷰 - Dead by Daylight은 일부만 내 취향이었다",
+      "content": "Dead by Daylight에서 재미를 느낀 순간은 있었다. 다만 매칭 밸런스에 기분이 좌우된다는 점이 반복되면서 내 핵심 취향과 거리가 생겼고, 장르 키워드는 긍정과 주의를 함께 달아야 한다.",
       "tags": [
         "MULTIPLAYER",
         "COOP",
@@ -260,14 +260,14 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 4.5
+      "rating": 3
     },
     {
       "type": "REVIEW",
       "gameTitle": "Sea of Thieves",
       "gamePlatform": "PC",
-      "title": "리뷰 - Sea of Thieves은 멀티플레이 선호 플레이어에게 잘 맞았다",
-      "content": "완성도보다 더 중요하게 느껴진 것은 플레이 리듬이었다. Sea of Thieves은 선원 역할과 즉흥 사건이 친구들과 이야기거리를 만든다는 구조 덕분에 오래 붙잡기 쉬웠고, 내 선호 장르를 설명하는 대표 사례에 가깝다.",
+      "title": "리뷰 - Sea of Thieves 플레이 후 남은 애매한 감정",
+      "content": "Sea of Thieves은 취향의 경계에 있는 게임이었다. 선원 역할과 즉흥 사건이 친구들과 이야기거리를 만든다는 점은 좋았지만 목표 없이 떠돌면 늘어진다는 점이 오래 플레이하는 데 방해가 됐다.",
       "tags": [
         "MULTIPLAYER",
         "COOP",
@@ -276,7 +276,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 4.8
+      "rating": 3.5
     },
     {
       "type": "JOURNAL",
@@ -307,7 +307,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 1.8
+      "rating": 2
     },
     {
       "type": "REVIEW",
@@ -323,7 +323,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 2.2
+      "rating": 2.5
     },
     {
       "type": "JOURNAL",
@@ -354,7 +354,7 @@
         "VOICE_COMMS",
         "META_MASTERY"
       ],
-      "rating": 3.2
+      "rating": 3
     }
   ]
 }
