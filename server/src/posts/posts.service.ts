@@ -83,7 +83,11 @@ export default class PostsService {
 
         // 클라이언트는 gameTitle만 보내므로, 서버에서 Game 레코드를 찾아 연결합니다.
         // IGDB 선택값이 있으면 자유 입력 제목보다 canonical id를 우선해 Game을 연결합니다.
-        const game = await this.findOrCreateGame(dto.gameTitle, dto.igdbGameId);
+        const game = await this.findOrCreateGame(
+            dto.gameTitle,
+            dto.igdbGameId,
+            dto.gamePlatform,
+        );
 
         if (dto.type === ArchivePostType.REVIEW) {
             await this.assertReviewNotDuplicated(userId, game);
@@ -376,10 +380,22 @@ export default class PostsService {
         this.assertOwner(post, userId);
 
         // 게임 제목이 바뀌면 새 제목에 해당하는 Game을 찾아 다시 연결합니다.
-        if (dto.gameTitle) {
+        if (dto.gameTitle || dto.igdbGameId || dto.gamePlatform !== undefined) {
+            const currentGame = dto.gameTitle
+                ? null
+                : await this.gameRepository.findOne({
+                      where: { id: post.gameId },
+                  });
+            const gameTitle = dto.gameTitle ?? currentGame?.title;
+
+            if (!gameTitle) {
+                throw new BadRequestException('gameTitle is required.');
+            }
+
             const game = await this.findOrCreateGame(
-                dto.gameTitle,
-                dto.igdbGameId,
+                gameTitle,
+                dto.igdbGameId ?? currentGame?.igdbId,
+                dto.gamePlatform,
             );
             post.gameId = game.id;
         }
@@ -458,9 +474,14 @@ export default class PostsService {
 
     // gameTitle을 기준으로 Game을 찾고, 아직 없으면 새로 만듭니다.
     // 게시글은 gameId를 필요로 하므로 생성 API에서 공통으로 사용하는 helper입니다.
-    private async findOrCreateGame(gameTitle: string, igdbGameId?: string) {
+    private async findOrCreateGame(
+        gameTitle: string,
+        igdbGameId?: string | null,
+        gamePlatform?: string,
+    ) {
         const title = gameTitle.trim();
         const igdbId = this.normalizeIgdbGameId(igdbGameId);
+        const userPlatform = this.normalizeGamePlatform(gamePlatform);
 
         if (!title) {
             throw new BadRequestException('gameTitle is required.');
@@ -486,16 +507,19 @@ export default class PostsService {
                 ...(metadata ?? {}),
                 title,
             });
+            this.applyUserGamePlatform(game, userPlatform);
 
             game = await this.gameRepository.save(game);
         } else if (
             (igdbId && game.igdbId !== igdbId) ||
             game.title !== title ||
-            this.shouldRefreshGameMetadata(game, metadata)
+            this.shouldRefreshGameMetadata(game, metadata) ||
+            this.shouldApplyUserGamePlatform(game, userPlatform)
         ) {
             game.igdbId = igdbId ?? game.igdbId;
             game.title = title;
             this.applyGameMetadata(game, metadata);
+            this.applyUserGamePlatform(game, userPlatform);
 
             game = await this.gameRepository.save(game);
         }
@@ -571,6 +595,13 @@ export default class PostsService {
         return Boolean(metadata && this.isGameMissingMetadata(game));
     }
 
+    private shouldApplyUserGamePlatform(
+        game: Game,
+        gamePlatform: string | null,
+    ) {
+        return Boolean(gamePlatform && game.platforms?.[0] !== gamePlatform);
+    }
+
     private isGameMissingMetadata(game: Game) {
         return Boolean(
             !game.imageUrl ||
@@ -589,13 +620,35 @@ export default class PostsService {
         game.genres = metadata.genres.length ? metadata.genres : game.genres;
         game.igdbId = metadata.igdbId ?? game.igdbId;
         game.imageUrl = metadata.imageUrl ?? game.imageUrl;
-        game.platforms = metadata.platforms.length
+        game.platforms = !game.platforms?.length && metadata.platforms.length
             ? metadata.platforms
             : game.platforms;
         game.tags = metadata.tags.length ? metadata.tags : game.tags;
     }
 
-    private normalizeIgdbGameId(igdbGameId?: string) {
+    private applyUserGamePlatform(game: Game, gamePlatform: string | null) {
+        if (gamePlatform) {
+            game.platforms = [gamePlatform];
+        }
+    }
+
+    private normalizeGamePlatform(gamePlatform?: string) {
+        const trimmed = gamePlatform?.trim();
+
+        if (!trimmed) {
+            return null;
+        }
+
+        if (trimmed.length > 40) {
+            throw new BadRequestException(
+                'gamePlatform must be 40 characters or less.',
+            );
+        }
+
+        return trimmed;
+    }
+
+    private normalizeIgdbGameId(igdbGameId?: string | null) {
         const trimmed = igdbGameId?.trim();
 
         if (!trimmed) {

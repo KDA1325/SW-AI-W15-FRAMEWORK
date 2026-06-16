@@ -164,6 +164,47 @@ describe('PostsService IGDB game selection', () => {
         });
     });
 
+    it('uses the user-selected platform before IGDB platforms', async () => {
+        const { gameRepository, igdbService, service } = createService();
+
+        igdbService.searchGames.mockResolvedValueOnce({
+            error: null,
+            errorCode: null,
+            games: [
+                {
+                    aliases: [],
+                    externalId: { id: '114795', provider: 'igdb' },
+                    genres: ['Action'],
+                    imageUrl:
+                        'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+                    platforms: ['PC'],
+                    releaseDate: '2020-09-17',
+                    sourceUrl: 'https://www.igdb.com/games/hades',
+                    summary: 'A rogue-like dungeon crawler.',
+                    tags: ['Fantasy'],
+                    title: 'Hades',
+                },
+            ],
+            provider: 'igdb',
+        });
+
+        await service.create('user-1', {
+            content: 'Great run structure.',
+            gamePlatform: 'Steam Deck',
+            gameTitle: 'Hades',
+            igdbGameId: '114795',
+            rating: 5,
+            title: 'Combat stays readable',
+            type: ArchivePostType.REVIEW,
+        });
+
+        expect(gameRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                platforms: ['Steam Deck'],
+            }),
+        );
+    });
+
     it('hydrates missing IGDB image metadata when loading an existing post', async () => {
         const { gameRepository, igdbService, postRepository, service } =
             createService();
@@ -484,6 +525,55 @@ describe('PostsService IGDB game selection', () => {
                         normalizedName: 'RETRO_PIXEL',
                     }),
                 ],
+            }),
+        );
+    });
+
+    it('updates the game platform without changing the game title', async () => {
+        const { gameRepository, postRepository, service } = createService();
+        const existingGame = {
+            description: 'A rogue-like dungeon crawler.',
+            genres: ['Action'],
+            id: 'game-1',
+            igdbId: '114795',
+            imageUrl:
+                'https://images.igdb.com/igdb/image/upload/t_cover_big/co1quf.jpg',
+            platforms: ['PC'],
+            tags: ['Fantasy'],
+            title: 'Hades',
+        };
+
+        postRepository.findOne
+            .mockResolvedValueOnce({
+                gameId: 'game-1',
+                id: 'post-1',
+                type: ArchivePostType.REVIEW,
+                userId: 'user-1',
+            })
+            .mockResolvedValueOnce({
+                game: existingGame,
+                gameId: 'game-1',
+                id: 'post-1',
+                type: ArchivePostType.REVIEW,
+                userId: 'user-1',
+            });
+        gameRepository.findOne
+            .mockReset()
+            .mockResolvedValueOnce(existingGame)
+            .mockResolvedValueOnce(existingGame);
+
+        await service.update('user-1', 'post-1', {
+            gamePlatform: 'Steam Deck',
+        });
+
+        expect(gameRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                platforms: ['Steam Deck'],
+            }),
+        );
+        expect(postRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                gameId: 'game-1',
             }),
         );
     });

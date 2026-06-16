@@ -32,6 +32,12 @@ export default class UpdatePostDto {
     @IsOptional()
     @IsString()
     @IsNotEmpty()
+    @MaxLength(40)
+    gamePlatform?: string;
+
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
     title?: string;
 
     @IsOptional()

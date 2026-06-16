@@ -29,6 +29,12 @@ export default class CreatePostDto {
     @IsNotEmpty()
     igdbGameId?: string;
 
+    @IsOptional()
+    @IsString()
+    @IsNotEmpty()
+    @MaxLength(40)
+    gamePlatform?: string;
+
     @IsString()
     @IsNotEmpty()
     title!: string;
