@@ -521,7 +521,7 @@ export class AgentService {
           messages: [
             {
               content:
-                'You write short Korean recommendation comments for a game recommendation UI. Return only JSON. Make each reason distinct, warm, and concise.',
+                'You write short Korean recommendation comments for a game recommendation UI. Return only JSON. Make each reason distinct, warm, concise, and polite formal Korean. Every reason must end naturally with 합니다, 습니다, or 니다. Never use casual speech or 반말.',
               role: 'system',
             },
             {
@@ -594,7 +594,7 @@ export class AgentService {
 
     return JSON.stringify({
       instruction:
-        '각 추천 게임마다 서로 다른 한국어 추천 근거를 작성하세요. 반드시 한 문장으로 쓰고, 70자 이내로 유지하세요. 문장은 "분석 결과 {게임명}은(는) {닉네임}님의 ..." 흐름을 따르되 카드마다 표현을 조금씩 다르게 만드세요. 과장하지 말고 주어진 플레이 성향/게임 요소 태그/장르만 근거로 삼으세요.',
+        '각 추천 게임마다 서로 다른 한국어 추천 근거를 작성하세요. 반드시 한 문장으로 쓰고, 70자 이내로 유지하세요. 문장은 "분석 결과 {게임명}은(는) {닉네임}님의 ..." 흐름을 따르되 카드마다 표현을 조금씩 다르게 만드세요. 모든 문장은 반드시 합니다, 습니다, 니다 같은 격식체로 끝내고 반말이나 해요체를 쓰지 마세요. 과장하지 말고 주어진 플레이 성향/게임 요소 태그/장르만 근거로 삼으세요.',
       nickname,
       playStyles,
       gameElementTags,

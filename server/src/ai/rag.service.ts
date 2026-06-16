@@ -23,6 +23,7 @@ import {
 
 const DEFAULT_TOP_K = 6;
 const MAX_TOP_K = 12;
+const MAX_EMBEDDING_INPUT_CHARS = 12000;
 
 type RagOptions = {
   refreshEmbeddings?: boolean;
@@ -310,9 +311,10 @@ export class RagService {
     }
 
     try {
+      const embeddingInput = this.truncateEmbeddingInput(text);
       const payload: Record<string, unknown> = {
         encoding_format: 'float',
-        input: text,
+        input: embeddingInput,
         model,
       };
 
@@ -350,6 +352,13 @@ export class RagService {
       );
       return this.createDemoEmbedding(text);
     }
+  }
+
+  private truncateEmbeddingInput(text: string): string {
+    const normalized = text.replace(/\s+/g, ' ').trim();
+    return normalized.length > MAX_EMBEDDING_INPUT_CHARS
+      ? normalized.slice(0, MAX_EMBEDDING_INPUT_CHARS)
+      : normalized;
   }
 
   private createDemoEmbedding(text: string): EmbeddingResult {
@@ -410,7 +419,7 @@ export class RagService {
           messages: [
             {
               content:
-                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context. Write playStyleSummary in Korean. Keep preferenceTags and wordCloud distinct: preferenceTags are enjoyed game elements such as genre, theme, mechanics, and presentation; wordCloud terms are player behavior/style patterns such as role, activity, pace, motivation, and social pattern.',
+                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context. Write playStyleSummary in polite formal Korean only, ending naturally with 합니다, 습니다, or 니다. Never use casual speech or 반말. Keep preferenceTags and wordCloud distinct: preferenceTags are enjoyed game elements such as genre, theme, mechanics, and presentation; wordCloud terms are player behavior/style patterns such as role, activity, pace, motivation, and social pattern.',
               role: 'system',
             },
             {
@@ -463,6 +472,7 @@ export class RagService {
       '- preferenceTags: why positively rated/repeated games were enjoyable, for example STORY_RICH, CRAFTING, HORROR_ATMOSPHERE, COZY_SIM.',
       '- wordCloud: how the user tends to play, for example FARMING_LOOP, TANK_ROLE, AESTHETIC_EXPLORER, SOLO_PLANNER, COOP_TEAMPLAYER.',
       'Do not copy the same labels into both arrays unless the evidence truly names both a game feature and a play behavior.',
+      'Write playStyleSummary as one polite formal Korean sentence. Do not use 반말, 해요체, or casual endings.',
       '',
       sourceText,
     ].join('\n');
@@ -821,6 +831,18 @@ export class RagService {
   }
 
   private errorMessage(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+      const status = error.response?.status;
+      const apiMessage = (
+        error.response?.data as
+          | { error?: { message?: string } }
+          | undefined
+      )?.error?.message;
+      const message = apiMessage ?? error.message;
+
+      return status ? `HTTP ${status}: ${message}` : message;
+    }
+
     if (error instanceof Error) {
       return error.message;
     }
