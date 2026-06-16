@@ -61,6 +61,7 @@ type LocalGameRow = {
   id: string;
   imageUrl: string | null;
   platforms: string[];
+  signalScore: number | string;
   steamAppId: string | null;
   tags: string[];
   title: string;
@@ -256,39 +257,90 @@ export class AgentService {
     ragContext: AiRagAnalysisResponse,
     state: AgentState,
   ): Promise<AiRecommendationCard[]> {
-    const localGames = await this.dataSource.query<LocalGameRow[]>(
-      `
-        SELECT id, title, "imageUrl", genres, platforms, tags, "steamAppId"
-        FROM "Game"
-        ORDER BY "updatedAt" DESC
-        LIMIT 10
-      `,
-    );
+    const localGames = await this.loadUserScopedLocalGames(state.userId);
     const matchedTags = ragContext.preferenceTags
       .slice(0, 4)
       .map((tag) => tag.label);
 
-    return localGames.map((game, index) => ({
-      externalId: {
-        id: game.steamAppId ?? game.id,
-        provider: game.steamAppId ? 'steam' : 'igdb',
-      },
-      gameId: game.id,
-      genres: game.genres,
-      imageUrl: game.imageUrl,
-      matchedTags,
-      matchScore: Number(Math.max(0.68, 0.88 - index * 0.04).toFixed(2)),
-      platforms: game.platforms,
-      rank: state.recommendations.length + index + 1,
-      reason:
-        `Fallback recommendation from local archive data because IGDB MCP search was unavailable. ` +
-        this.recommendationReason(game.title, matchedTags, game.title),
-      sourceUrl: game.steamAppId
-        ? `https://store.steampowered.com/app/${game.steamAppId}`
-        : null,
-      tags: game.tags,
-      title: game.title,
-    }));
+    return localGames.map((game, index) => {
+      const signalScore = Number(game.signalScore);
+
+      return {
+        externalId: {
+          id: game.steamAppId ?? game.id,
+          provider: game.steamAppId ? 'steam' : 'igdb',
+        },
+        gameId: game.id,
+        genres: game.genres,
+        imageUrl: game.imageUrl,
+        matchedTags,
+        matchScore: Number(
+          Math.min(
+            0.92,
+            Math.max(0.68, 0.7 + signalScore * 0.04 - index * 0.02),
+          ).toFixed(2),
+        ),
+        platforms: game.platforms,
+        rank: state.recommendations.length + index + 1,
+        reason:
+          `Fallback recommendation from this user's own journal, review, and Steam play signals. ` +
+          this.recommendationReason(game.title, matchedTags, game.title),
+        sourceUrl: game.steamAppId
+          ? `https://store.steampowered.com/app/${game.steamAppId}`
+          : null,
+        tags: game.tags,
+        title: game.title,
+      };
+    });
+  }
+
+  private async loadUserScopedLocalGames(
+    userId: string,
+  ): Promise<LocalGameRow[]> {
+    return this.dataSource.query<LocalGameRow[]>(
+      `
+        WITH user_signal_terms AS (
+          SELECT array_agg(DISTINCT lower(signal.term)) AS terms
+          FROM (
+            SELECT unnest(game.tags || game.genres || game.platforms) AS term
+            FROM "ArchivePost" post
+            INNER JOIN "Game" game ON game.id = post."gameId"
+            WHERE post."userId" = $1
+
+            UNION
+
+            SELECT unnest(game.tags || game.genres || game.platforms) AS term
+            FROM "UserGame" user_game
+            INNER JOIN "Game" game ON game.id = user_game."gameId"
+            WHERE user_game."userId" = $1
+          ) signal
+        )
+        SELECT
+          game.id,
+          game.title,
+          game."imageUrl",
+          game.genres,
+          game.platforms,
+          game.tags,
+          game."steamAppId",
+          COALESCE((
+            SELECT count(*)
+            FROM unnest(game.tags || game.genres || game.platforms) AS candidate(term)
+            WHERE lower(candidate.term) = ANY(COALESCE(signals.terms, ARRAY[]::text[]))
+          ), 0)::int AS "signalScore"
+        FROM "Game" game
+        CROSS JOIN user_signal_terms signals
+        WHERE COALESCE(array_length(signals.terms, 1), 0) > 0
+          AND EXISTS (
+            SELECT 1
+            FROM unnest(game.tags || game.genres || game.platforms) AS candidate(term)
+            WHERE lower(candidate.term) = ANY(signals.terms)
+          )
+        ORDER BY "signalScore" DESC, game."updatedAt" DESC
+        LIMIT 10
+      `,
+      [userId],
+    );
   }
 
   private recommendationReason(

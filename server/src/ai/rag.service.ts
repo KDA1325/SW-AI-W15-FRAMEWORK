@@ -42,6 +42,19 @@ type ArchivePostRow = {
   updatedAt: Date;
 };
 
+type UserGameRow = {
+  achievementRate: number | null;
+  gameDescription: string | null;
+  gameGenres: string[];
+  gameId: string;
+  gamePlatforms: string[];
+  gameTags: string[];
+  gameTitle: string;
+  lastPlayedAt: Date | null;
+  recentPlaytimeMinutes: number;
+  totalPlaytimeMinutes: number;
+};
+
 type RagSearchRow = {
   sourceType: string;
   sourceId: string;
@@ -96,25 +109,30 @@ export class RagService {
   ): Promise<AiRagAnalysisResponse> {
     const topK = this.normalizeTopK(options.topK);
     const posts = await this.loadUserArchivePosts(userId);
+    const playedGames = await this.loadUserGameRecords(userId);
     const refreshedDocuments =
       options.refreshEmbeddings === false
         ? 0
         : await this.refreshArchiveEmbeddings(posts);
 
-    const queryText = this.buildPreferenceQuery(posts);
+    const queryText = this.buildPreferenceQuery(posts, playedGames);
     const queryEmbedding = await this.createEmbedding(queryText);
     const searchRows = await this.searchContextRows(
       userId,
       queryEmbedding.values,
       topK,
     );
-    const analysis = await this.createAnalysis(searchRows);
+    const contextRows = [
+      ...searchRows,
+      ...playedGames.map((game) => this.toUserGameContextRow(game)),
+    ];
+    const analysis = await this.createAnalysis(contextRows);
 
     return {
       userId,
       generatedAt: new Date().toISOString(),
       ...analysis,
-      contextSources: searchRows.map((row) => this.toContextSource(row)),
+      contextSources: contextRows.map((row) => this.toContextSource(row)),
       embedding: {
         provider: queryEmbedding.provider,
         model: queryEmbedding.model,
@@ -152,6 +170,29 @@ export class RagService {
         INNER JOIN "Game" game ON game.id = post."gameId"
         WHERE post."userId" = $1
         ORDER BY post."updatedAt" DESC
+      `,
+      [userId],
+    );
+  }
+
+  private async loadUserGameRecords(userId: string): Promise<UserGameRow[]> {
+    return this.dataSource.query<UserGameRow[]>(
+      `
+        SELECT
+          user_game."gameId",
+          user_game."totalPlaytimeMinutes",
+          user_game."recentPlaytimeMinutes",
+          user_game."achievementRate",
+          user_game."lastPlayedAt",
+          game.title AS "gameTitle",
+          game.description AS "gameDescription",
+          game.genres AS "gameGenres",
+          game.platforms AS "gamePlatforms",
+          game.tags AS "gameTags"
+        FROM "UserGame" user_game
+        INNER JOIN "Game" game ON game.id = user_game."gameId"
+        WHERE user_game."userId" = $1
+        ORDER BY user_game."lastPlayedAt" DESC NULLS LAST, user_game."updatedAt" DESC
       `,
       [userId],
     );
@@ -220,23 +261,38 @@ export class RagService {
     ].join('\n');
   }
 
-  private buildPreferenceQuery(posts: ArchivePostRow[]): string {
-    if (posts.length === 0) {
+  private buildPreferenceQuery(
+    posts: ArchivePostRow[],
+    playedGames: UserGameRow[],
+  ): string {
+    if (posts.length === 0 && playedGames.length === 0) {
       return 'Gaming Journal Club player taste profile with no archive posts yet.';
     }
 
-    // The query embeds the user's own writing, so top-k search retrieves sources that best represent their taste.
-    return posts
-      .map((post) =>
-        [
-          post.gameTitle,
-          post.title,
-          post.content,
-          post.gameGenres.join(', '),
-          post.gameTags.join(', '),
-        ].join('\n'),
-      )
-      .join('\n\n');
+    // Only current-user writing and play records become the RAG query text, so another player's history cannot affect this analysis.
+    const postSignals = posts.map((post) =>
+      [
+        post.gameTitle,
+        post.title,
+        post.content,
+        post.gameGenres.join(', '),
+        post.gameTags.join(', '),
+      ].join('\n'),
+    );
+    const playSignals = playedGames.map((game) =>
+      [
+        `Played game: ${game.gameTitle}`,
+        `Description: ${game.gameDescription ?? ''}`,
+        `Total playtime minutes: ${game.totalPlaytimeMinutes}`,
+        `Recent playtime minutes: ${game.recentPlaytimeMinutes}`,
+        `Achievement rate: ${game.achievementRate ?? 'unknown'}`,
+        `Genres: ${game.gameGenres.join(', ')}`,
+        `Tags: ${game.gameTags.join(', ')}`,
+        `Platforms: ${game.gamePlatforms.join(', ')}`,
+      ].join('\n'),
+    );
+
+    return [...postSignals, ...playSignals].join('\n\n');
   }
 
   private async createEmbedding(text: string): Promise<EmbeddingResult> {
@@ -578,6 +634,26 @@ export class RagService {
       sourceId: row.sourceId,
       sourceType: row.sourceType as AiRagContextSource['sourceType'],
       title: row.metadata.title ?? 'Untitled source',
+    };
+  }
+
+  private toUserGameContextRow(game: UserGameRow): RagSearchRow {
+    return {
+      content: [
+        `Steam/UserGame play record for ${game.gameTitle}.`,
+        `Total playtime minutes: ${game.totalPlaytimeMinutes}.`,
+        `Recent playtime minutes: ${game.recentPlaytimeMinutes}.`,
+        `Achievement rate: ${game.achievementRate ?? 'unknown'}.`,
+        `Genres: ${game.gameGenres.join(', ')}.`,
+        `Tags: ${game.gameTags.join(', ')}.`,
+      ].join('\n'),
+      metadata: {
+        gameTitle: game.gameTitle,
+        title: `${game.gameTitle} play record`,
+      },
+      similarity: 1,
+      sourceId: game.gameId,
+      sourceType: 'GAME',
     };
   }
 
