@@ -34,6 +34,11 @@ export type AiRecommendationSyncResponse = {
   generatedAt: string
   lastSyncAt: string
   pipeline: {
+    cache?: {
+      hit: boolean
+      key: string
+      version: string
+    }
     agent: {
       iterations: number
       maxIterations: number
@@ -54,4 +59,15 @@ export type AiRecommendationSyncResponse = {
   requestId: string
   userId: string
   wordCloud: AiWordCloudTerm[]
+}
+
+export type AiRecommendationSyncJob = {
+  completedAt: string | null
+  error: string | null
+  jobId: string
+  requestId: string
+  result: AiRecommendationSyncResponse | null
+  startedAt: string | null
+  status: 'completed' | 'failed' | 'pending' | 'running'
+  userId: string
 }

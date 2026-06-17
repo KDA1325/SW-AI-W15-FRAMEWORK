@@ -10,9 +10,12 @@ import { api, getApiErrorMessage } from '../../api'
 import { useAuth } from '../../auth/AuthContext'
 import type { PostListResponse } from '../../types/posts'
 import type { RecommendArchiveSignalCounts } from '../../pages/RecommendDataNoticeModal'
-import { normalizeSyncResponse } from './normalize'
-import type { AiRecommendationSyncResponse } from './types'
+import { normalizeSyncJob, normalizeSyncResponse } from './normalize'
+import type { AiRecommendationSyncJob, AiRecommendationSyncResponse } from './types'
 import { RecommendationSyncContext } from './recommendationSyncContext'
+
+const ACTIVE_SYNC_JOB_STORAGE_KEY = 'gjc.activeRecommendationSyncJobId'
+const SYNC_JOB_POLL_INTERVAL_MS = 1500
 
 export function RecommendationSyncProvider({
   children,
@@ -32,6 +35,11 @@ export function RecommendationSyncProvider({
     null,
   )
   const [syncError, setSyncError] = useState<string | null>(null)
+  const activeJobIdRef = useRef<string | null>(null)
+  const pollTimeoutRef = useRef<number | null>(null)
+  const pollSyncJobRef = useRef<
+    ((jobId: string, requestOrder: number) => Promise<void>) | null
+  >(null)
   const syncRequestIdRef = useRef(0)
 
   const visibleWords = useMemo(
@@ -43,9 +51,94 @@ export function RecommendationSyncProvider({
     [syncData],
   )
 
+  const clearPollTimeout = useCallback(() => {
+    if (pollTimeoutRef.current !== null) {
+      window.clearTimeout(pollTimeoutRef.current)
+      pollTimeoutRef.current = null
+    }
+  }, [])
+
+  const finishJob = useCallback(
+    (job: AiRecommendationSyncJob, requestOrder: number) => {
+      if (requestOrder !== syncRequestIdRef.current) {
+        return
+      }
+
+      clearPollTimeout()
+      activeJobIdRef.current = null
+      window.localStorage.removeItem(ACTIVE_SYNC_JOB_STORAGE_KEY)
+      setIsSyncing(false)
+
+      if (job.status === 'completed') {
+        setSyncData(job.result)
+        setSyncError(job.result ? null : 'AI SYNC RESPONSE INVALID')
+        return
+      }
+
+      setSyncError(job.error ?? 'AI SYNC FAILED')
+    },
+    [clearPollTimeout],
+  )
+
+  const pollSyncJob = useCallback(
+    async (jobId: string, requestOrder: number) => {
+      try {
+        const response = await api.get<unknown>(
+          `/ai/recommendations/sync/${jobId}`,
+        )
+        const job = normalizeSyncJob(response.data)
+
+        if (!job) {
+          throw new Error('AI SYNC JOB RESPONSE INVALID')
+        }
+
+        if (job.status === 'completed' || job.status === 'failed') {
+          finishJob(job, requestOrder)
+          return
+        }
+
+        if (requestOrder === syncRequestIdRef.current) {
+          pollTimeoutRef.current = window.setTimeout(() => {
+            void pollSyncJobRef.current?.(jobId, requestOrder)
+          }, SYNC_JOB_POLL_INTERVAL_MS)
+        }
+      } catch (error) {
+        if (requestOrder === syncRequestIdRef.current) {
+          clearPollTimeout()
+          activeJobIdRef.current = null
+          window.localStorage.removeItem(ACTIVE_SYNC_JOB_STORAGE_KEY)
+          setIsSyncing(false)
+          setSyncError(getApiErrorMessage(error, 'AI SYNC JOB POLL FAILED'))
+        }
+      }
+    },
+    [clearPollTimeout, finishJob],
+  )
+
+  useEffect(() => {
+    pollSyncJobRef.current = pollSyncJob
+  }, [pollSyncJob])
+
+  const resumeSyncJob = useCallback(
+    (jobId: string) => {
+      const requestOrder = syncRequestIdRef.current + 1
+      syncRequestIdRef.current = requestOrder
+      activeJobIdRef.current = jobId
+      window.localStorage.setItem(ACTIVE_SYNC_JOB_STORAGE_KEY, jobId)
+      setIsSyncing(true)
+      setSyncError(null)
+      void pollSyncJob(jobId, requestOrder)
+    },
+    [pollSyncJob],
+  )
+
   useEffect(() => {
     if (!isAuthenticated) {
       const timeoutId = window.setTimeout(() => {
+        clearPollTimeout()
+        activeJobIdRef.current = null
+        window.localStorage.removeItem(ACTIVE_SYNC_JOB_STORAGE_KEY)
+        setIsSyncing(false)
         setSyncData(null)
         setSyncError(null)
       }, 0)
@@ -113,17 +206,41 @@ export function RecommendationSyncProvider({
       }
     }
 
+    async function resumeActiveSync() {
+      const storedJobId = window.localStorage.getItem(
+        ACTIVE_SYNC_JOB_STORAGE_KEY,
+      )
+
+      if (storedJobId) {
+        resumeSyncJob(storedJobId)
+        return
+      }
+
+      try {
+        const response = await api.get<unknown>('/ai/recommendations/sync/active')
+        const activeJob = normalizeSyncJob(response.data)
+
+        if (activeJob) {
+          resumeSyncJob(activeJob.jobId)
+        }
+      } catch {
+        window.localStorage.removeItem(ACTIVE_SYNC_JOB_STORAGE_KEY)
+      }
+    }
+
     void loadArchiveSignalCounts()
     void loadLatestSync()
+    void resumeActiveSync()
 
     return () => {
       isMounted = false
     }
-  }, [isAuthenticated])
+  }, [clearPollTimeout, isAuthenticated, resumeSyncJob])
 
   const syncRecommendations = useCallback(async () => {
     const requestOrder = syncRequestIdRef.current + 1
     syncRequestIdRef.current = requestOrder
+    clearPollTimeout()
     setIsSyncing(true)
     setIsDataNoticeOpen(false)
     setSyncError(null)
@@ -134,22 +251,35 @@ export function RecommendationSyncProvider({
         requestId: `gjc-web-sync-${Date.now()}`,
         topK: 12,
       })
-      const nextSync = normalizeSyncResponse(response.data)
+      const job = normalizeSyncJob(response.data)
 
-      if (requestOrder === syncRequestIdRef.current) {
-        setSyncData(nextSync)
-        setSyncError(nextSync ? null : 'AI SYNC RESPONSE INVALID')
+      if (!job) {
+        throw new Error('AI SYNC JOB RESPONSE INVALID')
       }
+
+      activeJobIdRef.current = job.jobId
+      window.localStorage.setItem(ACTIVE_SYNC_JOB_STORAGE_KEY, job.jobId)
+
+      if (job.status === 'completed' || job.status === 'failed') {
+        finishJob(job, requestOrder)
+        return
+      }
+
+      void pollSyncJob(job.jobId, requestOrder)
     } catch (error) {
       if (requestOrder === syncRequestIdRef.current) {
         setSyncError(getApiErrorMessage(error, 'AI SYNC FAILED'))
-      }
-    } finally {
-      if (requestOrder === syncRequestIdRef.current) {
         setIsSyncing(false)
       }
     }
-  }, [])
+  }, [clearPollTimeout, finishJob, pollSyncJob])
+
+  useEffect(
+    () => () => {
+      clearPollTimeout()
+    },
+    [clearPollTimeout],
+  )
 
   const value = useMemo(
     () => ({

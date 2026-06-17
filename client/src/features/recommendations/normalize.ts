@@ -1,6 +1,7 @@
 import type {
   AiPreferenceTag,
   AiRecommendationCard,
+  AiRecommendationSyncJob,
   AiRecommendationSyncResponse,
   AiWordCloudTerm,
 } from './types'
@@ -118,12 +119,20 @@ export function normalizeSyncResponse(
   const rag = isJsonRecord(pipeline.rag) ? pipeline.rag : {}
   const mcp = isJsonRecord(pipeline.mcp) ? pipeline.mcp : {}
   const agent = isJsonRecord(pipeline.agent) ? pipeline.agent : {}
+  const cache = isJsonRecord(pipeline.cache) ? pipeline.cache : null
 
   return {
     contextSources: [],
     generatedAt: readString(value.generatedAt),
     lastSyncAt: readString(value.lastSyncAt),
     pipeline: {
+      cache: cache
+        ? {
+            hit: Boolean(cache.hit),
+            key: readString(cache.key),
+            version: readString(cache.version),
+          }
+        : undefined,
       agent: {
         iterations: readNumber(agent.iterations),
         maxIterations: readNumber(agent.maxIterations),
@@ -151,5 +160,34 @@ export function normalizeSyncResponse(
     requestId: readString(value.requestId, 'saved-sync'),
     userId: readString(value.userId),
     wordCloud,
+  }
+}
+
+export function normalizeSyncJob(value: unknown): AiRecommendationSyncJob | null {
+  if (!isJsonRecord(value)) {
+    return null
+  }
+
+  const status = readString(value.status)
+
+  if (
+    status !== 'completed' &&
+    status !== 'failed' &&
+    status !== 'pending' &&
+    status !== 'running'
+  ) {
+    return null
+  }
+
+  return {
+    completedAt:
+      typeof value.completedAt === 'string' ? value.completedAt : null,
+    error: typeof value.error === 'string' ? value.error : null,
+    jobId: readString(value.jobId),
+    requestId: readString(value.requestId),
+    result: normalizeSyncResponse(value.result),
+    startedAt: typeof value.startedAt === 'string' ? value.startedAt : null,
+    status,
+    userId: readString(value.userId),
   }
 }
