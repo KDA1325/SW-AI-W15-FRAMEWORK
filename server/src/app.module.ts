@@ -7,6 +7,42 @@ import { DemoSeedService } from './database/demo-seed.service';
 import { PgvectorSetupService } from './database/pgvector-setup.service';
 import { PostsModule } from './posts/posts.module';
 
+function buildPostgresConfig(config: ConfigService) {
+  const parsedUrl = parsePostgresUrl(config.getOrThrow<string>('DATABASE_HOST'));
+  const sslEnabled =
+    parsedUrl?.ssl === true || config.get<string>('DATABASE_SSL') === 'true';
+
+  return {
+    type: 'postgres' as const,
+    host: parsedUrl?.host ?? config.getOrThrow<string>('DATABASE_HOST'),
+    port: parsedUrl?.port ?? Number(config.getOrThrow<string>('DATABASE_PORT')),
+    username: parsedUrl?.username ?? config.getOrThrow<string>('DATABASE_USER'),
+    password: parsedUrl?.password ?? config.getOrThrow<string>('DATABASE_PASSWORD'),
+    database: parsedUrl?.database ?? config.getOrThrow<string>('DATABASE_NAME'),
+    ssl: sslEnabled ? { rejectUnauthorized: false } : false,
+    autoLoadEntities: true,
+    synchronize: true,
+  };
+}
+
+function parsePostgresUrl(value: string) {
+  if (!value.startsWith('postgres://') && !value.startsWith('postgresql://')) {
+    return null;
+  }
+
+  const url = new URL(value);
+  const sslMode = url.searchParams.get('sslmode');
+
+  return {
+    database: url.pathname.replace(/^\/+/, ''),
+    host: url.hostname,
+    password: decodeURIComponent(url.password),
+    port: url.port ? Number(url.port) : 5432,
+    ssl: Boolean(sslMode && sslMode !== 'disable'),
+    username: decodeURIComponent(url.username),
+  };
+}
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -16,26 +52,7 @@ import { PostsModule } from './posts/posts.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.getOrThrow<string>('DATABASE_HOST'),
-        port: Number(config.getOrThrow<string>('DATABASE_PORT')),
-        username: config.getOrThrow<string>('DATABASE_USER'),
-        password: config.getOrThrow<string>('DATABASE_PASSWORD'),
-        database: config.getOrThrow<string>('DATABASE_NAME'),
-        ssl:
-          config.get<string>('DATABASE_SSL') === 'true'
-            ? { rejectUnauthorized: false }
-            : false,
-        autoLoadEntities: true,
-
-        // 개발 중에는 엔티티 기반 테이블을 자동 동기화합니다.
-        // 운영에서는 synchronize 대신 migration 중심으로 전환해야 합니다.
-        synchronize: true,
-
-        // EmbeddingDocument.embedding은 TypeORM 엔티티 컬럼이 아니라
-        // pgvector 전용 vector(1536) 컬럼으로 PgvectorSetupService에서 생성합니다.
-      }),
+      useFactory: buildPostgresConfig,
     }),
     AiModule,
     AuthModule,
