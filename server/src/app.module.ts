@@ -23,6 +23,10 @@ import { PostsModule } from './posts/posts.module';
         username: config.getOrThrow<string>('DATABASE_USER'),
         password: config.getOrThrow<string>('DATABASE_PASSWORD'),
         database: config.getOrThrow<string>('DATABASE_NAME'),
+        ssl:
+          config.get<string>('DATABASE_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
         autoLoadEntities: true,
 
         // 개발 중에는 엔티티 기반 테이블을 자동 동기화합니다.

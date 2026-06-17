@@ -90,7 +90,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // 3000번 포트에서 서버를 실행합니다.
-  await app.listen(3000);
+  await app.listen(Number(process.env.PORT) || 3000);
 }
 
 // bootstrap 함수를 실행해야 서버가 시작됩니다.
