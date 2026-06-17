@@ -1,5 +1,8 @@
+import json
 import re
 
+from .korean import contains_hangul, to_korean_analysis_label, unique_non_empty
+from .openai_client import request_openai_json
 from .schemas import (
     RecommendationBuildRequest,
     RecommendationBuildResponse,
@@ -120,6 +123,7 @@ def build_recommendations(
             unique_recommendations(recommendations)[: request.maxRecommendations],
         )
     ]
+    ranked = refine_recommendation_reasons(ranked, request)
 
     return RecommendationBuildResponse(
         provider="fastapi-python",
@@ -265,31 +269,115 @@ def simple_recommendation_reason(
         *matched_tags[:2],
         *[tag.label for tag in request.preferenceTags[:2]],
     ]
-    signal = ", ".join(unique_non_empty(labels)[:3])
-    preference_text = signal.replace("_", " ").lower() if signal else "your play history"
-    return (
-        f"{title} matches {request.nickname}'s {preference_text} signals "
-        "from the archive analysis."
+    signal = ", ".join(
+        to_korean_analysis_label(label)
+        for label in unique_non_empty(labels)[:3]
+        if to_korean_analysis_label(label)
     )
+    preference_text = signal if signal else "기록 기반 플레이 성향"
+    return (
+        f"{title}는 {request.nickname}님의 {preference_text}과 맞닿아 있어 추천합니다."
+    )
+
+
+def refine_recommendation_reasons(
+    recommendations: list[RecommendationCard],
+    request: RecommendationBuildRequest,
+) -> list[RecommendationCard]:
+    if not recommendations:
+        return recommendations
+
+    result = request_openai_json(
+        schema=recommendation_reason_json_schema(),
+        schema_name="gjc_recommendation_reasons_ko",
+        system_prompt=(
+            "당신은 게임 추천 UI에 들어갈 짧은 추천 근거를 씁니다. "
+            "반드시 JSON만 반환하고, 모든 reason은 자연스러운 한국어 존댓말 한 문장이어야 합니다. "
+            "영어 문장, 반말, 과장된 홍보 문구는 쓰지 마세요."
+        ),
+        user_content=json.dumps(
+            {
+                "instruction": (
+                    "각 추천 게임마다 서로 다른 추천 근거를 70자 안팎으로 작성하세요. "
+                    "사용자의 플레이 성향, 선호 게임 요소, 후보 게임의 장르/태그를 근거로 삼으세요."
+                ),
+                "nickname": request.nickname,
+                "playStyleSummary": request.playStyleSummary,
+                "playStyles": [
+                    to_korean_analysis_label(term.label)
+                    for term in request.wordCloud[:5]
+                ],
+                "gameElementTags": [
+                    to_korean_analysis_label(tag.label)
+                    for tag in request.preferenceTags[:8]
+                ],
+                "recommendations": [
+                    {
+                        "genres": recommendation.genres,
+                        "matchedTags": [
+                            to_korean_analysis_label(tag)
+                            for tag in recommendation.matchedTags
+                        ],
+                        "rank": recommendation.rank,
+                        "tags": recommendation.tags,
+                        "title": recommendation.title,
+                    }
+                    for recommendation in recommendations
+                ],
+            },
+            ensure_ascii=False,
+        ),
+        timeout_seconds=20,
+    )
+
+    if result is None:
+        return recommendations
+
+    reasons_by_rank = {
+        int(item["rank"]): str(item["reason"]).strip()
+        for item in result.get("reasons", [])
+        if isinstance(item, dict)
+        and isinstance(item.get("rank"), (int, float))
+        and isinstance(item.get("reason"), str)
+        and contains_hangul(str(item.get("reason")))
+    }
+
+    return [
+        recommendation.model_copy(
+            update={
+                "reason": reasons_by_rank.get(recommendation.rank)
+                or recommendation.reason,
+            },
+        )
+        for recommendation in recommendations
+    ]
+
+
+def recommendation_reason_json_schema() -> dict[str, object]:
+    return {
+        "additionalProperties": False,
+        "properties": {
+            "reasons": {
+                "items": {
+                    "additionalProperties": False,
+                    "properties": {
+                        "rank": {"type": "number"},
+                        "reason": {"type": "string"},
+                        "title": {"type": "string"},
+                    },
+                    "required": ["rank", "title", "reason"],
+                    "type": "object",
+                },
+                "type": "array",
+            },
+        },
+        "required": ["reasons"],
+        "type": "object",
+    }
 
 
 def query_parts(value: str) -> list[str]:
     return [part for part in re.split(r"[_\s-]+", value.lower()) if part]
-
-
-def unique_non_empty(values: list[str]) -> list[str]:
-    seen: set[str] = set()
-    result: list[str] = []
-
-    for value in values:
-        normalized = value.strip()
-        key = normalized.lower()
-
-        if normalized and key not in seen:
-            seen.add(key)
-            result.append(normalized)
-
-    return result
 
 
 def normalize_title(title: str) -> str:

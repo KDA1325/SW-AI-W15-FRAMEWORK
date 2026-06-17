@@ -111,7 +111,7 @@ describe('AgentService user-scoped recommendations', () => {
     expect(query).toContain('played_post."userId" = $1');
     expect(query).toContain('played_game."userId" = $1');
     expect(result.recommendations[0].reason).toContain(
-      '분석 결과 Scoped Strategy Game은(는) 플레이어님의',
+      'Scoped Strategy Game는 플레이어님의',
     );
     expect(aiProfileRepository.save).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -226,7 +226,7 @@ describe('AgentService user-scoped recommendations', () => {
     expect(result.recommendations[0].title).toBe('Baba Is You');
   });
 
-  it('uses OpenAI native function calling to select the search_games tool', async () => {
+  it('uses local planning when the FastAPI agent plan is unavailable', async () => {
     const ragContext: AiRagAnalysisResponse = {
       contextSources: [
         {
@@ -263,33 +263,6 @@ describe('AgentService user-scoped recommendations', () => {
             : undefined,
       ),
     };
-    mockedAxios.post
-      .mockResolvedValueOnce({
-        data: {
-          choices: [
-            {
-              message: {
-                tool_calls: [
-                  {
-                    function: {
-                      arguments: JSON.stringify({
-                        limit: 4,
-                        query: 'logic puzzle',
-                      }),
-                      name: 'search_games',
-                    },
-                    id: 'call-1',
-                    type: 'function',
-                  },
-                ],
-              },
-            },
-          ],
-        },
-      })
-      .mockResolvedValueOnce({
-        data: { choices: [{ message: { content: '{"reasons":[]}' } }] },
-      });
     const mcpService = {
       handle: jest.fn().mockResolvedValue({
         result: {
@@ -316,7 +289,6 @@ describe('AgentService user-scoped recommendations', () => {
           },
         },
       }),
-      listToolDefinitions: jest.fn().mockReturnValue([searchGamesToolDefinition()]),
     };
     const ragService = {
       analyzeForUser: jest.fn().mockResolvedValue(ragContext),
@@ -338,34 +310,17 @@ describe('AgentService user-scoped recommendations', () => {
       requestId: 'function-call-test',
     });
 
-    expect(mockedAxios.post).toHaveBeenNthCalledWith(
-      1,
-      'https://api.openai.com/v1/chat/completions',
-      expect.objectContaining({
-        tool_choice: 'required',
-        tools: [
-          expect.objectContaining({
-            function: expect.objectContaining({ name: 'search_games' }),
-            type: 'function',
-          }),
-        ],
-      }),
-      expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: 'Bearer test-openai-key',
-        }),
-      }),
-    );
+    expect(mockedAxios.post).not.toHaveBeenCalled();
     expect(mcpService.handle).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'logic puzzle',
+        id: 'PUZZLE SYSTEMS',
         method: 'tools/call',
       }),
     );
-    expect(result.pipeline.agent.planner).toBe('openai_function_calling');
+    expect(result.pipeline.agent.planner).toBe('local');
     expect(result.pipeline.agent.selectedTool).toBe('search_games');
-    expect(result.pipeline.agent.toolCallCount).toBe(1);
-    expect(result.pipeline.agent.queries).toEqual(['logic puzzle']);
+    expect(result.pipeline.agent.toolCallCount).toBeGreaterThanOrEqual(1);
+    expect(result.pipeline.agent.queries).toContain('PUZZLE SYSTEMS');
     expect(result.recommendations[0].title).toBe('Baba Is You');
   });
 

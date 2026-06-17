@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { RagService } from './rag.service';
 
 type TestArchivePost = {
@@ -85,16 +84,23 @@ describe('RagService taste analysis fallback', () => {
     });
   });
 
-  it('creates OpenAI embeddings in one batch when an API key is configured', async () => {
-    const axiosPost = jest.spyOn(axios, 'post').mockResolvedValueOnce({
-      data: {
-        data: [
-          { embedding: [0.1, 0.2], index: 0 },
-          { embedding: [0.3, 0.4], index: 1 },
-        ],
-        model: 'text-embedding-3-small',
-      },
-    });
+  it('delegates document embedding generation to the FastAPI compute client', async () => {
+    const aiComputeClient = {
+      createEmbedding: jest
+        .fn()
+        .mockResolvedValueOnce({
+          dimensions: 2,
+          model: 'text-embedding-3-small',
+          provider: 'openai',
+          values: [0.1, 0.2],
+        })
+        .mockResolvedValueOnce({
+          dimensions: 2,
+          model: 'text-embedding-3-small',
+          provider: 'openai',
+          values: [0.3, 0.4],
+        }),
+    };
     const service = new RagService(
       { query: jest.fn(), getRepository: jest.fn() } as never,
       {
@@ -108,6 +114,7 @@ describe('RagService taste analysis fallback', () => {
           return values[key];
         }),
       } as never,
+      aiComputeClient as never,
     );
 
     const embeddings = await (
@@ -121,18 +128,19 @@ describe('RagService taste analysis fallback', () => {
       }
     ).createEmbeddings(['first document', 'second document']);
 
-    expect(axiosPost).toHaveBeenCalledTimes(1);
-    expect(axiosPost.mock.calls[0][1]).toEqual(
-      expect.objectContaining({
-        input: ['first document', 'second document'],
-      }),
+    expect(aiComputeClient.createEmbedding).toHaveBeenCalledTimes(2);
+    expect(aiComputeClient.createEmbedding).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ input: 'first document' }),
+    );
+    expect(aiComputeClient.createEmbedding).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ input: 'second document' }),
     );
     expect(embeddings).toEqual([
       { dimensions: 2, model: 'text-embedding-3-small', provider: 'openai', values: [0.1, 0.2] },
       { dimensions: 2, model: 'text-embedding-3-small', provider: 'openai', values: [0.3, 0.4] },
     ]);
-
-    axiosPost.mockRestore();
   });
 
   it('refreshes only missing or stale archive embeddings', async () => {
@@ -227,13 +235,15 @@ describe('RagService taste analysis fallback', () => {
       .toEqual(['stale-post', 'new-post']);
   });
 
-  it('refreshes old demo embeddings when OpenAI embeddings are configured', async () => {
-    const axiosPost = jest.spyOn(axios, 'post').mockResolvedValueOnce({
-      data: {
-        data: [{ embedding: [0.1, -0.2, 0.3], index: 0 }],
+  it('refreshes old demo embeddings through the FastAPI compute client when OpenAI embeddings are configured', async () => {
+    const aiComputeClient = {
+      createEmbedding: jest.fn().mockResolvedValue({
+        dimensions: 3,
         model: 'text-embedding-3-small',
-      },
-    });
+        provider: 'openai',
+        values: [0.1, -0.2, 0.3],
+      }),
+    };
     const post = makeArchivePost({ id: 'demo-post' });
     const repository = {
       create: jest.fn(() => ({})),
@@ -266,6 +276,7 @@ describe('RagService taste analysis fallback', () => {
     const service = new RagService(
       dataSource as never,
       config as never,
+      aiComputeClient as never,
     );
 
     const refreshed = await (
@@ -277,9 +288,8 @@ describe('RagService taste analysis fallback', () => {
     ).refreshArchiveEmbeddings([post]);
 
     expect(refreshed).toBe(1);
-    expect(axiosPost).toHaveBeenCalledTimes(1);
+    expect(aiComputeClient.createEmbedding).toHaveBeenCalledTimes(1);
     expect(repository.save).toHaveBeenCalledTimes(1);
-    axiosPost.mockRestore();
   });
 
   it('delegates pgvector retrieval to the FastAPI LangChain retriever first', async () => {

@@ -6,7 +6,10 @@ from langchain_core.callbacks.manager import CallbackManagerForRetrieverRun
 from langchain_core.documents import Document
 from langchain_core.retrievers import BaseRetriever
 
+from .env import load_local_env
 from .schemas import RagSearchRow
+
+load_local_env()
 
 
 class PgvectorArchiveRetriever(BaseRetriever):
@@ -146,12 +149,17 @@ def postgres_connection_string() -> str:
         return configured
 
     host = os.getenv("DATABASE_HOST", "localhost")
+    if host.startswith("postgresql://") or host.startswith("postgres://"):
+        return host
+
     port = os.getenv("DATABASE_PORT", "5432")
     user = os.getenv("DATABASE_USER", "game_archive_user")
     password = os.getenv("DATABASE_PASSWORD", "game_archive_password")
     database = os.getenv("DATABASE_NAME", "game_archive")
+    ssl_mode = "require" if os.getenv("DATABASE_SSL", "").lower() == "true" else ""
+    ssl_query = f"?sslmode={ssl_mode}" if ssl_mode else ""
 
-    return f"postgresql://{user}:{password}@{host}:{port}/{database}"
+    return f"postgresql://{user}:{password}@{host}:{port}/{database}{ssl_query}"
 
 
 def to_pgvector_literal(values: list[float]) -> str:

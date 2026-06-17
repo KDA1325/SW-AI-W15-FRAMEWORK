@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 
 from .agent_graph import build_agent_plan
+from .analysis import analyze_rag_context
 from .embedding import create_embedding
+from .env import load_local_env
 from .recommendations import build_recommendations
 from .retrieval import search_archive_context
 from .schemas import (
@@ -12,9 +14,13 @@ from .schemas import (
     HealthResponse,
     RecommendationBuildRequest,
     RecommendationBuildResponse,
+    RagAnalyzeRequest,
+    RagAnalyzeResponse,
     RagSearchRequest,
     RagSearchResponse,
 )
+
+load_local_env()
 
 app = FastAPI(
     title="GJC AI Compute Service",
@@ -53,6 +59,11 @@ async def rag_search(request: RagSearchRequest) -> RagSearchResponse:
             request.topK,
         ),
     )
+
+
+@app.post("/rag/analyze", response_model=RagAnalyzeResponse)
+async def rag_analyze(request: RagAnalyzeRequest) -> RagAnalyzeResponse:
+    return analyze_rag_context(request)
 
 
 @app.post("/agent/recommendations/plan", response_model=AgentPlanResponse)

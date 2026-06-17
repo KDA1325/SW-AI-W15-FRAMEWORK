@@ -33,6 +33,27 @@ export type AiComputeRagSearchRow = {
   sourceType: string;
 };
 
+export type AiComputeRagAnalyzeRequest = {
+  contextRows: AiComputeRagSearchRow[];
+  userId: string;
+};
+
+export type AiComputeRagAnalyzeResult = {
+  provider: 'openai' | 'deterministic';
+  preferenceTags: Array<{
+    label: string;
+    sourceCount: number;
+    weight: number;
+  }>;
+  playStyleSummary: string;
+  wordCloud: Array<{
+    category: 'genre' | 'mood' | 'mechanic' | 'pace' | 'theme';
+    label: string;
+    sourceCount: number;
+    weight: number;
+  }>;
+};
+
 export type AiComputeAgentPlanRequest = {
   contextSources: Array<{
     gameTitle: string | null;
@@ -90,6 +111,7 @@ export type AiComputeRecommendationBuildRequest = {
   }>;
   maxRecommendations: number;
   nickname: string;
+  playStyleSummary: string;
   preferenceTags: Array<{
     label: string;
     sourceCount: number;
@@ -159,6 +181,8 @@ type AiComputeRagSearchResponse = {
   provider?: 'langchain-pgvector';
   rows?: AiComputeRagSearchRow[];
 };
+
+type AiComputeRagAnalyzeResponse = Partial<AiComputeRagAnalyzeResult>;
 
 type AiComputeAgentPlanResponse = Partial<AiComputeAgentPlanResult>;
 
@@ -241,6 +265,42 @@ export class AiComputeClient {
     } catch (error) {
       this.logger.warn(
         `FastAPI RAG search failed; falling back inside NestJS. ${this.errorMessage(error)}`,
+      );
+      return null;
+    }
+  }
+
+  async analyzeRagContext(
+    request: AiComputeRagAnalyzeRequest,
+  ): Promise<AiComputeRagAnalyzeResult | null> {
+    const baseUrl = this.baseUrl();
+
+    if (!baseUrl) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post<AiComputeRagAnalyzeResponse>(
+        `${baseUrl}/rag/analyze`,
+        request,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: this.agentTimeoutMs(),
+        },
+      );
+
+      if (
+        !Array.isArray(response.data.preferenceTags) ||
+        !Array.isArray(response.data.wordCloud) ||
+        typeof response.data.playStyleSummary !== 'string'
+      ) {
+        throw new Error('FastAPI RAG analysis response was invalid.');
+      }
+
+      return response.data as AiComputeRagAnalyzeResult;
+    } catch (error) {
+      this.logger.warn(
+        `FastAPI RAG analysis failed; falling back inside NestJS. ${this.errorMessage(error)}`,
       );
       return null;
     }

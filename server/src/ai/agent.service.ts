@@ -1,7 +1,6 @@
 import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
-import axios from 'axios';
 import { createHash } from 'crypto';
 import { DataSource } from 'typeorm';
 import {
@@ -14,7 +13,7 @@ import { AiProfile } from '../auth/entities/aiProfile.entity';
 import { User } from '../auth/entities/user.entity';
 import { AiComputeClient } from './ai-compute.client';
 import { ArchiveEmbeddingQueueService } from './archive-embedding-queue.service';
-import { McpService, McpToolDefinition } from './mcp.service';
+import { McpService } from './mcp.service';
 import { RagService } from './rag.service';
 
 const DEFAULT_AGENT_MAX_ITERATIONS = 4;
@@ -68,7 +67,7 @@ type AgentState = {
   userId: string;
 };
 
-type AgentPlanner = 'openai_function_calling' | 'fastapi_langgraph' | 'local';
+type AgentPlanner = 'fastapi_langgraph' | 'local';
 
 type AgentSearchPlan = {
   planner: AgentPlanner;
@@ -98,41 +97,6 @@ type RecommendationExclusionSet = {
   externalIds: Set<string>;
   gameIds: Set<string>;
   titles: Set<string>;
-};
-
-type OpenAiChatCompletionResponse = {
-  choices?: Array<{
-    message?: {
-      content?: string | null;
-      tool_calls?: OpenAiToolCall[];
-    };
-  }>;
-};
-
-type OpenAiToolCall = {
-  function?: {
-    arguments?: string;
-    name?: string;
-  };
-  id?: string;
-  type?: string;
-};
-
-type OpenAiToolDefinition = {
-  function: {
-    description: string;
-    name: string;
-    parameters: Record<string, unknown>;
-  };
-  type: 'function';
-};
-
-type RecommendationReasonDraft = {
-  reasons?: Array<{
-    rank?: number;
-    reason?: string;
-    title?: string;
-  }>;
 };
 
 @Injectable()
@@ -259,11 +223,7 @@ export class AgentService {
         ...recommendation,
         rank: index + 1,
       }));
-    const recommendations = await this.generateRecommendationReasons(
-      rankedRecommendations,
-      ragContext,
-      nickname,
-    );
+    const recommendations = rankedRecommendations;
 
     const response: AiRecommendationSyncResponse = {
       requestId,
@@ -321,7 +281,7 @@ export class AgentService {
     recommendations: AiRecommendationCard[];
     usedFallback: boolean;
   } | null> {
-    const result = await this.aiComputeClient?.buildRecommendations({
+    const result = await this.aiComputeClient?.buildRecommendations?.({
       contextSources: ragContext.contextSources,
       exclusionSet: {
         externalIds: [...state.exclusionSet.externalIds],
@@ -334,6 +294,7 @@ export class AgentService {
       })),
       maxRecommendations: MIN_RECOMMENDATION_COUNT,
       nickname,
+      playStyleSummary: ragContext.playStyleSummary,
       preferenceTags: ragContext.preferenceTags,
       toolResults: state.toolResults,
       userId,
@@ -478,16 +439,6 @@ export class AgentService {
     ragContext: AiRagAnalysisResponse,
     state: AgentState,
   ): Promise<AgentSearchPlan> {
-    const openAiPlan = await this.planSearchQueriesWithOpenAiFunctionCalling(
-      requestId,
-      ragContext,
-      state,
-    );
-
-    if (openAiPlan) {
-      return openAiPlan;
-    }
-
     const fastApiQueries = await this.planSearchQueriesWithFastApi(
       userId,
       requestId,
@@ -508,83 +459,6 @@ export class AgentService {
       queries: this.buildSearchQueries(ragContext),
       selectedTool: 'search_games',
     };
-  }
-
-  private async planSearchQueriesWithOpenAiFunctionCalling(
-    requestId: string,
-    ragContext: AiRagAnalysisResponse,
-    state: AgentState,
-  ): Promise<AgentSearchPlan | null> {
-    const apiKey = this.config.get<string>('OPENAI_API_KEY');
-
-    if (!apiKey) {
-      return null;
-    }
-
-    const tools = this.openAiToolsFromMcpTools(
-      this.mcpService.listToolDefinitions(),
-    );
-
-    if (tools.length === 0) {
-      return null;
-    }
-
-    try {
-      const response = await axios.post<OpenAiChatCompletionResponse>(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          messages: [
-            {
-              content:
-                'You select read-only game recommendation tools. Use only the provided tools. Return tool calls only. Choose search queries that are not already recorded game titles, are concise, and can retrieve recommendation candidates.',
-              role: 'system',
-            },
-            {
-              content: JSON.stringify({
-                contextSources: ragContext.contextSources.map((source) => ({
-                  gameTitle: source.gameTitle,
-                  similarity: source.similarity,
-                  title: source.title,
-                })),
-                maxIterations: state.maxIterations,
-                preferenceTags: ragContext.preferenceTags,
-                requestId,
-                userId: ragContext.userId,
-              }),
-              role: 'user',
-            },
-          ],
-          model: this.config.get<string>('OPENAI_CHAT_MODEL') ?? 'gpt-4o-mini',
-          tool_choice: 'required',
-          tools,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          timeout: this.timeoutMs(),
-        },
-      );
-      const toolCalls = response.data.choices?.[0]?.message?.tool_calls ?? [];
-      const queries = this.searchQueriesFromOpenAiToolCalls(
-        toolCalls,
-        ragContext,
-        state.maxIterations,
-      );
-
-      if (queries.length === 0) {
-        return null;
-      }
-
-      return {
-        planner: 'openai_function_calling',
-        queries,
-        selectedTool: 'search_games',
-      };
-    } catch {
-      return null;
-    }
   }
 
   private async planSearchQueriesWithFastApi(
@@ -612,64 +486,6 @@ export class AgentService {
     }
 
     return plan.searchQueries;
-  }
-
-  private openAiToolsFromMcpTools(
-    tools: McpToolDefinition[],
-  ): OpenAiToolDefinition[] {
-    return tools
-      .filter((tool) => tool.name === 'search_games')
-      .map((tool) => ({
-        function: {
-          description:
-            tool.description ??
-            'Search for video games that match the player preference context.',
-          name: tool.name,
-          parameters:
-            tool.inputSchema && typeof tool.inputSchema === 'object'
-              ? tool.inputSchema
-              : { type: 'object', properties: {}, additionalProperties: false },
-        },
-        type: 'function',
-      }));
-  }
-
-  private searchQueriesFromOpenAiToolCalls(
-    toolCalls: OpenAiToolCall[],
-    ragContext: AiRagAnalysisResponse,
-    maxIterations: number,
-  ): string[] {
-    const excludedTitles = this.buildTitleExclusionSet(ragContext);
-    const queries = toolCalls
-      .map((toolCall) => this.parseSearchGamesToolCall(toolCall))
-      .filter((query): query is string => Boolean(query))
-      .filter((query) => !this.isExcludedTitle(query, excludedTitles));
-
-    return [...new Set(queries)].slice(0, maxIterations);
-  }
-
-  private parseSearchGamesToolCall(toolCall: OpenAiToolCall): string | null {
-    if (
-      toolCall.type !== 'function' ||
-      toolCall.function?.name !== 'search_games' ||
-      typeof toolCall.function.arguments !== 'string'
-    ) {
-      return null;
-    }
-
-    try {
-      const args = JSON.parse(toolCall.function.arguments) as unknown;
-
-      if (!args || typeof args !== 'object') {
-        return null;
-      }
-
-      const query = (args as Record<string, unknown>).query;
-
-      return typeof query === 'string' && query.trim() ? query.trim() : null;
-    } catch {
-      return null;
-    }
   }
 
   private async callSearchGamesTool(
@@ -945,7 +761,8 @@ export class AgentService {
     await repository.save(profile);
   }
 
-  private async generateRecommendationReasons(
+  /*
+  private async legacyDisabledRecommendationReasons(
     recommendations: AiRecommendationCard[],
     ragContext: AiRagAnalysisResponse,
     nickname: string,
@@ -957,8 +774,8 @@ export class AgentService {
     }
 
     try {
-      const response = await axios.post<OpenAiChatCompletionResponse>(
-        'https://api.openai.com/v1/chat/completions',
+      const response = await disabledLegacyRequest(
+        'legacy-disabled',
         {
           messages: [
             {
@@ -992,7 +809,7 @@ export class AgentService {
         return recommendations;
       }
 
-      const draft = JSON.parse(content) as RecommendationReasonDraft;
+      const draft = JSON.parse(content) as { reasons?: unknown[] };
       const reasonsByRank = new Map(
         (draft.reasons ?? [])
           .filter(
@@ -1074,11 +891,19 @@ export class AgentService {
     };
   }
 
+  */
   private async loadUserNickname(userId: string): Promise<string> {
     const user = await this.dataSource.getRepository(User).findOne({
       select: { nickname: true },
       where: { id: userId },
     });
+
+    const nickname = user?.nickname?.trim();
+    if (nickname) {
+      return nickname;
+    }
+
+    return '플레이어';
 
     return user?.nickname?.trim() || '플레이어';
   }
@@ -1099,11 +924,52 @@ export class AgentService {
       .map((label) => this.toKoreanAnalysisLabel(label))
       .join(', ');
 
+    return `${title}는 ${nickname}님의 ${signal || '기록 기반 플레이 성향'}과 맞닿아 있어 추천합니다.`;
+
     return `분석 결과 ${title}은(는) ${nickname}님의 ${signal || '플레이 성향'}와 잘 맞는 게임이라 추천합니다!`;
   }
 
   private toKoreanAnalysisLabel(label: string): string {
     const normalized = label.trim().replaceAll(' ', '_').toUpperCase();
+    if (/[\uac00-\ud7a3]/.test(label)) {
+      return label.trim();
+    }
+
+    const koreanLabels: Record<string, string> = {
+      AESTHETIC_EXPLORER: '미감과 분위기를 탐색하는 성향',
+      AESTHETIC_PRESENTATION: '아트와 분위기',
+      ARCHIVE_BASED_PLAYER: '기록 기반 플레이 성향',
+      ATMOSPHERE: '분위기',
+      COOP_TEAMPLAYER: '협동 플레이 성향',
+      COLLECTION: '수집 요소',
+      COLLECTION_COMPLETIONIST: '수집 완성형 플레이',
+      COZY_SIM: '편안한 시뮬레이션 감성',
+      CRAFTING: '제작과 장비 성장',
+      DEDUCTION: '추리 요소',
+      DELIBERATE_PLANNER: '차분하게 계획하는 플레이',
+      EUREKA_MOMENTS: '깨달음이 있는 퍼즐',
+      FARMING_LOOP: '반복 성장 루프',
+      GAME_ELEMENTS: '선호 게임 요소',
+      HORROR_ATMOSPHERE: '공포 분위기',
+      HUNTING_LOOP: '사냥과 보스 공략',
+      LOW_PRESSURE_ROUTINE: '부담 없는 반복 플레이',
+      NARRATIVE_ROLEPLAYER: '서사 몰입형 플레이',
+      OPTIMIZATION: '최적화 요소',
+      PIXEL_ART: '픽셀 아트',
+      PROGRAMMING_PUZZLE: '프로그래밍 퍼즐',
+      PUZZLE_SYSTEMS: '퍼즐 시스템',
+      SOLO_PROBLEM_SOLVER: '혼자 문제를 푸는 성향',
+      SPATIAL_REASONING: '공간 추론',
+      STORY_DRIVEN: '스토리 중심 구성',
+      SYSTEM_OPTIMIZER: '시스템 최적화 성향',
+      TACTICAL: '전술적 플레이',
+      TACTICAL_COMBAT: '전술 전투',
+      TACTICAL_RPG: '전술 RPG',
+      TANK_ROLE: '탱커 역할 선호',
+    };
+
+    return koreanLabels[normalized] ?? normalized.replaceAll('_', ' ').toLowerCase();
+
     const labels: Record<string, string> = {
       AESTHETIC_EXPLORER: '심미적 탐험 성향',
       AESTHETIC_PRESENTATION: '아트와 분위기',
@@ -1144,6 +1010,13 @@ export class AgentService {
     matchedTags: string[],
     query: string,
   ): string {
+    const koreanTags =
+      matchedTags.length > 0
+        ? matchedTags.map((tag) => this.toKoreanAnalysisLabel(tag)).join(', ')
+        : '기록 기반 추천 맥락';
+
+    return `${title}는 검색 기준 "${query}"와 사용자 선호 태그(${koreanTags})가 함께 맞아 추천합니다.`;
+
     const tags =
       matchedTags.length > 0
         ? matchedTags.join(', ')

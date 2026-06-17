@@ -1,6 +1,10 @@
 import os
 from dataclasses import dataclass
 
+from .env import load_local_env
+
+load_local_env()
+
 DEMO_EMBEDDING_DIMENSIONS = 1536
 DEMO_EMBEDDING_MODEL = "demo-hash-embedding-v1"
 MAX_EMBEDDING_INPUT_CHARS = 12000

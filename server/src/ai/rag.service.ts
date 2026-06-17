@@ -1,7 +1,6 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
-import axios from 'axios';
 import { DataSource } from 'typeorm';
 import { AiComputeClient } from './ai-compute.client';
 import {
@@ -26,7 +25,6 @@ const DEFAULT_TOP_K = 12;
 const MAX_TOP_K = 12;
 const MAX_EMBEDDING_INPUT_CHARS = 12000;
 const MAX_ARCHIVE_DIGEST_CHARS = 9000;
-const OPENAI_EMBEDDING_BATCH_SIZE = 64;
 
 type RagOptions = {
   refreshEmbeddings?: boolean;
@@ -83,22 +81,6 @@ type RagAnalysisDraft = {
   wordCloud: AiWordCloudTerm[];
 };
 
-type OpenAiEmbeddingResponse = {
-  data?: Array<{
-    embedding?: number[];
-    index?: number;
-  }>;
-  model?: string;
-};
-
-type OpenAiChatCompletionResponse = {
-  choices?: Array<{
-    message?: {
-      content?: string | null;
-    };
-  }>;
-};
-
 @Injectable()
 export class RagService {
   private readonly logger = new Logger(RagService.name);
@@ -134,7 +116,7 @@ export class RagService {
       ...searchRows,
       ...playedGames.map((game) => this.toUserGameContextRow(game)),
     ];
-    const analysis = await this.createAnalysis(contextRows);
+    const analysis = await this.createAnalysis(userId, contextRows);
 
     return {
       userId,
@@ -408,7 +390,6 @@ export class RagService {
   }
 
   private async createEmbedding(text: string): Promise<EmbeddingResult> {
-    const apiKey = this.config.get<string>('OPENAI_API_KEY');
     const model =
       this.config.get<string>('OPENAI_EMBEDDING_MODEL') ??
       'text-embedding-3-small';
@@ -426,7 +407,7 @@ export class RagService {
       model,
     });
 
-    if (fastApiEmbedding && !(apiKey && fastApiEmbedding.provider === 'demo')) {
+    if (fastApiEmbedding) {
       return {
         dimensions: fastApiEmbedding.dimensions,
         model: fastApiEmbedding.model,
@@ -435,51 +416,7 @@ export class RagService {
       };
     }
 
-    if (!apiKey) {
-      return this.createDemoEmbedding(text);
-    }
-
-    try {
-      const payload: Record<string, unknown> = {
-        encoding_format: 'float',
-        input: embeddingInput,
-        model,
-      };
-
-      if (model.startsWith('text-embedding-3')) {
-        payload.dimensions = dimensions;
-      }
-
-      const response = await axios.post<OpenAiEmbeddingResponse>(
-        'https://api.openai.com/v1/embeddings',
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            'Content-Type': 'application/json',
-          },
-          timeout: 15000,
-        },
-      );
-
-      const values = response.data.data?.[0]?.embedding;
-
-      if (!values?.length) {
-        throw new Error('OpenAI embedding response did not include a vector.');
-      }
-
-      return {
-        dimensions: values.length,
-        model: response.data.model ?? model,
-        provider: 'openai',
-        values,
-      };
-    } catch (error) {
-      this.logger.warn(
-        `OpenAI embedding failed; falling back to demo embedding. ${this.errorMessage(error)}`,
-      );
-      return this.createDemoEmbedding(text);
-    }
+    return this.createDemoEmbedding(text);
   }
 
   private async createEmbeddings(texts: string[]): Promise<EmbeddingResult[]> {
@@ -487,82 +424,7 @@ export class RagService {
       return [];
     }
 
-    const apiKey = this.config.get<string>('OPENAI_API_KEY');
-
-    if (!apiKey) {
-      return Promise.all(texts.map((text) => this.createEmbedding(text)));
-    }
-
-    const model =
-      this.config.get<string>('OPENAI_EMBEDDING_MODEL') ??
-      'text-embedding-3-small';
-    const dimensions = Number(
-      this.config.get<string>('OPENAI_EMBEDDING_DIMENSIONS') ??
-        DEMO_EMBEDDING_DIMENSIONS,
-    );
-    const results: EmbeddingResult[] = [];
-
-    for (let start = 0; start < texts.length; start += OPENAI_EMBEDDING_BATCH_SIZE) {
-      const chunk = texts.slice(start, start + OPENAI_EMBEDDING_BATCH_SIZE);
-
-      try {
-        const payload: Record<string, unknown> = {
-          encoding_format: 'float',
-          input: chunk.map((text) => this.truncateEmbeddingInput(text)),
-          model,
-        };
-
-        if (model.startsWith('text-embedding-3')) {
-          payload.dimensions = dimensions;
-        }
-
-        const response = await axios.post<OpenAiEmbeddingResponse>(
-          'https://api.openai.com/v1/embeddings',
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            timeout: 30000,
-          },
-        );
-        const data = response.data.data ?? [];
-        const orderedData = data
-          .slice()
-          .sort((left, right) => (left.index ?? 0) - (right.index ?? 0));
-
-        if (orderedData.length !== chunk.length) {
-          throw new Error('OpenAI embedding response count did not match request count.');
-        }
-
-        results.push(
-          ...orderedData.map((item) => {
-            const values = item.embedding;
-
-            if (!values?.length) {
-              throw new Error('OpenAI embedding response did not include a vector.');
-            }
-
-            return {
-              dimensions: values.length,
-              model: response.data.model ?? model,
-              provider: 'openai' as const,
-              values,
-            };
-          }),
-        );
-      } catch (error) {
-        this.logger.warn(
-          `OpenAI batch embedding failed; falling back to per-document embeddings. ${this.errorMessage(error)}`,
-        );
-        results.push(
-          ...(await Promise.all(chunk.map((text) => this.createEmbedding(text)))),
-        );
-      }
-    }
-
-    return results;
+    return Promise.all(texts.map((text) => this.createEmbedding(text)));
   }
 
   private truncateEmbeddingInput(text: string): string {
@@ -618,13 +480,27 @@ export class RagService {
   }
 
   private async createAnalysis(
+    userId: string,
     searchRows: RagSearchRow[],
   ): Promise<RagAnalysisDraft> {
-    const openAiAnalysis = await this.createOpenAiAnalysis(searchRows);
-    return openAiAnalysis ?? this.createFallbackAnalysis(searchRows);
+    const fastApiAnalysis = await this.aiComputeClient?.analyzeRagContext({
+      contextRows: searchRows.map((row) => ({
+        content: row.content,
+        metadata: row.metadata,
+        similarity: Number(row.similarity),
+        sourceId: row.sourceId,
+        sourceType: row.sourceType,
+      })),
+      userId,
+    });
+
+    return fastApiAnalysis
+      ? this.normalizeAnalysis(fastApiAnalysis)
+      : this.createFallbackAnalysis(searchRows);
   }
 
-  private async createOpenAiAnalysis(
+  /*
+  private async legacyDisabledAnalysis(
     searchRows: RagSearchRow[],
   ): Promise<RagAnalysisDraft | null> {
     const apiKey = this.config.get<string>('OPENAI_API_KEY');
@@ -634,8 +510,8 @@ export class RagService {
     }
 
     try {
-      const response = await axios.post<OpenAiChatCompletionResponse>(
-        'https://api.openai.com/v1/chat/completions',
+      const response = await disabledLegacyRequest(
+        'legacy-disabled',
         {
           messages: [
             {
@@ -751,6 +627,7 @@ export class RagService {
     };
   }
 
+  */
   private createFallbackAnalysis(searchRows: RagSearchRow[]): RagAnalysisDraft {
     const gameElementCandidates: Array<{
       category: AiWordCloudTerm['category'];
@@ -979,6 +856,12 @@ export class RagService {
       .map((style) => style.label.replaceAll('_', ' '));
 
     if (labels.length === 0) {
+      return '아직 분석할 기록이 충분하지 않아 기본적인 플레이 기록을 중심으로 추천을 준비합니다.';
+    }
+
+    return `기록을 보면 ${labels.join(', ').toLowerCase()} 성향이 두드러지며, 추천은 선호 게임 요소와 플레이 패턴을 함께 반영합니다.`;
+
+    if (labels.length === 0) {
       return '아직 분석할 기록이 부족하므로 더 많은 저널이나 리뷰가 쌓이면 추천 정확도가 높아집니다.';
     }
 
@@ -1005,7 +888,7 @@ export class RagService {
       playStyleSummary:
         typeof analysis.playStyleSummary === 'string'
           ? analysis.playStyleSummary
-          : 'The available sources describe a focused player profile.',
+          : '기록을 바탕으로 플레이 성향을 분석하고 추천 후보를 정리했습니다.',
       preferenceTags,
       wordCloud,
     };
@@ -1134,18 +1017,6 @@ export class RagService {
   }
 
   private errorMessage(error: unknown): string {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-      const apiMessage = (
-        error.response?.data as
-          | { error?: { message?: string } }
-          | undefined
-      )?.error?.message;
-      const message = apiMessage ?? error.message;
-
-      return status ? `HTTP ${status}: ${message}` : message;
-    }
-
     if (error instanceof Error) {
       return error.message;
     }

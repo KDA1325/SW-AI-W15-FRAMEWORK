@@ -43,6 +43,14 @@ class RagSearchResponse(BaseModel):
     rows: list[RagSearchRow]
 
 
+class RagAnalysisContextRow(BaseModel):
+    sourceType: str
+    sourceId: str
+    content: str
+    metadata: dict[str, object] = Field(default_factory=dict)
+    similarity: float = 0
+
+
 class AgentPreferenceTag(BaseModel):
     label: str
     weight: float = 0
@@ -82,6 +90,18 @@ class AgentPlanResponse(BaseModel):
 
 class AiWordCloudTerm(AgentPreferenceTag):
     category: Literal["genre", "mood", "mechanic", "pace", "theme"]
+
+
+class RagAnalyzeRequest(BaseModel):
+    contextRows: list[RagAnalysisContextRow] = Field(default_factory=list)
+    userId: str = Field(..., min_length=1)
+
+
+class RagAnalyzeResponse(BaseModel):
+    provider: Literal["openai", "deterministic"]
+    preferenceTags: list[AgentPreferenceTag]
+    playStyleSummary: str
+    wordCloud: list[AiWordCloudTerm]
 
 
 class AiRagContextSource(BaseModel):
@@ -143,6 +163,7 @@ class RecommendationBuildRequest(BaseModel):
     localGames: list[RecommendationLocalGame] = Field(default_factory=list)
     maxRecommendations: int = Field(6, ge=1, le=24)
     nickname: str = "player"
+    playStyleSummary: str = ""
     preferenceTags: list[AgentPreferenceTag] = Field(default_factory=list)
     toolResults: list[RecommendationToolResult] = Field(default_factory=list)
     userId: str = Field(..., min_length=1)

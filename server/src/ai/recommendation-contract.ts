@@ -79,7 +79,7 @@ export type AiPipelineTrace = {
   agent: {
     maxIterations: number;
     iterations: number;
-    planner?: 'openai_function_calling' | 'fastapi_langgraph' | 'local';
+    planner?: 'fastapi_langgraph' | 'local';
     queries?: string[];
     selectedTool?: 'search_games' | null;
     stoppedReason: AiAgentStoppedReason;
@@ -135,7 +135,7 @@ export const AI_RECOMMENDATION_SYNC_SAMPLE = {
     { label: 'HIGH_DIFFICULTY', weight: 0.78, sourceCount: 2 },
   ],
   playStyleSummary:
-    'You favor deliberate combat, readable systems, and games where repeated failure reveals better strategy rather than pure grind.',
+    '기록을 보면 차분한 전투 판단과 읽기 쉬운 시스템을 선호하며, 반복 실패가 더 나은 전략으로 이어지는 게임에 잘 반응합니다.',
   wordCloud: [
     {
       label: 'TACTICAL',
@@ -179,7 +179,7 @@ export const AI_RECOMMENDATION_SYNC_SAMPLE = {
       matchScore: 0.93,
       matchedTags: ['RETRO_PIXEL', 'STORY_DRIVEN', 'TACTICAL_RPG'],
       reason:
-        'Your journals emphasize precise combat and puzzle-like encounters, which match the action RPG structure and pixel presentation of CrossCode.',
+        '정교한 전투와 퍼즐 같은 전개를 선호한 기록이 CrossCode의 액션 RPG 구조와 잘 맞아 추천합니다.',
       sourceUrl: 'https://store.steampowered.com/app/368340',
     },
   ],
@@ -190,7 +190,7 @@ export const AI_RECOMMENDATION_SYNC_SAMPLE = {
       title: 'Boss patterns feel fair when the rules are visible',
       gameTitle: 'Into the Breach',
       excerpt:
-        'I enjoyed how every loss taught me a clearer tactical rule instead of asking for more grinding.',
+        '패배할 때마다 단순 반복보다 더 명확한 전술 규칙을 배우게 되는 점이 좋았습니다.',
       similarity: 0.89,
     },
   ],
@@ -207,7 +207,7 @@ export const AI_RECOMMENDATION_SYNC_SAMPLE = {
     agent: {
       maxIterations: 4,
       iterations: 3,
-      planner: 'openai_function_calling',
+      planner: 'fastapi_langgraph',
       queries: ['tactical RPG', 'story rich RPG'],
       selectedTool: 'search_games',
       stoppedReason: 'completed',
