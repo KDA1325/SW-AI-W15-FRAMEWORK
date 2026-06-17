@@ -15,11 +15,9 @@
 
 ## 2. 시연 초기화 SQL
 
-시연을 위해 기존 임베딩 문서와 AI 프로필 분석 결과를 초기화했다.
+시연을 위해 AI 프로필에 저장된 마지막 추천 스냅샷과 분석 결과만 초기화한다. `EmbeddingDocument`는 RAG 검색에 필요한 벡터 캐시이므로 일반 시연 초기화에서는 삭제하지 않는다.
 
 ```sql
-DELETE FROM "EmbeddingDocument";
-
 UPDATE "AiProfile"
 SET
   "lastRecommendationSync" = NULL,
@@ -30,7 +28,7 @@ SET
   "updatedAt" = now();
 ```
 
-이 초기화는 추천 결과를 새로 생성하게 만들기 위한 작업이다. `EmbeddingDocument`를 비우면 RAG 검색에 쓰는 벡터 문서를 다시 만들 수 있고, `AiProfile`의 동기화 결과를 비우면 추천 페이지에서 최신 분석을 다시 수행하게 된다.
+이 초기화는 추천 페이지 첫 진입 시 이전 추천 결과 스냅샷이 남아 보이지 않게 만드는 작업이다. 이후 `SYNC_DATA`를 누르면 기존 `EmbeddingDocument`를 재사용하거나, 필요한 경우 갱신하면서 새 추천 결과를 다시 저장한다.
 
 ## 3. 데이터셋 평점 검증
 
@@ -339,7 +337,7 @@ server build passed
 1. LLM 출력은 프롬프트로 제어하고 있으므로, 정말 엄격한 말투 보장이 필요하면 후처리 검증을 추가하는 것이 좋다.
 2. OpenAI API 400이 다시 발생하면 이제 더 구체적인 로그가 남으므로, 그 메시지 기준으로 모델명, dimensions, 입력 크기, billing 상태 등을 추가 확인해야 한다.
 3. 추천 카드의 태그는 `matchedTags`가 가장 강한 근거이고, 없을 때만 게임 메타데이터의 `tags`/`genres`를 fallback으로 보여준다.
-4. 시연 전에는 항상 `EmbeddingDocument`와 `AiProfile` 초기화 후, 올바른 페르소나 계정으로 로그인했는지 확인해야 한다.
+4. 시연 전에는 보통 `AiProfile`의 마지막 추천 스냅샷만 초기화하고, 올바른 페르소나 계정으로 로그인했는지 확인해야 한다.
 
 ## 16. 소스 범위
 
