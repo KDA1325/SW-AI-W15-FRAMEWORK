@@ -61,6 +61,11 @@ export type AiRagContextSource = {
 };
 
 export type AiPipelineTrace = {
+  cache?: {
+    hit: boolean;
+    key: string;
+    version: string;
+  };
   // The trace lets the demo prove that RAG, MCP, and the agent loop all ran during one SYNC.
   rag: {
     topK: number;

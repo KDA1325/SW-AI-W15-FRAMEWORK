@@ -2,6 +2,7 @@ import { Injectable, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDataSource } from '@nestjs/typeorm';
 import axios from 'axios';
+import { createHash } from 'crypto';
 import { DataSource } from 'typeorm';
 import {
   AiAgentStoppedReason,
@@ -20,8 +21,9 @@ const DEFAULT_AGENT_TIMEOUT_MS = 30_000;
 // GJC-178: persona QA needs at least six cards so users can compare more than a top-three list.
 const MIN_RECOMMENDATION_COUNT = 6;
 const MAX_RECOMMENDATIONS_PER_SERIES = 1;
+const RECOMMENDATION_CACHE_VERSION = 'gjc-recommendation-cache-v2';
 
-type AgentSyncOptions = {
+export type AgentSyncOptions = {
   forceRefresh?: boolean;
   requestId?: string;
   topK?: number;
@@ -147,6 +149,23 @@ export class AgentService {
     options: AgentSyncOptions = {},
   ): Promise<AiRecommendationSyncResponse> {
     const requestId = options.requestId ?? `gjc-sync-${Date.now()}`;
+    const cachedProfile = await this.dataSource
+      .getRepository(AiProfile)
+      .findOne({
+        where: { userId },
+      });
+    const cachedResponse = await this.getCachedRecommendationSync(
+      userId,
+      options,
+      requestId,
+      cachedProfile?.lastRecommendationSync ?? null,
+    );
+
+    if (cachedResponse) {
+      await this.saveLatestRecommendationSync(userId, cachedResponse);
+      return cachedResponse;
+    }
+
     const ragContext = await this.ragService.analyzeForUser(userId, {
       refreshEmbeddings: options.forceRefresh !== false,
       topK: options.topK,
@@ -206,6 +225,7 @@ export class AgentService {
             : 'fallback';
 
     const now = new Date().toISOString();
+    const cacheKey = await this.buildRecommendationCacheKey(userId, options);
     const rankedRecommendations = state.recommendations
       .slice(0, MIN_RECOMMENDATION_COUNT)
       .map((recommendation, index) => ({
@@ -229,6 +249,11 @@ export class AgentService {
       recommendations,
       contextSources: ragContext.contextSources,
       pipeline: {
+        cache: {
+          hit: false,
+          key: cacheKey,
+          version: RECOMMENDATION_CACHE_VERSION,
+        },
         agent: {
           iterations: state.toolResults.length,
           maxIterations: state.maxIterations,
@@ -257,6 +282,102 @@ export class AgentService {
     await this.saveLatestRecommendationSync(userId, response);
 
     return response;
+  }
+
+  private async getCachedRecommendationSync(
+    userId: string,
+    options: AgentSyncOptions,
+    requestId: string,
+    cached: AiRecommendationSyncResponse | null,
+  ): Promise<AiRecommendationSyncResponse | null> {
+    if (!cached) {
+      return null;
+    }
+
+    const cacheKey = await this.buildRecommendationCacheKey(userId, options);
+
+    if (
+      cached.pipeline.cache?.key !== cacheKey ||
+      cached.pipeline.cache.version !== RECOMMENDATION_CACHE_VERSION
+    ) {
+      return null;
+    }
+
+    const now = new Date().toISOString();
+
+    return {
+      ...cached,
+      lastSyncAt: now,
+      requestId,
+      pipeline: {
+        ...cached.pipeline,
+        cache: {
+          hit: true,
+          key: cacheKey,
+          version: RECOMMENDATION_CACHE_VERSION,
+        },
+      },
+    };
+  }
+
+  private async buildRecommendationCacheKey(
+    userId: string,
+    options: AgentSyncOptions,
+  ): Promise<string> {
+    const rows = await this.dataSource.query<
+      Array<{
+        archiveCount: string | number;
+        archiveLatest: string | null;
+        userGameCount: string | number;
+        userGameLatest: string | null;
+      }>
+    >(
+        `
+          SELECT
+            (
+              SELECT count(*)
+              FROM "ArchivePost" post
+              WHERE post."userId" = $1
+            ) AS "archiveCount",
+            (
+              SELECT max(post."updatedAt")
+              FROM "ArchivePost" post
+              WHERE post."userId" = $1
+            ) AS "archiveLatest",
+            (
+              SELECT count(*)
+              FROM "UserGame" user_game
+              WHERE user_game."userId" = $1
+            ) AS "userGameCount",
+            (
+              SELECT max(user_game."updatedAt")
+              FROM "UserGame" user_game
+              WHERE user_game."userId" = $1
+            ) AS "userGameLatest"
+        `,
+        [userId],
+      );
+    const signature = Array.isArray(rows) ? rows[0] : null;
+    const payload = {
+      archiveCount: Number(signature?.archiveCount ?? 0),
+      archiveLatest: signature?.archiveLatest ?? null,
+      chatModel: this.config.get<string>('OPENAI_CHAT_MODEL') ?? 'gpt-4o-mini',
+      embeddingDimensions:
+        this.config.get<string>('OPENAI_EMBEDDING_DIMENSIONS') ?? '1536',
+      embeddingModel:
+        this.config.get<string>('OPENAI_EMBEDDING_MODEL') ??
+        'text-embedding-3-small',
+      maxIterations: this.maxIterations(),
+      minRecommendations: MIN_RECOMMENDATION_COUNT,
+      topK: options.topK ?? null,
+      userGameCount: Number(signature?.userGameCount ?? 0),
+      userGameLatest: signature?.userGameLatest ?? null,
+      version: RECOMMENDATION_CACHE_VERSION,
+    };
+
+    return createHash('sha256')
+      .update(JSON.stringify(payload))
+      .digest('hex');
   }
 
   async getLatestRecommendations(
