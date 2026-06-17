@@ -1,34 +1,5 @@
 {
   "scriptCompleted": true,
-  "project": {
-    "name": "Gaming Journal Club",
-    "languages": [
-      "config",
-      "css",
-      "dockerfile",
-      "html",
-      "javascript",
-      "json",
-      "markdown",
-      "python",
-      "txt",
-      "typescript",
-      "unknown",
-      "yaml"
-    ],
-    "frameworks": [
-      "React",
-      "Vite",
-      "NestJS",
-      "FastAPI",
-      "LangChain",
-      "TypeORM",
-      "PostgreSQL pgvector"
-    ],
-    "description": "게임 저널, RAG 기반 추천, MCP 도구 호출, FastAPI LangChain 임베딩 계산을 결합한 React/NestJS MVP입니다.",
-    "analyzedAt": "2026-06-16T19:10:36.710Z",
-    "gitCommitHash": "c32cd3bd6624ec884ae9cb5240d6a964e465657b"
-  },
   "files": [
     {
       "path": ".understand-anything/.understandignore",
@@ -49,6 +20,12 @@
       "fileCategory": "code"
     },
     {
+      "path": "ai-compute/app/agent_graph.py",
+      "language": "python",
+      "sizeLines": 232,
+      "fileCategory": "code"
+    },
+    {
       "path": "ai-compute/app/embedding.py",
       "language": "python",
       "sizeLines": 103,
@@ -57,13 +34,19 @@
     {
       "path": "ai-compute/app/main.py",
       "language": "python",
-      "sizeLines": 30,
+      "sizeLines": 59,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ai-compute/app/retrieval.py",
+      "language": "python",
+      "sizeLines": 158,
       "fileCategory": "code"
     },
     {
       "path": "ai-compute/app/schemas.py",
       "language": "python",
-      "sizeLines": 24,
+      "sizeLines": 80,
       "fileCategory": "code"
     },
     {
@@ -75,13 +58,13 @@
     {
       "path": "ai-compute/README.md",
       "language": "markdown",
-      "sizeLines": 52,
+      "sizeLines": 88,
       "fileCategory": "docs"
     },
     {
       "path": "ai-compute/requirements.txt",
       "language": "txt",
-      "sizeLines": 4,
+      "sizeLines": 6,
       "fileCategory": "docs"
     },
     {
@@ -148,6 +131,36 @@
       "path": "client/src/components/Header.tsx",
       "language": "typescript",
       "sizeLines": 88,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/features/journals/useJournalDetailPage.ts",
+      "language": "typescript",
+      "sizeLines": 255,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/features/journals/useJournalsPage.ts",
+      "language": "typescript",
+      "sizeLines": 269,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/features/profile/useProfilePage.ts",
+      "language": "typescript",
+      "sizeLines": 317,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/features/recommendations/types.ts",
+      "language": "typescript",
+      "sizeLines": 57,
+      "fileCategory": "code"
+    },
+    {
+      "path": "client/src/features/recommendations/useRecommendationSync.ts",
+      "language": "typescript",
+      "sizeLines": 152,
       "fileCategory": "code"
     },
     {
@@ -309,13 +322,13 @@
     {
       "path": "client/src/pages/JournalDetail.tsx",
       "language": "typescript",
-      "sizeLines": 606,
+      "sizeLines": 404,
       "fileCategory": "code"
     },
     {
       "path": "client/src/pages/Journals.tsx",
       "language": "typescript",
-      "sizeLines": 669,
+      "sizeLines": 413,
       "fileCategory": "code"
     },
     {
@@ -345,7 +358,7 @@
     {
       "path": "client/src/pages/Profile.tsx",
       "language": "typescript",
-      "sizeLines": 571,
+      "sizeLines": 316,
       "fileCategory": "code"
     },
     {
@@ -369,7 +382,7 @@
     {
       "path": "client/src/pages/Recommend.tsx",
       "language": "typescript",
-      "sizeLines": 664,
+      "sizeLines": 495,
       "fileCategory": "code"
     },
     {
@@ -493,6 +506,12 @@
       "fileCategory": "markup"
     },
     {
+      "path": "client/src/types/posts.ts",
+      "language": "typescript",
+      "sizeLines": 44,
+      "fileCategory": "code"
+    },
+    {
       "path": "client/src/vite-env.d.ts",
       "language": "typescript",
       "sizeLines": 1,
@@ -525,13 +544,13 @@
     {
       "path": "docker-compose.yml",
       "language": "yaml",
-      "sizeLines": 28,
+      "sizeLines": 31,
       "fileCategory": "infra"
     },
     {
       "path": "docs/GJC-78_RAG_TECH_DECISION.md",
       "language": "markdown",
-      "sizeLines": 181,
+      "sizeLines": 210,
       "fileCategory": "docs"
     },
     {
@@ -753,13 +772,13 @@
     {
       "path": "README.md",
       "language": "markdown",
-      "sizeLines": 247,
+      "sizeLines": 254,
       "fileCategory": "docs"
     },
     {
       "path": "server/.env.example",
       "language": "config",
-      "sizeLines": 31,
+      "sizeLines": 34,
       "fileCategory": "config"
     },
     {
@@ -783,7 +802,7 @@
     {
       "path": "server/README.md",
       "language": "markdown",
-      "sizeLines": 700,
+      "sizeLines": 769,
       "fileCategory": "docs"
     },
     {
@@ -795,7 +814,7 @@
     {
       "path": "server/scripts/smoke-mcp-igdb.js",
       "language": "javascript",
-      "sizeLines": 160,
+      "sizeLines": 182,
       "fileCategory": "code"
     },
     {
@@ -807,19 +826,19 @@
     {
       "path": "server/src/ai/agent.service.spec.ts",
       "language": "typescript",
-      "sizeLines": 357,
+      "sizeLines": 752,
       "fileCategory": "code"
     },
     {
       "path": "server/src/ai/agent.service.ts",
       "language": "typescript",
-      "sizeLines": 922,
+      "sizeLines": 1163,
       "fileCategory": "code"
     },
     {
       "path": "server/src/ai/ai-compute.client.ts",
       "language": "typescript",
-      "sizeLines": 106,
+      "sizeLines": 244,
       "fileCategory": "code"
     },
     {
@@ -841,15 +860,21 @@
       "fileCategory": "code"
     },
     {
+      "path": "server/src/ai/mcp.controller.spec.ts",
+      "language": "typescript",
+      "sizeLines": 102,
+      "fileCategory": "code"
+    },
+    {
       "path": "server/src/ai/mcp.controller.ts",
       "language": "typescript",
-      "sizeLines": 12,
+      "sizeLines": 136,
       "fileCategory": "code"
     },
     {
       "path": "server/src/ai/mcp.service.ts",
       "language": "typescript",
-      "sizeLines": 222,
+      "sizeLines": 233,
       "fileCategory": "code"
     },
     {
@@ -861,19 +886,19 @@
     {
       "path": "server/src/ai/rag.service.spec.ts",
       "language": "typescript",
-      "sizeLines": 95,
+      "sizeLines": 163,
       "fileCategory": "code"
     },
     {
       "path": "server/src/ai/rag.service.ts",
       "language": "typescript",
-      "sizeLines": 871,
+      "sizeLines": 881,
       "fileCategory": "code"
     },
     {
       "path": "server/src/ai/recommendation-contract.ts",
       "language": "typescript",
-      "sizeLines": 204,
+      "sizeLines": 212,
       "fileCategory": "code"
     },
     {
@@ -1147,13 +1172,13 @@
       "fileCategory": "config"
     }
   ],
-  "totalFiles": 186,
-  "filteredByIgnore": 38,
+  "totalFiles": 195,
+  "filteredByIgnore": 28,
   "estimatedComplexity": "large",
   "stats": {
-    "filesScanned": 186,
+    "filesScanned": 195,
     "byCategory": {
-      "code": 98,
+      "code": 107,
       "config": 11,
       "infra": 2,
       "docs": 42,
@@ -1162,25 +1187,58 @@
     "byLanguage": {
       "unknown": 1,
       "json": 10,
-      "python": 5,
+      "python": 7,
       "dockerfile": 1,
       "markdown": 41,
       "txt": 1,
       "javascript": 5,
       "html": 18,
-      "typescript": 87,
+      "typescript": 94,
       "css": 15,
       "yaml": 1,
       "config": 1
     }
   },
+  "projectName": "Gaming Journal Club",
+  "projectDescription": "게임 저널, 리뷰, Steam 프로필, RAG 검색, MCP 도구 호출, FastAPI LangChain AI Compute를 묶어 개인화 게임 추천을 만드는 React/NestJS MVP입니다.",
+  "languages": [
+    "config",
+    "css",
+    "dockerfile",
+    "html",
+    "javascript",
+    "json",
+    "markdown",
+    "python",
+    "txt",
+    "typescript",
+    "unknown",
+    "yaml"
+  ],
+  "frameworks": [
+    "React",
+    "Vite",
+    "NestJS",
+    "FastAPI",
+    "LangChain",
+    "TypeORM",
+    "PostgreSQL pgvector"
+  ],
   "importMap": {
     ".understand-anything/.understandignore": [],
     ".understand-anything/config.json": [],
     "ai-compute/app/__init__.py": [],
+    "ai-compute/app/agent_graph.py": [
+      "ai-compute/app/schemas.py"
+    ],
     "ai-compute/app/embedding.py": [],
     "ai-compute/app/main.py": [
+      "ai-compute/app/agent_graph.py",
       "ai-compute/app/embedding.py",
+      "ai-compute/app/retrieval.py",
+      "ai-compute/app/schemas.py"
+    ],
+    "ai-compute/app/retrieval.py": [
       "ai-compute/app/schemas.py"
     ],
     "ai-compute/app/schemas.py": [
@@ -1221,6 +1279,27 @@
       "client/src/auth/AuthContext.tsx",
       "client/src/styles/Header.css"
     ],
+    "client/src/features/journals/useJournalDetailPage.ts": [
+      "client/src/api.ts",
+      "client/src/auth/AuthContext.tsx",
+      "client/src/types/posts.ts"
+    ],
+    "client/src/features/journals/useJournalsPage.ts": [
+      "client/src/api.ts",
+      "client/src/types/posts.ts"
+    ],
+    "client/src/features/profile/useProfilePage.ts": [
+      "client/src/api.ts",
+      "client/src/auth/AuthContext.tsx",
+      "client/src/types/posts.ts"
+    ],
+    "client/src/features/recommendations/types.ts": [],
+    "client/src/features/recommendations/useRecommendationSync.ts": [
+      "client/src/api.ts",
+      "client/src/features/recommendations/types.ts",
+      "client/src/pages/RecommendDataNoticeModal.tsx",
+      "client/src/types/posts.ts"
+    ],
     "client/src/index.css": [],
     "client/src/main.tsx": [
       "client/src/App.tsx",
@@ -1229,16 +1308,16 @@
     ],
     "client/src/pages/DeleteJournalModal.tsx": [
       "client/src/api.ts",
-      "client/src/pages/Journals.tsx"
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/DeleteReviewModal.tsx": [
       "client/src/api.ts",
-      "client/src/pages/Journals.tsx"
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/EditJournalModal.tsx": [
       "client/src/api.ts",
       "client/src/pages/gamePlatformOptions.ts",
-      "client/src/pages/Journals.tsx"
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/EditProfileModal.tsx": [
       "client/src/api.ts",
@@ -1248,7 +1327,7 @@
     "client/src/pages/EditReviewModal.tsx": [
       "client/src/api.ts",
       "client/src/pages/gamePlatformOptions.ts",
-      "client/src/pages/Journals.tsx"
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/gamePlatformOptions.ts": [],
     "client/src/pages/GameSearchInput.tsx": [
@@ -1272,23 +1351,22 @@
     "client/src/pages/htmls/WriteJournal.html": [],
     "client/src/pages/htmls/WriteReview.html": [],
     "client/src/pages/JournalDetail.tsx": [
-      "client/src/api.ts",
-      "client/src/auth/AuthContext.tsx",
+      "client/src/features/journals/useJournalDetailPage.ts",
       "client/src/pages/DeleteJournalModal.tsx",
       "client/src/pages/EditJournalModal.tsx",
-      "client/src/pages/Journals.tsx",
       "client/src/pages/PageChrome.tsx",
       "client/src/pages/ProfileAvatar.tsx",
       "client/src/styles/JournalDetail.css"
     ],
     "client/src/pages/Journals.tsx": [
-      "client/src/api.ts",
+      "client/src/features/journals/useJournalsPage.ts",
       "client/src/pages/DeleteJournalModal.tsx",
       "client/src/pages/DeleteReviewModal.tsx",
       "client/src/pages/EditJournalModal.tsx",
       "client/src/pages/EditReviewModal.tsx",
       "client/src/pages/PageChrome.tsx",
-      "client/src/styles/Journals.css"
+      "client/src/styles/Journals.css",
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/Login.tsx": [
       "client/src/api.ts",
@@ -1304,10 +1382,8 @@
     ],
     "client/src/pages/PostTagInput.tsx": [],
     "client/src/pages/Profile.tsx": [
-      "client/src/api.ts",
-      "client/src/auth/AuthContext.tsx",
+      "client/src/features/profile/useProfilePage.ts",
       "client/src/pages/EditProfileModal.tsx",
-      "client/src/pages/Journals.tsx",
       "client/src/pages/PageChrome.tsx",
       "client/src/pages/profileImage.ts",
       "client/src/pages/ProfileSteamLoadingModal.tsx",
@@ -1319,8 +1395,8 @@
     "client/src/pages/profileImage.ts": [],
     "client/src/pages/ProfileSteamLoadingModal.tsx": [],
     "client/src/pages/Recommend.tsx": [
-      "client/src/api.ts",
-      "client/src/pages/Journals.tsx",
+      "client/src/features/recommendations/types.ts",
+      "client/src/features/recommendations/useRecommendationSync.ts",
       "client/src/pages/PageChrome.tsx",
       "client/src/pages/RecommendAnalyzingModal.tsx",
       "client/src/pages/RecommendDataNoticeModal.tsx",
@@ -1337,16 +1413,16 @@
       "client/src/api.ts",
       "client/src/pages/DeleteReviewModal.tsx",
       "client/src/pages/EditReviewModal.tsx",
-      "client/src/pages/Journals.tsx",
       "client/src/pages/PageChrome.tsx",
       "client/src/pages/ProfileAvatar.tsx",
-      "client/src/styles/JournalDetail.css"
+      "client/src/styles/JournalDetail.css",
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/Timeline.tsx": [
       "client/src/api.ts",
-      "client/src/pages/Journals.tsx",
       "client/src/pages/PageChrome.tsx",
-      "client/src/pages/ProfileAvatar.tsx"
+      "client/src/pages/ProfileAvatar.tsx",
+      "client/src/types/posts.ts"
     ],
     "client/src/pages/WriteJournal.tsx": [
       "client/src/api.ts",
@@ -1373,6 +1449,7 @@
     "client/src/styles/Timeline.css": [],
     "client/src/styles/WriteJournal.css": [],
     "client/src/styles/WriteReview.css": [],
+    "client/src/types/posts.ts": [],
     "client/src/vite-env.d.ts": [],
     "client/tsconfig.app.json": [],
     "client/tsconfig.json": [],
@@ -1434,6 +1511,7 @@
       "server/src/ai/recommendation-contract.ts"
     ],
     "server/src/ai/agent.service.ts": [
+      "server/src/ai/ai-compute.client.ts",
       "server/src/ai/mcp.service.ts",
       "server/src/ai/rag.service.ts",
       "server/src/ai/recommendation-contract.ts",
@@ -1455,6 +1533,10 @@
     ],
     "server/src/ai/demo-embedding.ts": [],
     "server/src/ai/igdb.service.ts": [],
+    "server/src/ai/mcp.controller.spec.ts": [
+      "server/src/ai/mcp.controller.ts",
+      "server/src/ai/mcp.service.ts"
+    ],
     "server/src/ai/mcp.controller.ts": [
       "server/src/ai/mcp.service.ts"
     ],
