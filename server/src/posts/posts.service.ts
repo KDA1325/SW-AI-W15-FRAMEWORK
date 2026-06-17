@@ -587,7 +587,7 @@ export default class PostsService {
             );
 
             if (metadata) {
-                this.applyGameMetadata(game, metadata);
+                await this.applySafeGameMetadata(game, metadata);
                 await this.gameRepository.save(game);
             }
         }
@@ -631,6 +631,20 @@ export default class PostsService {
             ? metadata.platforms
             : game.platforms;
         game.tags = metadata.tags.length ? metadata.tags : game.tags;
+    }
+
+    private async applySafeGameMetadata(game: Game, metadata: GameMetadata) {
+        const existingGame = metadata.igdbId
+            ? await this.gameRepository.findOne({
+                  where: { igdbId: metadata.igdbId },
+              })
+            : null;
+        const safeMetadata =
+            existingGame && existingGame.id !== game.id
+                ? { ...metadata, igdbId: null }
+                : metadata;
+
+        this.applyGameMetadata(game, safeMetadata);
     }
 
     private applyUserGamePlatform(game: Game, gamePlatform: string | null) {

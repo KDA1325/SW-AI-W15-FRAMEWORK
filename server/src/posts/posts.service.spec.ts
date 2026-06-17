@@ -507,6 +507,66 @@ describe('PostsService IGDB game selection', () => {
         expect(listQuery.andWhere).toHaveBeenCalledWith(expect.any(Object));
     });
 
+    it('hydrates missing game metadata without reusing another game igdb id', async () => {
+        const { gameRepository, igdbService, postRepository, service } =
+            createService();
+        const journalGame = {
+            description: null,
+            genres: [],
+            id: 'journal-game',
+            igdbId: null,
+            imageUrl: null,
+            platforms: ['PC'],
+            tags: [],
+            title: 'Shared IGDB Title',
+        };
+        const listQuery = createListQuery([
+            {
+                game: journalGame,
+                id: 'journal-1',
+                title: 'Journal with sparse game metadata',
+                type: ArchivePostType.JOURNAL,
+                userId: 'user-1',
+            },
+        ]);
+
+        postRepository.createQueryBuilder.mockReturnValueOnce(listQuery);
+        igdbService.searchGames.mockResolvedValueOnce({
+            error: null,
+            errorCode: null,
+            games: [
+                {
+                    externalId: { id: '335434', provider: 'igdb' },
+                    genres: ['Adventure'],
+                    imageUrl: 'https://example.com/cover.jpg',
+                    platforms: ['PC'],
+                    summary: 'A useful summary.',
+                    tags: ['Mystery'],
+                    title: 'Shared IGDB Title',
+                },
+            ],
+            provider: 'igdb',
+        });
+        gameRepository.findOne.mockReset();
+        gameRepository.findOne.mockResolvedValueOnce({
+            id: 'existing-game',
+            igdbId: '335434',
+        });
+
+        await service.findAll('user-1', ArchivePostType.JOURNAL);
+
+        expect(gameRepository.save).toHaveBeenCalledWith(
+            expect.objectContaining({
+                description: 'A useful summary.',
+                genres: ['Adventure'],
+                id: 'journal-game',
+                igdbId: null,
+                imageUrl: 'https://example.com/cover.jpg',
+                tags: ['Mystery'],
+            }),
+        );
+    });
+
     it('keeps the multiplayer persona journals visible with default list paging', async () => {
         const { postRepository, service } = createService();
         const personaJournalPosts = Array.from({ length: 7 }, (_, index) => ({
