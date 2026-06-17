@@ -30,6 +30,8 @@ Required values:
 | `JWT_EXPIRES_IN`              | JWT expiration time                                                | `1d`                       |
 | `SERVER_URL`                  | Backend public origin used for Steam OpenID callback URLs          | `http://localhost:3000`    |
 | `CLIENT_URL`                  | Frontend origin allowed by CORS                                    | `http://localhost:5173`    |
+| `COOKIE_SAME_SITE`            | Auth cookie SameSite policy (`lax`, `strict`, or `none`)           | `lax`                      |
+| `COOKIE_SECURE`               | Sends auth cookies only over HTTPS                                 | `false`                    |
 | `DEMO_SEED_ENABLED`           | Enables local demo AI seed data                                    | `true`                     |
 | `DEMO_USER_EMAIL`             | Fixed demo login email                                             | `demo@gaming-journal.club` |
 | `DEMO_USER_PASSWORD`          | Fixed demo login password                                          | `demo-password`            |
@@ -244,6 +246,18 @@ Authentication uses an HTTP-only cookie named `access_token`.
 - `httpOnly: true` prevents browser JavaScript from reading the token directly.
 - `sameSite: 'lax'` supports normal local development navigation.
 - `secure: false` is for local HTTP development. Use HTTPS and `secure: true` in production.
+
+For Vercel frontend + Render API deployment, the browser treats auth requests as
+cross-site requests. Set these values on the Render backend service:
+
+```text
+COOKIE_SAME_SITE=none
+COOKIE_SECURE=true
+```
+
+Without `SameSite=None; Secure`, login can return 200 while the next
+`GET /auth/me` request is unauthenticated because the browser does not store or
+send the `access_token` cookie for cross-site XHR requests.
 
 JWT settings are configured in `src/auth/auth.module.ts`.
 

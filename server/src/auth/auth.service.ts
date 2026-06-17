@@ -30,7 +30,7 @@ import * as bcrypt from 'bcrypt'
 
 // Express의 Response 타입입니다.
 // 쿠키를 응답에 저장하거나 삭제할 때 사용합니다.
-import { Response } from 'express'
+import { type CookieOptions, Response } from 'express'
 
 // DB에서 가져온 사용자 객체의 타입으로 사용합니다.
 import { User } from './entities/user.entity'
@@ -282,15 +282,7 @@ export class AuthService {
     // 쿠키를 삭제했는데 이후에 해당 쿠키가 포함된 요청이 어떻게 옴?
     // -> 쿠키를 삭제했는데도 브라우저가 해당 쿠키를 계속 보내는 경우가 있을 수 있음-> 어떻게?
     // -> 쿠키 삭제는 브라우저가 해당 쿠키를 더 이상 저장하지 않도록 하는 것이지만, 이미 저장된 쿠키가 완전히 사라지는 것은 아니기 때문에, 브라우저가 해당 쿠키를 계속 보내는 경우가 있을 수 있음
-    res.clearCookie('access_token', {
-      // httpOnly: true로 설정한 쿠키는 JavaScript에서 직접 삭제할 수 없기 때문에, 서버에서 clearCookie를 사용하여 삭제해야 합니다.
-      httpOnly: true,
-      // sameSite과 secure 옵션도 쿠키를 설정할 때와 동일하게 맞춰주는 것이 좋습니다.
-      // lax로 설정하면 같은 사이트 또는 일반적인 이동 요청에서는 쿠키를 보냅니다.
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-    })
+    res.clearCookie('access_token', this.getCookieOptions())
 
     return { ok: true }
   }
@@ -303,19 +295,7 @@ export class AuthService {
 
     // access_token이라는 이름의 쿠키에 JWT를 저장합니다.
     res.cookie('access_token', token, {
-      // JavaScript에서 쿠키를 직접 읽지 못하게 합니다.
-      httpOnly: true,
-
-      // 같은 사이트 또는 일반적인 이동 요청에서는 쿠키를 보냅니다.
-      sameSite: 'lax',
-
-      // 로컬 개발 환경은 http이므로 false입니다.
-      // 실제 배포에서 https를 쓰면 true로 바꿉니다.
-      secure: false,
-
-      // 사이트 전체 경로에서 쿠키를 사용할 수 있게 합니다.
-      path: '/',
-
+      ...this.getCookieOptions(),
       // 쿠키 유지 시간입니다. 24시간입니다.
       // 그럼 계속 로그인 되어있어도 24시간 뒤엔 자동 로그아웃과 같은 거임?
       // -> JWT 토큰의 만료 시간과 쿠키의 유지 시간을 맞춰주는 것이 일반적이기 때문에,
@@ -330,6 +310,34 @@ export class AuthService {
       // 혹은 Access Token + Refresh token 방식으로 구현하면 Access Token 만료되면 Refresh token으로 새 access token 발급받음
       maxAge: 1000 * 60 * 60 * 24,
     })
+  }
+
+  private getCookieOptions(): CookieOptions {
+    const configuredSameSite = process.env.COOKIE_SAME_SITE?.toLowerCase()
+    const sameSite =
+      configuredSameSite === 'none' ||
+      configuredSameSite === 'strict' ||
+      configuredSameSite === 'lax'
+        ? configuredSameSite
+        : process.env.NODE_ENV === 'production'
+          ? 'none'
+          : 'lax'
+    const secure =
+      process.env.COOKIE_SECURE === undefined
+        ? sameSite === 'none' || process.env.NODE_ENV === 'production'
+        : process.env.COOKIE_SECURE === 'true'
+
+    return {
+      // JavaScript에서 쿠키를 직접 읽지 못하게 합니다.
+      httpOnly: true,
+
+      // Vercel frontend -> Render API is a cross-site browser request, so production cookies need SameSite=None; Secure.
+      sameSite,
+      secure,
+
+      // 사이트 전체 경로에서 쿠키를 사용할 수 있게 합니다.
+      path: '/',
+    }
   }
 
   private normalizeGamerTags(tags: string[]) {
