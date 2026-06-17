@@ -24,7 +24,6 @@ import type { Request, Response } from 'express'
 import { AuthService } from './auth.service'
 
 // 로그인/회원가입 요청 body 타입입니다.
-import { LinkSteamProfileDto } from './dto/link-steam-profile.dto'
 import { LoginDto } from './dto/login.dto'
 import { RegisterDto } from './dto/register.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto'
@@ -150,15 +149,6 @@ export class AuthController {
     )
 
     return res.redirect(this.steamService.profileRedirectUrl(result))
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Post('steam/link')
-  linkSteamProfile(
-    @Req() req: AuthedRequest,
-    @Body() dto: LinkSteamProfileDto,
-  ) {
-    return this.steamService.linkProfile(req.user.userId, dto.steamProfile)
   }
 
   @UseGuards(JwtAuthGuard)

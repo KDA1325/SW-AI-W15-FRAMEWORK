@@ -138,23 +138,18 @@ This lets the Agent continue with a fallback plan instead of crashing the full S
 
 ## Steam Profile Link API
 
-The profile page can link a Steam profile through the authenticated NestJS API.
+The profile page links a Steam profile through Steam OpenID so the server only stores a SteamID64 after Steam confirms account ownership.
 
 ```text
 GET /auth/steam/profile
-POST /auth/steam/link
+GET /auth/steam/openid
+GET /auth/steam/openid/callback
 DELETE /auth/steam/link
 ```
 
-`POST /auth/steam/link` accepts a SteamID64, a `steamcommunity.com/profiles/<steamid>` URL, or a `steamcommunity.com/id/<vanity>` URL:
+`GET /auth/steam/openid` starts the ownership-verified Steam OpenID link flow. The callback posts Steam's signed OpenID payload back to Steam with `check_authentication`, stores the verified SteamID64 on success, and redirects back to `${CLIENT_URL}/profile` with the link result in query parameters.
 
-```json
-{
-  "steamProfile": "76561198000000000"
-}
-```
-
-When `STEAM_WEB_API_KEY` is configured, the server calls Steam Web API `ISteamUser/GetPlayerSummaries/v2`, stores the verified SteamID64 on `User.steamId`, and returns a display profile:
+When `STEAM_WEB_API_KEY` is configured, `GET /auth/steam/profile` calls Steam Web API `ISteamUser/GetPlayerSummaries/v2` for the linked SteamID64 and returns a display profile:
 
 ```json
 {
@@ -172,9 +167,7 @@ When `STEAM_WEB_API_KEY` is configured, the server calls Steam Web API `ISteamUs
 }
 ```
 
-When the key is missing, the API returns `connected: false`, `errorCode: "missing_credentials"`, and does not store the profile. Vanity URLs also require the key because they must be resolved through `ISteamUser/ResolveVanityURL/v1`.
-
-`GET /auth/steam/openid` starts the ownership-verified Steam OpenID link flow. The callback posts Steam's signed OpenID payload back to Steam with `check_authentication`, stores the verified SteamID64 on success, and redirects back to `${CLIENT_URL}/profile` with the link result in query parameters.
+When the key is missing, profile and stats APIs return `connected: false` with `errorCode: "missing_credentials"`.
 
 `GET /auth/steam/stats` returns the linked user's Steam stats for the profile stat grid. It combines `GetOwnedGames`, `GetRecentlyPlayedGames`, and per-app `GetPlayerAchievements` calls across played games, then returns owned game count including played free games, achievement totals, recent playtime, recent games, and the shorter Steam friend-code identifier. Steam's public recent-play API exposes a two-week playtime window instead of daily timestamps, so the response labels the current profile fallback as `recentWindowDays: 14`.
 
@@ -187,7 +180,7 @@ cd server
 npm run smoke:steam
 ```
 
-By default, the script starts a temporary NestJS app, logs in as the demo user, links a public Steam profile through `POST /auth/steam/link`, verifies `GET /auth/steam/profile`, and then restores the demo user's previous Steam link. Override the target profile with `STEAM_SMOKE_PROFILE=<steamid-or-url>`.
+By default, the script starts a temporary NestJS app, logs in as the demo user, and verifies `GET /auth/steam/profile`. The demo user must already have a Steam profile linked through Steam OpenID.
 
 Recorded live Steam result on `2026-06-16`:
 

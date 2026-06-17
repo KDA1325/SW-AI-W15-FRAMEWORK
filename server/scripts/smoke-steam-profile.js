@@ -11,8 +11,6 @@ const configuredBaseUrl = process.env.STEAM_SMOKE_BASE_URL
   : null;
 const demoEmail = process.env.DEMO_USER_EMAIL ?? 'demo@gaming-journal.club';
 const demoPassword = process.env.DEMO_USER_PASSWORD ?? 'demo-password';
-const smokeProfile =
-  process.env.STEAM_SMOKE_PROFILE ?? '76561197960435530';
 
 function trimTrailingSlash(value) {
   return value.replace(/\/+$/, '');
@@ -36,7 +34,6 @@ async function main() {
     : await startTemporaryNestServer();
   const baseUrl = configuredBaseUrl ?? temporaryServer.baseUrl;
   let cookie = '';
-  let originalSteamId = null;
 
   try {
     const login = await axios.post(
@@ -54,20 +51,12 @@ async function main() {
       headers: { Cookie: cookie },
       timeout: 15_000,
     });
-    originalSteamId = me.data?.steamId ?? null;
 
-    // The smoke test uses the same route as the Profile page, then restores
-    // the demo user's previous Steam link so repeated runs stay idempotent.
-    const linked = await axios.post(
-      `${baseUrl}/auth/steam/link`,
-      { steamProfile: smokeProfile },
-      {
-        headers: { Cookie: cookie },
-        timeout: 20_000,
-      },
-    );
-
-    assertConnectedSteamProfile(linked.data, 'link response');
+    if (!me.data?.steamId) {
+      throw new Error(
+        'Demo user has no linked Steam profile. Link through Steam OpenID before running this smoke test.',
+      );
+    }
 
     const fetched = await axios.get(`${baseUrl}/auth/steam/profile`, {
       headers: { Cookie: cookie },
@@ -93,10 +82,6 @@ async function main() {
     reportError(error);
     process.exitCode = 1;
   } finally {
-    if (cookie) {
-      await restoreOriginalSteamLink(baseUrl, cookie, originalSteamId);
-    }
-
     if (temporaryServer) {
       await temporaryServer.close();
     }
@@ -128,31 +113,6 @@ function assertConnectedSteamProfile(response, label) {
     !response.profile?.profileUrl
   ) {
     throw new Error(`Steam ${label} did not include required profile fields.`);
-  }
-}
-
-async function restoreOriginalSteamLink(baseUrl, cookie, originalSteamId) {
-  try {
-    if (originalSteamId) {
-      await axios.post(
-        `${baseUrl}/auth/steam/link`,
-        { steamProfile: originalSteamId },
-        {
-          headers: { Cookie: cookie },
-          timeout: 20_000,
-        },
-      );
-      return;
-    }
-
-    await axios.delete(`${baseUrl}/auth/steam/link`, {
-      headers: { Cookie: cookie },
-      timeout: 15_000,
-    });
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'unknown restore error';
-    console.error(`Steam smoke cleanup failed: ${message}`);
   }
 }
 

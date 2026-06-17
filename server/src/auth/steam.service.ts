@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { InjectRepository } from '@nestjs/typeorm'
 import axios, { AxiosError } from 'axios'
@@ -48,13 +48,6 @@ type SteamOpenIdLinkResponse = {
   error: string | null
   errorCode: SteamProfileErrorCode | null
   steamId: string | null
-}
-
-type SteamVanityResponse = {
-  response?: {
-    steamid?: string
-    success?: number
-  }
 }
 
 type SteamSummaryResponse = {
@@ -172,29 +165,6 @@ export class SteamService {
     return this.fetchStats(user.steamId)
   }
 
-  async linkProfile(
-    userId: string,
-    rawProfile: string,
-  ): Promise<SteamProfileResponse> {
-    const parsed = this.parseSteamProfileInput(rawProfile)
-    const steamId =
-      parsed.kind === 'steamid'
-        ? parsed.value
-        : await this.resolveVanityUrl(parsed.value)
-
-    if (typeof steamId !== 'string') {
-      return steamId
-    }
-
-    const profile = await this.fetchProfile(steamId)
-
-    if (profile.connected) {
-      await this.userRepository.update(userId, { steamId: profile.steamId })
-    }
-
-    return profile
-  }
-
   async unlinkProfile(userId: string) {
     await this.userRepository.update(userId, { steamId: null })
 
@@ -257,28 +227,6 @@ export class SteamService {
     return `${this.clientBaseUrl()}/profile?${params.toString()}`
   }
 
-  private parseSteamProfileInput(
-    rawProfile: string,
-  ): { kind: 'steamid'; value: string } | { kind: 'vanity'; value: string } {
-    const input = rawProfile.trim()
-    const steamIdMatch = input.match(/(?:profiles\/)?(\d{17})/)
-
-    if (steamIdMatch?.[1]) {
-      return { kind: 'steamid', value: steamIdMatch[1] }
-    }
-
-    const vanityMatch = input.match(/steamcommunity\.com\/id\/([^/?#]+)/i)
-    const vanity = vanityMatch?.[1] ?? input
-
-    if (/^[a-zA-Z0-9_-]{2,64}$/.test(vanity)) {
-      return { kind: 'vanity', value: vanity }
-    }
-
-    throw new BadRequestException(
-      'SteamID64, Steam profile URL, or vanity URL name is required.',
-    )
-  }
-
   private async verifyOpenIdCallback(
     query: Record<string, unknown>,
   ): Promise<string | null> {
@@ -322,55 +270,6 @@ export class SteamService {
 
   private stringQueryValue(value: unknown) {
     return typeof value === 'string' ? value : null
-  }
-
-  private async resolveVanityUrl(
-    vanityUrl: string,
-  ): Promise<string | SteamProfileResponse> {
-    const apiKey = this.apiKey()
-
-    if (!apiKey) {
-      return {
-        connected: false,
-        error: 'STEAM_WEB_API_KEY is required to resolve Steam vanity URLs.',
-        errorCode: 'missing_credentials',
-        profile: null,
-        steamId: null,
-      }
-    }
-
-    try {
-      const response = await axios.get<SteamVanityResponse>(
-        'https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/',
-        {
-          params: {
-            key: apiKey,
-            vanityurl: vanityUrl,
-          },
-          timeout: 10_000,
-        },
-      )
-      const steamId = response.data.response?.steamid
-
-      if (!steamId) {
-        return {
-          connected: false,
-          error: 'Steam vanity URL was not found.',
-          errorCode: 'profile_not_found',
-          profile: null,
-          steamId: null,
-        }
-      }
-
-      return steamId
-    } catch (error) {
-      return {
-        ...this.externalError(error),
-        connected: false,
-        profile: null,
-        steamId: null,
-      }
-    }
   }
 
   private async fetchProfile(steamId: string): Promise<SteamProfileResponse> {

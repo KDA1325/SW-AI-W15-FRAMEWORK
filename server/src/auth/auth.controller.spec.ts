@@ -27,7 +27,6 @@ describe('AuthController', () => {
             getLinkedProfile: jest.fn(),
             getLinkedStats: jest.fn(),
             linkOpenIdProfile: jest.fn(),
-            linkProfile: jest.fn(),
             profileRedirectUrl: jest.fn(),
             unlinkProfile: jest.fn(),
           },
