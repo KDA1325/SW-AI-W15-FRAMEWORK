@@ -143,6 +143,10 @@ function Timeline() {
         : 'hover:bg-[var(--gjc-primary)] hover:text-[var(--gjc-on-primary)]',
     ].join(' ')
   const changeFilter = (nextFilter: TimelineFilter) => {
+    if (nextFilter === filter) {
+      return
+    }
+
     setFilter(nextFilter)
     setPage(1)
     setPosts([])

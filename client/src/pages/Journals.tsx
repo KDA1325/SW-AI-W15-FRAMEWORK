@@ -55,7 +55,7 @@ function Journals() {
         <section className="flex flex-col gap-4">
           <form className="flex flex-col gap-3 md:flex-row" onSubmit={handleSearch}>
             <div className="relative flex-1">
-              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-secondary">
+              <span className="material-symbols-outlined pointer-events-none absolute left-4 top-8 -translate-y-1/2 text-lg text-secondary">
                 search
               </span>
               <input
