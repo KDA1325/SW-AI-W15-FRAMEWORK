@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "/Login.tsx" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
