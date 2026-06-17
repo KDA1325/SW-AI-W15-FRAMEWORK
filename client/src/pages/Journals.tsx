@@ -1,93 +1,15 @@
-import { type FormEvent, useCallback, useEffect, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
-import { api, getApiErrorMessage } from '../api'
+import { Link } from 'react-router-dom'
+import {
+  type JournalLimit,
+  useJournalsPage,
+} from '../features/journals/useJournalsPage'
+import type { PostSort } from '../types/posts'
 import DeleteJournalModal from './DeleteJournalModal'
 import DeleteReviewModal from './DeleteReviewModal'
 import EditJournalModal from './EditJournalModal'
 import EditReviewModal from './EditReviewModal'
 import PageChrome from './PageChrome'
 import '../styles/Journals.css'
-
-type JournalsModal = 'delete-journal' | 'delete-review' | 'edit-journal' | 'edit-review' | null
-
-export type PostType = 'REVIEW' | 'JOURNAL'
-export type PostSort = 'latest' | 'oldest' | 'rating'
-type JournalLimit = 5 | 10 | 15
-
-const DEFAULT_REVIEW_SORT: PostSort = 'rating'
-const DEFAULT_REVIEW_LIMIT: JournalLimit = 10
-const DEFAULT_JOURNAL_SORT: PostSort = 'latest'
-const DEFAULT_JOURNAL_LIMIT: JournalLimit = 5
-
-function parsePostSort(value: string | null, fallback: PostSort): PostSort {
-  return value === 'latest' || value === 'oldest' || value === 'rating' ? value : fallback
-}
-
-function parseJournalSort(value: string | null): PostSort {
-  return value === 'latest' || value === 'oldest' ? value : DEFAULT_JOURNAL_SORT
-}
-
-function parseJournalLimit(value: string | null): JournalLimit {
-  const parsed = Number(value)
-
-  return parsed === 5 || parsed === 10 || parsed === 15 ? parsed : DEFAULT_JOURNAL_LIMIT
-}
-
-function parseJournalPage(value: string | null) {
-  const parsed = Number(value)
-
-  return Number.isInteger(parsed) && parsed >= 1 ? parsed : 1
-}
-
-function paginationWindow(currentPage: number, totalPages: number) {
-  const lastPage = Math.max(1, totalPages)
-  const start = Math.max(1, currentPage - 2)
-  const end = Math.min(lastPage, currentPage + 2)
-
-  // GJC-174: keep a small page-number window so mobile pagination stays readable.
-  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
-}
-
-export type PostTag = {
-  id: string
-  name: string
-  normalizedName: string
-}
-
-export type JournalPost = {
-  id: string
-  type: PostType
-  title: string
-  content: string
-  rating: number | null
-  createdAt: string
-  updatedAt: string
-  userId: string
-  canEdit?: boolean
-  game: {
-    id: string
-    title: string
-    imageUrl?: string | null
-    platforms?: string[]
-  }
-  user: {
-    id: string
-    nickname: string
-    profileImageUrl?: string | null
-  }
-  tags?: PostTag[]
-}
-
-export type PostListResponse<TPost = JournalPost> = {
-  hasNextPage: boolean
-  hasPreviousPage: boolean
-  items: TPost[]
-  limit: number
-  page: number
-  sort: PostSort
-  total: number
-  totalPages: number
-}
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR')
@@ -98,212 +20,34 @@ function gameInitials(title: string) {
 }
 
 function Journals() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const initialSearchQuery = searchParams.get('q')?.trim() ?? ''
-  const [activeModal, setActiveModal] = useState<JournalsModal>(null)
-  const [reviews, setReviews] = useState<JournalPost[]>([])
-  const [journals, setJournals] = useState<JournalPost[]>([])
-  const [message, setMessage] = useState('')
-  // searchInput은 사용자가 검색창에 타이핑하고 있는 현재 값입니다.
-  // searchQuery는 실제 API 요청에 사용할 확정된 검색어입니다.
-  // 두 값을 분리한 이유:
-  // - input onChange마다 바로 API를 호출하면 글자 하나 입력할 때마다 서버 요청이 발생합니다.
-  // - 그래서 사용자가 엔터를 치거나 SEARCH 버튼을 눌렀을 때만 searchQuery를 갱신합니다.
-  // - searchQuery가 바뀌면 fetchPosts가 다시 만들어지고, useEffect가 목록을 다시 불러옵니다.
-  const [searchInput, setSearchInput] = useState(initialSearchQuery)
-  const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
-  const [selectedPost, setSelectedPost] = useState<JournalPost | null>(null)
-  // These controls map directly to GET /posts query params.
-  // Review cards only need sorting, while journal rows also support page size and page movement.
-  const [reviewSort, setReviewSort] = useState<PostSort>(() =>
-    parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT),
-  )
-  const [reviewPage, setReviewPage] = useState(() => parseJournalPage(searchParams.get('reviewPage')))
-  const [journalSort, setJournalSort] = useState<PostSort>(() =>
-    parseJournalSort(searchParams.get('journalSort')),
-  )
-  const [journalLimit, setJournalLimit] = useState<JournalLimit>(() => parseJournalLimit(searchParams.get('limit')))
-  const [journalPage, setJournalPage] = useState(() => parseJournalPage(searchParams.get('page')))
-  const [journalPageInfo, setJournalPageInfo] = useState({
-    hasNextPage: false,
-    hasPreviousPage: false,
-    total: 0,
-    totalPages: 0,
-  })
-  const [reviewPageInfo, setReviewPageInfo] = useState({
-    hasNextPage: false,
-    hasPreviousPage: false,
-    total: 0,
-    totalPages: 0,
-  })
-
-  // Journals is a personal archive, so it requests only the signed-in user's posts.
-  // Timeline should use /posts without mine=true when it needs every user's posts.
-  const fetchPosts = useCallback(async () => {
-    try {
-      setMessage('')
-      // 이 페이지는 REVIEW_LOGS와 JOURNAL_LOGS를 화면에서 분리해서 보여줍니다.
-      // 그래서 API도 type=REVIEW, type=JOURNAL 두 번 호출합니다.
-      // mine=true는 "내가 작성한 게시글만" 가져오도록 서버에 알려주는 값입니다.
-      // 검색어가 있을 때는 q=검색어를 추가해서 서버가 DB에서 제목/본문/게임명 검색을 수행하게 합니다.
-      // Build separate query strings because REVIEW_LOGS and JOURNAL_LOGS have different controls.
-      const reviewParams = new URLSearchParams({
-        limit: String(DEFAULT_REVIEW_LIMIT),
-        page: String(reviewPage),
-        type: 'REVIEW',
-        mine: 'true',
-        sort: reviewSort,
-      })
-      // Journal pagination is server-side: limit controls take(), page controls skip().
-      const journalParams = new URLSearchParams({
-        type: 'JOURNAL',
-        mine: 'true',
-        sort: journalSort,
-        limit: String(journalLimit),
-        page: String(journalPage),
-      })
-
-      if (searchQuery) {
-        reviewParams.set('q', searchQuery)
-        journalParams.set('q', searchQuery)
-      }
-
-      const [reviewResponse, journalResponse] = await Promise.all([
-        api.get<PostListResponse>(`/posts?${reviewParams.toString()}`),
-        api.get<PostListResponse>(`/posts?${journalParams.toString()}`),
-      ])
-      const reviewPageData = reviewResponse.data
-      const journalPageData = journalResponse.data
-
-      setReviews(reviewPageData.items)
-      setJournals(journalPageData.items)
-      // GJC-176: REVIEW_LOGS also keeps API pagination metadata so profile-only-looking reviews can be reached here.
-      setReviewPageInfo({
-        hasNextPage: reviewPageData.hasNextPage,
-        hasPreviousPage: reviewPageData.hasPreviousPage,
-        total: reviewPageData.total,
-        totalPages: reviewPageData.totalPages,
-      })
-      // The API owns pagination truth, so NEXT/PREV and TOTAL labels do not guess from array length.
-      setJournalPageInfo({
-        hasNextPage: journalPageData.hasNextPage,
-        hasPreviousPage: journalPageData.hasPreviousPage,
-        total: journalPageData.total,
-        totalPages: journalPageData.totalPages,
-      })
-
-      if (journalPageData.totalPages > 0 && journalPage > journalPageData.totalPages) {
-        // A shared URL can point past the last page after filters/data change; clamp before rendering a broken page.
-        setJournalPage(journalPageData.totalPages)
-      }
-      if (reviewPageData.totalPages > 0 && reviewPage > reviewPageData.totalPages) {
-        setReviewPage(reviewPageData.totalPages)
-      }
-    } catch (error) {
-      setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
-    }
-  }, [journalLimit, journalPage, journalSort, reviewPage, reviewSort, searchQuery])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      const nextSearchQuery = searchParams.get('q')?.trim() ?? ''
-
-      setSearchInput(nextSearchQuery)
-      setSearchQuery(nextSearchQuery)
-      setReviewSort(parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT))
-      setReviewPage(parseJournalPage(searchParams.get('reviewPage')))
-      setJournalSort(parseJournalSort(searchParams.get('journalSort')))
-      setJournalLimit(parseJournalLimit(searchParams.get('limit')))
-      setJournalPage(parseJournalPage(searchParams.get('page')))
-    }, 0)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [searchParams])
-
-  useEffect(() => {
-    const nextParams = new URLSearchParams()
-
-    if (searchQuery) {
-      nextParams.set('q', searchQuery)
-    }
-
-    if (reviewSort !== DEFAULT_REVIEW_SORT) {
-      nextParams.set('reviewSort', reviewSort)
-    }
-
-    if (reviewPage !== 1) {
-      nextParams.set('reviewPage', String(reviewPage))
-    }
-
-    if (journalSort !== DEFAULT_JOURNAL_SORT) {
-      nextParams.set('journalSort', journalSort)
-    }
-
-    if (journalLimit !== DEFAULT_JOURNAL_LIMIT) {
-      nextParams.set('limit', String(journalLimit))
-    }
-
-    if (journalPage !== 1) {
-      nextParams.set('page', String(journalPage))
-    }
-
-    if (nextParams.toString() !== searchParams.toString()) {
-      // Query-backed controls are reflected in the URL so refresh/share preserves the same list.
-      setSearchParams(nextParams, { replace: true })
-    }
-  }, [journalLimit, journalPage, journalSort, reviewPage, reviewSort, searchParams, searchQuery, setSearchParams])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      void fetchPosts()
-    }, 0)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [fetchPosts])
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      // Search input is debounced before it becomes an API query, so typing does not fire one request per key.
-      setReviewPage(1)
-      setJournalPage(1)
-      setSearchQuery(searchInput.trim())
-    }, 350)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [searchInput])
-
-  const closeModal = () => {
-    setActiveModal(null)
-    setSelectedPost(null)
-  }
-
-  const openModal = (modal: Exclude<JournalsModal, null>, post: JournalPost) => {
-    setSelectedPost(post)
-    setActiveModal(modal)
-  }
-
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    // form submit은 엔터 입력과 SEARCH 버튼 클릭 둘 다에서 발생합니다.
-    // trim()으로 앞뒤 공백을 제거한 값을 검색어로 확정합니다.
-    // 만약 공백만 입력했다면 빈 문자열이 되므로 q를 붙이지 않고 전체 목록을 다시 조회합니다.
-    // A new search should always start from the first journal page.
-    setReviewPage(1)
-    setJournalPage(1)
-    setSearchQuery(searchInput.trim())
-  }
-
-  const resetFilters = () => {
-    // Reset every query-backed control to its default so the next fetch reproduces the initial list state.
-    setSearchInput('')
-    setSearchQuery('')
-    setReviewSort(DEFAULT_REVIEW_SORT)
-    setReviewPage(1)
-    setJournalSort(DEFAULT_JOURNAL_SORT)
-    setJournalLimit(DEFAULT_JOURNAL_LIMIT)
-    setJournalPage(1)
-  }
-  const journalPageNumbers = paginationWindow(journalPage, journalPageInfo.totalPages)
+  const {
+    activeModal,
+    closeModal,
+    fetchPosts,
+    handleSearch,
+    journalLimit,
+    journalPage,
+    journalPageInfo,
+    journalPageNumbers,
+    journalSort,
+    journals,
+    message,
+    openModal,
+    resetFilters,
+    reviewPage,
+    reviewPageInfo,
+    reviewSort,
+    reviews,
+    searchInput,
+    searchQuery,
+    selectedPost,
+    setJournalLimit,
+    setJournalPage,
+    setJournalSort,
+    setReviewPage,
+    setReviewSort,
+    setSearchInput,
+  } = useJournalsPage()
 
   return (
     <PageChrome active="journals">

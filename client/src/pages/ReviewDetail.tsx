@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { api, getApiErrorMessage } from '../api'
 import DeleteReviewModal from './DeleteReviewModal'
 import EditReviewModal from './EditReviewModal'
-import type { JournalPost } from './Journals'
+import type { JournalPost } from '../types/posts'
 import PageChrome from './PageChrome'
 import ProfileAvatar, {
   PROFILE_AVATAR_COLOR_IMAGE_CLASS,

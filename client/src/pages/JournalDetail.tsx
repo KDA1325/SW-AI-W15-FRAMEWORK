@@ -1,42 +1,15 @@
-﻿import { type FormEvent, useEffect, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { useCallback } from 'react'
-import { api, getApiErrorMessage } from '../api'
-import { useAuth } from '../auth/AuthContext'
+import { Link } from 'react-router-dom'
+import {
+  type DetailComment,
+  useJournalDetailPage,
+} from '../features/journals/useJournalDetailPage'
 import DeleteJournalModal from './DeleteJournalModal'
 import EditJournalModal from './EditJournalModal'
-import type { JournalPost } from './Journals'
 import PageChrome from './PageChrome'
 import ProfileAvatar, {
   PROFILE_AVATAR_COLOR_IMAGE_CLASS,
 } from './ProfileAvatar'
 import '../styles/JournalDetail.css'
-
-type DetailComment = {
-  id: string
-  postId: string
-  userId: string
-  content: string
-  parentCommentId: string | null
-  createdAt: string
-  user: {
-    nickname: string
-    profileImageUrl?: string | null
-  }
-  replies?: DetailComment[]
-}
-
-type JournalDetailPost = JournalPost & {
-  game: JournalPost['game'] & {
-    description?: string | null
-    genres?: string[]
-    platforms?: string[]
-    tags?: string[]
-  }
-  comments?: DetailComment[]
-}
-
-type DetailModal = 'edit-journal' | 'delete-journal' | null
 
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('ko-KR')
@@ -53,189 +26,38 @@ function getInitials(value: string) {
 }
 
 function JournalDetail() {
-  const { user } = useAuth()
-  const location = useLocation()
-  const navigate = useNavigate()
-  // App.tsx에서 /journal-detail/:postId 라우트를 등록했습니다.
-  // 여기서 postId는 URL에 들어있는 실제 게시글 id입니다.
-  // 예: /journal-detail/abc-123 으로 들어오면 postId === 'abc-123' 이 됩니다.
-  // 이 값을 API 경로 /posts/:id에 넣어 현재 보고 있는 게시글 하나만 DB에서 조회합니다.
-  const { postId } = useParams()
-  const [post, setPost] = useState<JournalDetailPost | null>(null)
-  const [comment, setComment] = useState('')
-  const [message, setMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [isSubmittingComment, setIsSubmittingComment] = useState(false)
-  const [editingCommentId, setEditingCommentId] = useState<string | null>(null)
-  const [editingCommentContent, setEditingCommentContent] = useState('')
-  const [commentActionId, setCommentActionId] = useState<string | null>(null)
-
-  // 상세 페이지 안에서 여는 게시글 관리 모달 상태입니다.
-  // null이면 아무 모달도 열지 않고,
-  // edit-journal이면 수정 모달, delete-journal이면 삭제 확인 모달을 보여줍니다.
-  // 이 값은 post.canEdit이 true인 작성자 본인에게만 버튼으로 변경할 수 있습니다.
-  const [activeModal, setActiveModal] = useState<DetailModal>(null)
-
-  const fetchPost = useCallback(async () => {
-    if (!postId) {
-      return
-    }
-
-    try {
-      setIsLoading(true)
-      setMessage('')
-
-      // 상세 API 호출 흐름:
-      // 1. 목록 또는 타임라인에서 넘어온 postId를 이용해 GET /posts/:id 요청을 보냅니다.
-      // 2. 서버는 게시글의 game, user, comments와 함께 canEdit 값을 내려줍니다.
-      // 3. canEdit은 현재 로그인 사용자가 이 글의 작성자인지 서버에서 계산한 값입니다.
-      //    그래서 저널 목록에서 들어왔든 타임라인에서 들어왔든 같은 기준으로 수정/삭제 버튼을 보여줄 수 있습니다.
-      const response = await api.get<JournalDetailPost>(`/posts/${postId}`)
-      if (response.data.type !== 'JOURNAL') {
-        setPost(null)
-        setMessage('POST ID NOT FOUND')
-        return
-      }
-
-      setPost(response.data)
-    } catch (error) {
-      setPost(null)
-      setMessage(getApiErrorMessage(error, 'POST LOAD FAILED'))
-    } finally {
-      setIsLoading(false)
-    }
-  }, [postId])
-
-  useEffect(() => {
-    if (!postId) {
-      return
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void fetchPost()
-    }, 0)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [fetchPost, postId])
-
-  const closeModal = () => {
-    setActiveModal(null)
-  }
-
-  const submitComment = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-
-    const content = comment.trim()
-
-    if (!post || !content) {
-      return
-    }
-
-    try {
-      setIsSubmittingComment(true)
-      setMessage('')
-
-      const response = await api.post<JournalDetailPost>(`/posts/${post.id}/comments`, {
-        content,
-      })
-
-      setPost(response.data)
-      setComment('')
-    } catch (error) {
-      setMessage(getApiErrorMessage(error, 'COMMENT SAVE FAILED'))
-    } finally {
-      setIsSubmittingComment(false)
-    }
-  }
-
-  const startEditComment = (entry: DetailComment) => {
-    setEditingCommentId(entry.id)
-    setEditingCommentContent(entry.content)
-    setMessage('')
-  }
-
-  const cancelEditComment = () => {
-    setEditingCommentId(null)
-    setEditingCommentContent('')
-  }
-
-  const submitCommentEdit = async (entry: DetailComment) => {
-    if (!post) {
-      return
-    }
-
-    const content = editingCommentContent.trim()
-
-    if (!content) {
-      setMessage('COMMENT CONTENT REQUIRED')
-      return
-    }
-
-    try {
-      setCommentActionId(entry.id)
-      setMessage('')
-
-      const response = await api.patch<JournalDetailPost>(
-        `/posts/${post.id}/comments/${entry.id}`,
-        { content },
-      )
-
-      setPost(response.data)
-      cancelEditComment()
-    } catch (error) {
-      setMessage(getApiErrorMessage(error, 'COMMENT UPDATE FAILED'))
-    } finally {
-      setCommentActionId(null)
-    }
-  }
-
-  const deleteComment = async (entry: DetailComment) => {
-    if (!post) {
-      return
-    }
-
-    const confirmed = window.confirm('댓글을 삭제할까요?')
-
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      setCommentActionId(entry.id)
-      setMessage('')
-
-      await api.delete(`/posts/${post.id}/comments/${entry.id}`)
-
-      setPost((currentPost) => {
-        if (!currentPost) {
-          return currentPost
-        }
-
-        const removeFromTree = (comments: DetailComment[]): DetailComment[] =>
-          comments
-            .filter((commentEntry) => commentEntry.id !== entry.id)
-            .map((commentEntry) => ({
-              ...commentEntry,
-              replies: commentEntry.replies
-                ? removeFromTree(commentEntry.replies)
-                : commentEntry.replies,
-            }))
-
-        return {
-          ...currentPost,
-          comments: removeFromTree(currentPost.comments ?? []),
-        }
-      })
-
-      if (editingCommentId === entry.id) {
-        cancelEditComment()
-      }
-    } catch (error) {
-      setMessage(getApiErrorMessage(error, 'COMMENT DELETE FAILED'))
-    } finally {
-      setCommentActionId(null)
-    }
-  }
+  const {
+    activeModal,
+    author,
+    authorProfileImageUrl,
+    cancelEditComment,
+    closeModal,
+    comment,
+    commentActionId,
+    currentUserName,
+    currentUserProfileImageUrl,
+    deleteComment,
+    editingCommentContent,
+    editingCommentId,
+    fetchPost,
+    gameTitle,
+    isLoading,
+    isSubmittingComment,
+    loggedAt,
+    navigateAfterDelete,
+    platform,
+    post,
+    returnPath,
+    setActiveModal,
+    setComment,
+    setEditingCommentContent,
+    startEditComment,
+    statusMessage,
+    submitComment,
+    submitCommentEdit,
+    topLevelComments,
+    user,
+  } = useJournalDetailPage()
 
   const renderCommentActions = (entry: DetailComment) => {
     const canManageComment = user?.id === entry.userId
@@ -305,30 +127,6 @@ function JournalDetail() {
       />
     )
   }
-
-  // 상세 API 응답의 comments 안에는 이 게시글에 연결된 댓글들이 들어옵니다.
-  // 그래도 화면에서는 한 번 더 postId를 확인합니다.
-  // 이유:
-  // - 댓글 엔티티에는 postId 컬럼이 있어서 어떤 게시글의 댓글인지 알 수 있습니다.
-  // - entry.postId === post.id 조건으로 현재 상세 페이지의 게시글 댓글만 남깁니다.
-  // - parentCommentId === null 조건으로 대댓글이 아닌 최상위 댓글만 먼저 화면에 배치합니다.
-  // - 대댓글은 각 댓글의 replies 배열에서 따로 렌더링합니다.
-  const topLevelComments = (post?.comments ?? [])
-    .filter((entry) => entry.postId === post?.id && entry.parentCommentId === null)
-    .sort((first, second) => first.createdAt.localeCompare(second.createdAt))
-
-  const gameTitle = post?.game.title ?? 'UNKNOWN_GAME'
-  const platform = post?.game.platforms?.[0] ?? 'UNKNOWN'
-  const author = post?.user.nickname ?? 'PLAYER'
-  const authorProfileImageUrl = post?.user.profileImageUrl ?? null
-  const currentUserName = user?.nickname ?? 'PLAYER'
-  const currentUserProfileImageUrl = user?.profileImageUrl ?? null
-  const loggedAt = post ? formatDate(post.createdAt) : '-'
-  const statusMessage = postId ? message : 'POST ID NOT FOUND'
-  // Timeline 카드에서 상세로 들어올 때는 Link state에 from: '/timeline'을 담아 보냅니다.
-  // 그 값이 있으면 뒤로가기 링크와 삭제 후 이동 경로를 타임라인으로 맞추고,
-  // 직접 URL을 열었거나 저널 목록에서 들어온 경우에는 기존처럼 /journals로 돌아갑니다.
-  const returnPath = (location.state as { from?: string } | null)?.from ?? '/journals'
 
   return (
     <PageChrome active="journals">
@@ -597,7 +395,7 @@ function JournalDetail() {
         // 삭제가 끝나면 현재 상세 페이지의 게시글은 더 이상 존재하지 않습니다.
         // 그래서 모달 안에서 삭제 API가 성공한 뒤, 진입 경로에 맞춰 목록 화면으로 이동합니다.
         // 타임라인에서 들어온 경우 returnPath는 /timeline이고, 기본값은 /journals입니다.
-        onDeleted={() => navigate(returnPath)}
+        onDeleted={navigateAfterDelete}
       />
     </PageChrome>
   )

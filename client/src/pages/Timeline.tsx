@@ -5,7 +5,7 @@ import PageChrome from './PageChrome'
 import ProfileAvatar, {
   PROFILE_AVATAR_GRAYSCALE_HOVER_IMAGE_CLASS,
 } from './ProfileAvatar'
-import type { JournalPost, PostListResponse } from './Journals'
+import type { JournalPost, PostListResponse } from '../types/posts'
 
 type TimelineFilter = 'ALL' | 'REVIEW' | 'JOURNAL'
 

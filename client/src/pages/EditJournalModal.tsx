@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { api, getApiErrorMessage } from '../api'
-import type { JournalPost } from './Journals'
+import type { JournalPost } from '../types/posts'
 import {
   GAME_PLATFORM_OPTIONS,
   normalizeGamePlatformOption,

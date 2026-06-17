@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { api, getApiErrorMessage } from '../api'
-import type { JournalPost } from './Journals'
+import type { JournalPost } from '../types/posts'
 
 type DeleteReviewModalProps = {
   isOpen: boolean
