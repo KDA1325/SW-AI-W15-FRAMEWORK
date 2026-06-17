@@ -202,6 +202,7 @@ describe('AgentService user-scoped recommendations', () => {
       config as never,
       mcpService as never,
       ragService as never,
+      undefined,
       aiComputeClient as never,
     );
 

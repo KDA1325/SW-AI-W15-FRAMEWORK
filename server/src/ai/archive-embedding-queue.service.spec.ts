@@ -1,31 +1,55 @@
 import { ArchiveEmbeddingQueueService } from './archive-embedding-queue.service';
 
 describe('ArchiveEmbeddingQueueService', () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  it('batches post embedding requests for the same user', async () => {
+  it('stores post embedding requests as pending database jobs', async () => {
+    const dataSource = {
+      query: jest.fn().mockResolvedValue([]),
+    };
     const ragService = {
       refreshArchiveEmbeddingsForPosts: jest.fn().mockResolvedValue(2),
     };
-    const service = new ArchiveEmbeddingQueueService(ragService as never);
+    const service = new ArchiveEmbeddingQueueService(
+      dataSource as never,
+      ragService as never,
+    );
 
-    service.enqueue('user-1', 'post-1');
-    service.enqueue('user-1', 'post-2');
-    service.enqueue('user-1', 'post-2');
+    await service.enqueue('user-1', 'post-1');
 
-    jest.advanceTimersByTime(1500);
-    await Promise.resolve();
+    expect(dataSource.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO "EmbeddingJob"'),
+      ['user-1', 'ARCHIVE_POST', 'post-1', 'PENDING'],
+    );
+  });
 
-    expect(ragService.refreshArchiveEmbeddingsForPosts).toHaveBeenCalledTimes(1);
+  it('flushes pending jobs for a user before recommendation sync', async () => {
+    const dataSource = {
+      query: jest
+        .fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { id: 'job-1', sourceId: 'post-1', userId: 'user-1' },
+          { id: 'job-2', sourceId: 'post-2', userId: 'user-1' },
+        ])
+        .mockResolvedValueOnce([]),
+    };
+    const ragService = {
+      refreshArchiveEmbeddingsForPosts: jest.fn().mockResolvedValue(2),
+    };
+    const service = new ArchiveEmbeddingQueueService(
+      dataSource as never,
+      ragService as never,
+    );
+
+    const refreshed = await service.flushPendingForUser('user-1');
+
     expect(ragService.refreshArchiveEmbeddingsForPosts).toHaveBeenCalledWith(
       'user-1',
       ['post-1', 'post-2'],
     );
+    expect(dataSource.query).toHaveBeenLastCalledWith(
+      expect.stringContaining('UPDATE "EmbeddingJob"'),
+      ['COMPLETED', null, ['job-1', 'job-2']],
+    );
+    expect(refreshed).toBe(2);
   });
 });

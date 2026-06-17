@@ -13,6 +13,7 @@ import {
 import { AiProfile } from '../auth/entities/aiProfile.entity';
 import { User } from '../auth/entities/user.entity';
 import { AiComputeClient } from './ai-compute.client';
+import { ArchiveEmbeddingQueueService } from './archive-embedding-queue.service';
 import { McpService, McpToolDefinition } from './mcp.service';
 import { RagService } from './rag.service';
 
@@ -141,6 +142,8 @@ export class AgentService {
     private readonly config: ConfigService,
     private readonly mcpService: McpService,
     private readonly ragService: RagService,
+    @Optional()
+    private readonly archiveEmbeddingQueue?: ArchiveEmbeddingQueueService,
     @Optional() private readonly aiComputeClient?: AiComputeClient,
   ) {}
 
@@ -149,6 +152,8 @@ export class AgentService {
     options: AgentSyncOptions = {},
   ): Promise<AiRecommendationSyncResponse> {
     const requestId = options.requestId ?? `gjc-sync-${Date.now()}`;
+    await this.archiveEmbeddingQueue?.flushPendingForUser(userId);
+
     const cachedProfile = await this.dataSource
       .getRepository(AiProfile)
       .findOne({

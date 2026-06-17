@@ -111,7 +111,7 @@ export default class PostsService {
         });
 
         const savedPost = await this.savePostOrConflict(post, dto.type);
-        this.archiveEmbeddingQueue?.enqueue(userId, savedPost.id);
+        await this.archiveEmbeddingQueue?.enqueue(userId, savedPost.id);
 
         // 저장 직후 relation(game, user)과 canEdit까지 포함한 상세 응답을 재사용합니다.
         return this.findOne(userId, savedPost.id);
@@ -430,7 +430,7 @@ export default class PostsService {
         }
 
         await this.postRepository.save(post);
-        this.archiveEmbeddingQueue?.enqueue(userId, id);
+        await this.archiveEmbeddingQueue?.enqueue(userId, id);
 
         return this.findOne(userId, id);
     }

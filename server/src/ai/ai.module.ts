@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AgentService } from './agent.service';
 import { AiComputeClient } from './ai-compute.client';
 import { ArchiveEmbeddingQueueService } from './archive-embedding-queue.service';
+import { EmbeddingJob } from './entities/embeddingJob.entity';
 import { IgdbService } from './igdb.service';
 import { McpController } from './mcp.controller';
 import { McpService } from './mcp.service';
@@ -11,6 +13,7 @@ import { RecommendationSyncJobService } from './recommendation-sync-job.service'
 import { RecommendationsController } from './recommendations.controller';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([EmbeddingJob])],
   controllers: [McpController, RagController, RecommendationsController],
   exports: [
     AgentService,
