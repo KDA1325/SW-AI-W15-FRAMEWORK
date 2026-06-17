@@ -181,6 +181,27 @@ describe('AgentService user-scoped recommendations', () => {
       analyzeForUser: jest.fn().mockResolvedValue(ragContext),
     };
     const aiComputeClient = {
+      buildRecommendations: jest.fn().mockResolvedValue({
+        provider: 'fastapi-python',
+        recommendations: [
+          {
+            externalId: { id: '200', provider: 'igdb' },
+            gameId: null,
+            genres: ['Puzzle'],
+            imageUrl: 'https://images.example/baba.jpg',
+            matchedTags: ['PUZZLE_SYSTEMS'],
+            matchScore: 0.94,
+            platforms: ['PC'],
+            rank: 1,
+            reason:
+              '분석 결과 Baba Is You는 퍼즐 시스템 선호와 잘 맞아 추천합니다.',
+            sourceUrl: 'https://www.igdb.com/games/baba-is-you',
+            tags: ['Puzzle', 'Logic'],
+            title: 'Baba Is You',
+          },
+        ],
+        usedFallback: false,
+      }),
       planAgentSearches: jest.fn().mockResolvedValue({
         errors: [],
         iterations: 1,
@@ -215,6 +236,13 @@ describe('AgentService user-scoped recommendations', () => {
         maxIterations: 4,
         requestId: 'plan-test',
         userId: 'current-user-id',
+      }),
+    );
+    expect(aiComputeClient.buildRecommendations).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reasonLanguageInstruction: expect.stringContaining(
+          'reason은 반드시 자연스러운 한국어 존댓말',
+        ),
       }),
     );
     expect(mcpService.handle).toHaveBeenCalledWith(
@@ -661,6 +689,11 @@ describe('AgentService user-scoped recommendations', () => {
       generatedAt: '2026-06-16T00:00:00.000Z',
       lastSyncAt: '2026-06-16T00:00:00.000Z',
       pipeline: {
+        cache: {
+          hit: false,
+          key: 'saved-cache-key',
+          version: 'gjc-recommendation-cache-v3',
+        },
         agent: {
           iterations: 0,
           maxIterations: 4,

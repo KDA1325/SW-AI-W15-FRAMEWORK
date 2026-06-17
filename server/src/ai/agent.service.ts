@@ -21,7 +21,9 @@ const DEFAULT_AGENT_TIMEOUT_MS = 30_000;
 // GJC-178: persona QA needs at least six cards so users can compare more than a top-three list.
 const MIN_RECOMMENDATION_COUNT = 6;
 const MAX_RECOMMENDATIONS_PER_SERIES = 1;
-const RECOMMENDATION_CACHE_VERSION = 'gjc-recommendation-cache-v2';
+const RECOMMENDATION_CACHE_VERSION = 'gjc-recommendation-cache-v3';
+const RECOMMENDATION_REASON_LANGUAGE_INSTRUCTION =
+  '추천 카드의 reason은 반드시 자연스러운 한국어 존댓말 한 문장으로 작성합니다. 영어 단어 나열, 영어 문장, 번역투, 반말, 해요체를 쓰지 말고, 문장은 합니다, 습니다, 또는 니다로 자연스럽게 끝내세요. reason 값에 한글이 없으면 잘못된 응답입니다.';
 
 export type AgentSyncOptions = {
   forceRefresh?: boolean;
@@ -281,7 +283,11 @@ export class AgentService {
     recommendations: AiRecommendationCard[];
     usedFallback: boolean;
   } | null> {
-    const result = await this.aiComputeClient?.buildRecommendations?.({
+    if (!this.aiComputeClient?.buildRecommendations) {
+      return null;
+    }
+
+    const result = await this.aiComputeClient.buildRecommendations({
       contextSources: ragContext.contextSources,
       exclusionSet: {
         externalIds: [...state.exclusionSet.externalIds],
@@ -296,13 +302,16 @@ export class AgentService {
       nickname,
       playStyleSummary: ragContext.playStyleSummary,
       preferenceTags: ragContext.preferenceTags,
+      reasonLanguageInstruction: RECOMMENDATION_REASON_LANGUAGE_INSTRUCTION,
       toolResults: state.toolResults,
       userId,
       wordCloud: ragContext.wordCloud,
     });
 
     if (!result) {
-      return null;
+      throw new Error(
+        'AI recommendation Korean reason generation failed. Please retry SYNC after the AI compute service is available.',
+      );
     }
 
     return {
@@ -414,7 +423,16 @@ export class AgentService {
       where: { userId },
     });
 
-    return profile?.lastRecommendationSync ?? null;
+    const latestSync = profile?.lastRecommendationSync ?? null;
+
+    if (
+      latestSync &&
+      latestSync.pipeline.cache?.version !== RECOMMENDATION_CACHE_VERSION
+    ) {
+      return null;
+    }
+
+    return latestSync;
   }
 
   private buildSearchQueries(ragContext: AiRagAnalysisResponse): string[] {
@@ -902,8 +920,6 @@ export class AgentService {
     if (nickname) {
       return nickname;
     }
-
-    return '플레이어';
 
     return user?.nickname?.trim() || '플레이어';
   }

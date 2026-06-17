@@ -25,6 +25,8 @@ const DEFAULT_TOP_K = 12;
 const MAX_TOP_K = 12;
 const MAX_EMBEDDING_INPUT_CHARS = 12000;
 const MAX_ARCHIVE_DIGEST_CHARS = 9000;
+const WORD_CLOUD_LANGUAGE_INSTRUCTION =
+  'wordCloud.label은 반드시 화면 표시용 한국어 명사구로 작성합니다. 영어 코드, UPPER_SNAKE_CASE, 번역 전 원문 영어를 쓰지 말고 사용자의 행동 성향을 한국어로 표현하세요.';
 
 type RagOptions = {
   refreshEmbeddings?: boolean;
@@ -492,6 +494,7 @@ export class RagService {
         sourceType: row.sourceType,
       })),
       userId,
+      wordCloudLanguageInstruction: WORD_CLOUD_LANGUAGE_INSTRUCTION,
     });
 
     return fastApiAnalysis

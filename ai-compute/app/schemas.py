@@ -95,6 +95,10 @@ class AiWordCloudTerm(AgentPreferenceTag):
 class RagAnalyzeRequest(BaseModel):
     contextRows: list[RagAnalysisContextRow] = Field(default_factory=list)
     userId: str = Field(..., min_length=1)
+    wordCloudLanguageInstruction: str = (
+        "wordCloud.label은 반드시 화면 표시용 한국어 명사구로 작성합니다. "
+        "영어 코드, UPPER_SNAKE_CASE, 번역 전 원문 영어를 쓰지 말고 사용자의 행동 성향을 한국어로 표현하세요."
+    )
 
 
 class RagAnalyzeResponse(BaseModel):
@@ -165,6 +169,11 @@ class RecommendationBuildRequest(BaseModel):
     nickname: str = "player"
     playStyleSummary: str = ""
     preferenceTags: list[AgentPreferenceTag] = Field(default_factory=list)
+    reasonLanguageInstruction: str = (
+        "추천 카드의 reason은 반드시 자연스러운 한국어 존댓말 한 문장으로 작성합니다. "
+        "영어 단어 나열, 영어 문장, 번역투, 반말, 해요체를 쓰지 말고, 문장은 합니다, 습니다, 또는 니다로 자연스럽게 끝내세요. "
+        "reason 값에 한글이 없으면 잘못된 응답입니다."
+    )
     toolResults: list[RecommendationToolResult] = Field(default_factory=list)
     userId: str = Field(..., min_length=1)
     wordCloud: list[AiWordCloudTerm] = Field(default_factory=list)

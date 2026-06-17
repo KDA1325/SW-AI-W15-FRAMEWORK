@@ -36,6 +36,7 @@ export type AiComputeRagSearchRow = {
 export type AiComputeRagAnalyzeRequest = {
   contextRows: AiComputeRagSearchRow[];
   userId: string;
+  wordCloudLanguageInstruction: string;
 };
 
 export type AiComputeRagAnalyzeResult = {
@@ -117,6 +118,7 @@ export type AiComputeRecommendationBuildRequest = {
     sourceCount: number;
     weight: number;
   }>;
+  reasonLanguageInstruction: string;
   toolResults: Array<{
     error: string | null;
     errorCode: string | null;

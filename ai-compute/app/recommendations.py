@@ -124,6 +124,8 @@ def build_recommendations(
         )
     ]
     ranked = refine_recommendation_reasons(ranked, request)
+    if ranked is None:
+        raise RuntimeError("Korean recommendation reason generation failed.")
 
     return RecommendationBuildResponse(
         provider="fastapi-python",
@@ -283,7 +285,7 @@ def simple_recommendation_reason(
 def refine_recommendation_reasons(
     recommendations: list[RecommendationCard],
     request: RecommendationBuildRequest,
-) -> list[RecommendationCard]:
+) -> list[RecommendationCard] | None:
     if not recommendations:
         return recommendations
 
@@ -293,14 +295,17 @@ def refine_recommendation_reasons(
         system_prompt=(
             "당신은 게임 추천 UI에 들어갈 짧은 추천 근거를 씁니다. "
             "반드시 JSON만 반환하고, 모든 reason은 자연스러운 한국어 존댓말 한 문장이어야 합니다. "
-            "영어 문장, 반말, 과장된 홍보 문구는 쓰지 마세요."
+            "영어 단어 나열, 영어 문장, 반말, 해요체, 과장된 홍보 문구는 쓰지 마세요. "
+            f"{request.reasonLanguageInstruction}"
         ),
         user_content=json.dumps(
             {
                 "instruction": (
                     "각 추천 게임마다 서로 다른 추천 근거를 70자 안팎으로 작성하세요. "
-                    "사용자의 플레이 성향, 선호 게임 요소, 후보 게임의 장르/태그를 근거로 삼으세요."
+                    "사용자의 플레이 성향, 선호 게임 요소, 후보 게임의 장르/태그를 근거로 삼으세요. "
+                    "reason 값에는 반드시 한글이 포함되어야 하며 영어로 작성하면 안 됩니다."
                 ),
+                "reasonLanguageInstruction": request.reasonLanguageInstruction,
                 "nickname": request.nickname,
                 "playStyleSummary": request.playStyleSummary,
                 "playStyles": [
@@ -331,7 +336,7 @@ def refine_recommendation_reasons(
     )
 
     if result is None:
-        return recommendations
+        return None
 
     reasons_by_rank = {
         int(item["rank"]): str(item["reason"]).strip()
@@ -342,13 +347,11 @@ def refine_recommendation_reasons(
         and contains_hangul(str(item.get("reason")))
     }
 
+    if len(reasons_by_rank) < len(recommendations):
+        return None
+
     return [
-        recommendation.model_copy(
-            update={
-                "reason": reasons_by_rank.get(recommendation.rank)
-                or recommendation.reason,
-            },
-        )
+        recommendation.model_copy(update={"reason": reasons_by_rank[recommendation.rank]})
         for recommendation in recommendations
     ]
 

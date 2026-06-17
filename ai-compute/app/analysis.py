@@ -79,6 +79,7 @@ def create_openai_analysis(
                     "preferenceTags는 장르, 테마, 메커닉, 표현 방식 같은 게임 요소를 뽑고, "
                     "wordCloud는 플레이 속도, 행동 패턴, 역할, 동기, 사회적 플레이 방식처럼 사용자 행동 성향을 뽑으세요."
                 ),
+                "wordCloudLanguageInstruction": request.wordCloudLanguageInstruction,
                 "sources": [context_row_to_prompt(row) for row in request.contextRows],
                 "userId": request.userId,
             },
@@ -262,13 +263,16 @@ def normalize_word_cloud(
             continue
 
         normalized_label = label.strip()
+        if not contains_hangul(normalized_label):
+            continue
+
         if normalized_label.replace(" ", "_").upper() in preference_labels:
             continue
 
         terms.append(
             AiWordCloudTerm(
                 category=category,
-                label=to_korean_analysis_label(normalized_label),
+                label=normalized_label,
                 sourceCount=to_int(item.get("sourceCount"), 1),
                 weight=to_weight(item.get("weight")),
             ),
