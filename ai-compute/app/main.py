@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from .agent_graph import build_agent_plan
 from .embedding import create_embedding
+from .recommendations import build_recommendations
 from .retrieval import search_archive_context
 from .schemas import (
     AgentPlanRequest,
@@ -9,6 +10,8 @@ from .schemas import (
     EmbedRequest,
     EmbedResponse,
     HealthResponse,
+    RecommendationBuildRequest,
+    RecommendationBuildResponse,
     RagSearchRequest,
     RagSearchResponse,
 )
@@ -57,3 +60,13 @@ async def agent_recommendation_plan(
     request: AgentPlanRequest,
 ) -> AgentPlanResponse:
     return build_agent_plan(request)
+
+
+@app.post(
+    "/agent/recommendations/build",
+    response_model=RecommendationBuildResponse,
+)
+async def agent_recommendations_build(
+    request: RecommendationBuildRequest,
+) -> RecommendationBuildResponse:
+    return build_recommendations(request)

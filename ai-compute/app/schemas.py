@@ -78,3 +78,93 @@ class AgentPlanResponse(BaseModel):
     searchQueries: list[str]
     stoppedReason: Literal["completed", "max_iterations", "timeout"]
     toolPlan: list[AgentToolPlan]
+
+
+class AiWordCloudTerm(AgentPreferenceTag):
+    category: Literal["genre", "mood", "mechanic", "pace", "theme"]
+
+
+class AiRagContextSource(BaseModel):
+    excerpt: str
+    gameTitle: str | None = None
+    similarity: float
+    sourceId: str
+    sourceType: str
+    title: str
+
+
+class RecommendationExternalId(BaseModel):
+    id: str
+    provider: Literal["igdb", "rawg", "steam"]
+
+
+class RecommendationGame(BaseModel):
+    aliases: list[str] = Field(default_factory=list)
+    externalId: RecommendationExternalId
+    genres: list[str] = Field(default_factory=list)
+    imageUrl: str | None = None
+    platforms: list[str] = Field(default_factory=list)
+    releaseDate: str | None = None
+    sourceUrl: str | None = None
+    summary: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    title: str
+    totalRating: float | None = None
+
+
+class RecommendationToolResult(BaseModel):
+    error: str | None = None
+    errorCode: str | None = None
+    games: list[RecommendationGame] = Field(default_factory=list)
+    provider: Literal["igdb"]
+    query: str
+
+
+class RecommendationLocalGame(BaseModel):
+    genres: list[str] = Field(default_factory=list)
+    id: str
+    imageUrl: str | None = None
+    platforms: list[str] = Field(default_factory=list)
+    signalScore: float = 0
+    steamAppId: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    title: str
+
+
+class RecommendationExclusionSet(BaseModel):
+    externalIds: list[str] = Field(default_factory=list)
+    gameIds: list[str] = Field(default_factory=list)
+    titles: list[str] = Field(default_factory=list)
+
+
+class RecommendationBuildRequest(BaseModel):
+    contextSources: list[AiRagContextSource] = Field(default_factory=list)
+    exclusionSet: RecommendationExclusionSet = Field(default_factory=RecommendationExclusionSet)
+    localGames: list[RecommendationLocalGame] = Field(default_factory=list)
+    maxRecommendations: int = Field(6, ge=1, le=24)
+    nickname: str = "player"
+    preferenceTags: list[AgentPreferenceTag] = Field(default_factory=list)
+    toolResults: list[RecommendationToolResult] = Field(default_factory=list)
+    userId: str = Field(..., min_length=1)
+    wordCloud: list[AiWordCloudTerm] = Field(default_factory=list)
+
+
+class RecommendationCard(BaseModel):
+    externalId: RecommendationExternalId
+    gameId: str | None = None
+    genres: list[str]
+    imageUrl: str | None = None
+    matchedTags: list[str]
+    matchScore: float
+    platforms: list[str]
+    rank: int
+    reason: str
+    sourceUrl: str | None = None
+    tags: list[str]
+    title: str
+
+
+class RecommendationBuildResponse(BaseModel):
+    provider: Literal["fastapi-python"]
+    recommendations: list[RecommendationCard]
+    usedFallback: bool

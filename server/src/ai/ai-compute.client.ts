@@ -64,6 +64,90 @@ export type AiComputeAgentPlanResult = {
   }>;
 };
 
+export type AiComputeRecommendationBuildRequest = {
+  contextSources: Array<{
+    excerpt: string;
+    gameTitle: string | null;
+    similarity: number;
+    sourceId: string;
+    sourceType: string;
+    title: string;
+  }>;
+  exclusionSet: {
+    externalIds: string[];
+    gameIds: string[];
+    titles: string[];
+  };
+  localGames: Array<{
+    genres: string[];
+    id: string;
+    imageUrl: string | null;
+    platforms: string[];
+    signalScore: number;
+    steamAppId: string | null;
+    tags: string[];
+    title: string;
+  }>;
+  maxRecommendations: number;
+  nickname: string;
+  preferenceTags: Array<{
+    label: string;
+    sourceCount: number;
+    weight: number;
+  }>;
+  toolResults: Array<{
+    error: string | null;
+    errorCode: string | null;
+    games: Array<{
+      aliases?: string[];
+      externalId: {
+        id: string;
+        provider: 'igdb';
+      };
+      genres: string[];
+      imageUrl: string | null;
+      platforms: string[];
+      releaseDate: string | null;
+      sourceUrl: string | null;
+      summary: string | null;
+      tags: string[];
+      title: string;
+      totalRating?: number | null;
+    }>;
+    provider: 'igdb';
+    query: string;
+  }>;
+  userId: string;
+  wordCloud: Array<{
+    category: 'genre' | 'mood' | 'mechanic' | 'pace' | 'theme';
+    label: string;
+    sourceCount: number;
+    weight: number;
+  }>;
+};
+
+export type AiComputeRecommendationBuildResult = {
+  provider: 'fastapi-python';
+  recommendations: Array<{
+    externalId: {
+      id: string;
+      provider: 'igdb' | 'rawg' | 'steam';
+    };
+    gameId: string | null;
+    genres: string[];
+    imageUrl: string | null;
+    matchedTags: string[];
+    matchScore: number;
+    platforms: string[];
+    rank: number;
+    reason: string;
+    sourceUrl: string | null;
+    tags: string[];
+    title: string;
+  }>;
+  usedFallback: boolean;
+};
+
 type AiComputeEmbedResponse = {
   dimensions?: number;
   embedding?: number[];
@@ -192,6 +276,41 @@ export class AiComputeClient {
     } catch (error) {
       this.logger.warn(
         `FastAPI Agent plan failed; falling back inside NestJS. ${this.errorMessage(error)}`,
+      );
+      return null;
+    }
+  }
+
+  async buildRecommendations(
+    request: AiComputeRecommendationBuildRequest,
+  ): Promise<AiComputeRecommendationBuildResult | null> {
+    const baseUrl = this.agentBaseUrl();
+
+    if (!baseUrl) {
+      return null;
+    }
+
+    try {
+      const response = await axios.post<AiComputeRecommendationBuildResult>(
+        `${baseUrl}/agent/recommendations/build`,
+        request,
+        {
+          headers: { 'Content-Type': 'application/json' },
+          timeout: this.agentTimeoutMs(),
+        },
+      );
+
+      if (
+        response.data.provider !== 'fastapi-python' ||
+        !Array.isArray(response.data.recommendations)
+      ) {
+        throw new Error('FastAPI recommendation build response was invalid.');
+      }
+
+      return response.data;
+    } catch (error) {
+      this.logger.warn(
+        `FastAPI recommendation build failed; falling back inside NestJS. ${this.errorMessage(error)}`,
       );
       return null;
     }

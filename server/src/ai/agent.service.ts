@@ -201,22 +201,44 @@ export class AgentService {
 
       const toolResult = await this.callSearchGamesTool(query, ragContext);
       state.toolResults.push(toolResult);
-      state.recommendations.push(
-        ...this.toRecommendations(toolResult, ragContext, state, nickname),
-      );
-      state.recommendations = this.uniqueRecommendations(state.recommendations);
-
-      if (state.recommendations.length >= MIN_RECOMMENDATION_COUNT) {
-        break;
-      }
     }
 
-    if (state.recommendations.length < MIN_RECOMMENDATION_COUNT) {
-      usedFallback = true;
-      state.recommendations = this.uniqueRecommendations([
-        ...state.recommendations,
-        ...(await this.fallbackRecommendations(ragContext, state, nickname)),
-      ]);
+    const localGames = await this.loadUserScopedLocalGames(userId);
+    const fastApiBuild = await this.buildRecommendationsWithFastApi(
+      userId,
+      ragContext,
+      state,
+      nickname,
+      localGames,
+    );
+
+    if (fastApiBuild) {
+      state.recommendations = fastApiBuild.recommendations;
+      usedFallback = fastApiBuild.usedFallback;
+    } else {
+      for (const toolResult of state.toolResults) {
+        state.recommendations.push(
+          ...this.toRecommendations(toolResult, ragContext, state, nickname),
+        );
+        state.recommendations = this.uniqueRecommendations(state.recommendations);
+
+        if (state.recommendations.length >= MIN_RECOMMENDATION_COUNT) {
+          break;
+        }
+      }
+
+      if (state.recommendations.length < MIN_RECOMMENDATION_COUNT) {
+        usedFallback = true;
+        state.recommendations = this.uniqueRecommendations([
+          ...state.recommendations,
+          ...this.fallbackRecommendationsFromLocalGames(
+            localGames,
+            ragContext,
+            state,
+            nickname,
+          ),
+        ]);
+      }
     }
 
     const stoppedReason: AiAgentStoppedReason = usedFallback
@@ -287,6 +309,45 @@ export class AgentService {
     await this.saveLatestRecommendationSync(userId, response);
 
     return response;
+  }
+
+  private async buildRecommendationsWithFastApi(
+    userId: string,
+    ragContext: AiRagAnalysisResponse,
+    state: AgentState,
+    nickname: string,
+    localGames: LocalGameRow[],
+  ): Promise<{
+    recommendations: AiRecommendationCard[];
+    usedFallback: boolean;
+  } | null> {
+    const result = await this.aiComputeClient?.buildRecommendations({
+      contextSources: ragContext.contextSources,
+      exclusionSet: {
+        externalIds: [...state.exclusionSet.externalIds],
+        gameIds: [...state.exclusionSet.gameIds],
+        titles: [...state.exclusionSet.titles],
+      },
+      localGames: localGames.map((game) => ({
+        ...game,
+        signalScore: Number(game.signalScore),
+      })),
+      maxRecommendations: MIN_RECOMMENDATION_COUNT,
+      nickname,
+      preferenceTags: ragContext.preferenceTags,
+      toolResults: state.toolResults,
+      userId,
+      wordCloud: ragContext.wordCloud,
+    });
+
+    if (!result) {
+      return null;
+    }
+
+    return {
+      recommendations: result.recommendations,
+      usedFallback: result.usedFallback,
+    };
   }
 
   private async getCachedRecommendationSync(
@@ -698,6 +759,20 @@ export class AgentService {
     nickname: string,
   ): Promise<AiRecommendationCard[]> {
     const localGames = await this.loadUserScopedLocalGames(state.userId);
+    return this.fallbackRecommendationsFromLocalGames(
+      localGames,
+      ragContext,
+      state,
+      nickname,
+    );
+  }
+
+  private fallbackRecommendationsFromLocalGames(
+    localGames: LocalGameRow[],
+    ragContext: AiRagAnalysisResponse,
+    state: AgentState,
+    nickname: string,
+  ): AiRecommendationCard[] {
     const matchedTags = ragContext.preferenceTags
       .slice(0, 4)
       .map((tag) => tag.label);
