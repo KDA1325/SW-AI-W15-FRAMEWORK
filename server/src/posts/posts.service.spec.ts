@@ -73,15 +73,20 @@ describe('PostsService IGDB game selection', () => {
                 provider: 'igdb',
             }),
         };
+        const archiveEmbeddingQueue = {
+            enqueue: jest.fn(),
+        };
         const service = new PostsService(
             postRepository as never,
             commentRepository as never,
             tagRepository as never,
             gameRepository as never,
             igdbService as never,
+            archiveEmbeddingQueue as never,
         );
 
         return {
+            archiveEmbeddingQueue,
             gameRepository,
             igdbService,
             postRepository,
@@ -91,6 +96,23 @@ describe('PostsService IGDB game selection', () => {
             service,
         };
     }
+
+    it('queues archive embedding after creating a post', async () => {
+        const { archiveEmbeddingQueue, service } = createService();
+
+        await service.create('user-1', {
+            content: 'Great run structure.',
+            gameTitle: 'Hades',
+            rating: 5,
+            title: 'Combat stays readable',
+            type: ArchivePostType.REVIEW,
+        });
+
+        expect(archiveEmbeddingQueue.enqueue).toHaveBeenCalledWith(
+            'user-1',
+            'post-1',
+        );
+    });
 
     it('stores the selected IGDB id when creating a post game', async () => {
         const { gameRepository, postRepository, service } = createService();

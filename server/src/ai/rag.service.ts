@@ -150,6 +150,20 @@ export class RagService {
     };
   }
 
+  async refreshArchiveEmbeddingsForPosts(
+    userId: string,
+    postIds: string[],
+  ): Promise<number> {
+    const uniquePostIds = [...new Set(postIds.filter(Boolean))];
+
+    if (uniquePostIds.length === 0) {
+      return 0;
+    }
+
+    const posts = await this.loadUserArchivePosts(userId, uniquePostIds);
+    return this.refreshArchiveEmbeddings(posts);
+  }
+
   private normalizeTopK(value?: number): number {
     if (!value || !Number.isInteger(value) || value < 1) {
       return DEFAULT_TOP_K;
@@ -160,7 +174,14 @@ export class RagService {
 
   private async loadUserArchivePosts(
     userId: string,
+    postIds?: string[],
   ): Promise<ArchivePostRow[]> {
+    const normalizedPostIds = postIds?.filter(Boolean) ?? [];
+    const postFilter =
+      normalizedPostIds.length > 0 ? 'AND post.id = ANY($2::uuid[])' : '';
+    const params =
+      normalizedPostIds.length > 0 ? [userId, normalizedPostIds] : [userId];
+
     return this.dataSource.query<ArchivePostRow[]>(
       `
         SELECT
@@ -177,9 +198,10 @@ export class RagService {
         FROM "ArchivePost" post
         INNER JOIN "Game" game ON game.id = post."gameId"
         WHERE post."userId" = $1
+        ${postFilter}
         ORDER BY post."updatedAt" DESC
       `,
-      [userId],
+      params,
     );
   }
 

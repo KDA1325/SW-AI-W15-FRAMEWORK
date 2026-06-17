@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AgentService } from './agent.service';
 import { AiComputeClient } from './ai-compute.client';
+import { ArchiveEmbeddingQueueService } from './archive-embedding-queue.service';
 import { IgdbService } from './igdb.service';
 import { McpController } from './mcp.controller';
 import { McpService } from './mcp.service';
@@ -14,6 +15,7 @@ import { RecommendationsController } from './recommendations.controller';
   exports: [
     AgentService,
     AiComputeClient,
+    ArchiveEmbeddingQueueService,
     IgdbService,
     McpService,
     RagService,
@@ -22,6 +24,7 @@ import { RecommendationsController } from './recommendations.controller';
   providers: [
     AgentService,
     AiComputeClient,
+    ArchiveEmbeddingQueueService,
     IgdbService,
     McpService,
     RagService,
