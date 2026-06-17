@@ -9,6 +9,31 @@ import type { JournalPost, PostListResponse } from '../types/posts'
 
 type TimelineFilter = 'ALL' | 'REVIEW' | 'JOURNAL'
 
+type TimelinePageInfo = {
+  hasNextPage: boolean
+  total: number
+}
+
+type TimelineSnapshot = {
+  failedImagePostIds: string[]
+  filter: TimelineFilter
+  page: number
+  pageInfo: TimelinePageInfo
+  posts: JournalPost[]
+}
+
+const EMPTY_TIMELINE_PAGE_INFO: TimelinePageInfo = {
+  hasNextPage: false,
+  total: 0,
+}
+const timelineCache = new Map<TimelineFilter, TimelineSnapshot>()
+let latestTimelineSnapshot: TimelineSnapshot | null = null
+
+function saveTimelineSnapshot(snapshot: TimelineSnapshot) {
+  timelineCache.set(snapshot.filter, snapshot)
+  latestTimelineSnapshot = snapshot
+}
+
 // 서버에서 내려오는 createdAt은 ISO 문자열입니다.
 // 화면에서는 사용자가 읽기 쉽도록 날짜와 시간을 분리해서 보여주기 때문에
 // 날짜 포맷 함수와 시간 포맷 함수를 따로 두었습니다.
@@ -37,20 +62,24 @@ function getDetailPath(post: JournalPost) {
 }
 
 function Timeline() {
+  const initialSnapshot = latestTimelineSnapshot ?? timelineCache.get('ALL')
   // filter는 현재 선택된 타입 필터입니다.
   // ALL: type 쿼리 없이 전체 게시글 조회
   // REVIEW: /posts?type=REVIEW 조회
   // JOURNAL: /posts?type=JOURNAL 조회
-  const [filter, setFilter] = useState<TimelineFilter>('ALL')
-  const [page, setPage] = useState(1)
-  const [pageInfo, setPageInfo] = useState({
-    hasNextPage: false,
-    total: 0,
-  })
+  const [filter, setFilter] = useState<TimelineFilter>(
+    () => initialSnapshot?.filter ?? 'ALL',
+  )
+  const [page, setPage] = useState(() => initialSnapshot?.page ?? 1)
+  const [pageInfo, setPageInfo] = useState<TimelinePageInfo>(
+    () => initialSnapshot?.pageInfo ?? EMPTY_TIMELINE_PAGE_INFO,
+  )
 
   // posts에는 현재 필터 조건에 맞춰 서버에서 받아온 타임라인 카드 목록을 저장합니다.
   // 이전 목업 배열 대신 이 state를 map 해서 화면을 그립니다.
-  const [posts, setPosts] = useState<JournalPost[]>([])
+  const [posts, setPosts] = useState<JournalPost[]>(
+    () => initialSnapshot?.posts ?? [],
+  )
 
   // message는 API 실패 같은 사용자에게 보여줄 상태 메시지입니다.
   // getApiErrorMessage를 거쳐 서버 오류 메시지를 화면 문구로 정리해 넣습니다.
@@ -58,11 +87,11 @@ function Timeline() {
 
   // isLoading은 목록을 불러오는 동안 LOADING_TIMELINE 문구를 보여주기 위한 상태입니다.
   // 빈 목록 메시지와 동시에 보이지 않게 아래 JSX에서 함께 사용합니다.
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(!initialSnapshot)
 
   // Image URLs may come from IGDB, Steam, or seeded DB data; track failures per post so one broken cover falls back safely.
   const [failedImagePostIds, setFailedImagePostIds] = useState<Set<string>>(
-    () => new Set(),
+    () => new Set(initialSnapshot?.failedImagePostIds ?? []),
   )
 
   const markImageFailed = useCallback((postId: string) => {
@@ -98,20 +127,34 @@ function Timeline() {
       }
 
       const response = await api.get<PostListResponse>(`/posts?${params.toString()}`)
-      setPageInfo({
+      const nextPageInfo = {
         hasNextPage: response.data.hasNextPage,
         total: response.data.total,
-      })
+      }
+
+      setPageInfo(nextPageInfo)
       // GJC-140: later pages append by id so repeated clicks or overlapping data cannot duplicate cards.
       setPosts((currentPosts) => {
-        if (page === 1) {
-          return response.data.items
-        }
+        const nextPosts =
+          page === 1
+            ? response.data.items
+            : [
+                ...currentPosts,
+                ...response.data.items.filter(
+                  (post) =>
+                    !currentPosts.some((currentPost) => currentPost.id === post.id),
+                ),
+              ]
 
-        const seen = new Set(currentPosts.map((post) => post.id))
-        const nextPosts = response.data.items.filter((post) => !seen.has(post.id))
+        saveTimelineSnapshot({
+          failedImagePostIds: [],
+          filter,
+          page,
+          pageInfo: nextPageInfo,
+          posts: nextPosts,
+        })
 
-        return [...currentPosts, ...nextPosts]
+        return nextPosts
       })
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'TIMELINE LOAD FAILED'))
@@ -147,10 +190,14 @@ function Timeline() {
       return
     }
 
+    const cachedSnapshot = timelineCache.get(nextFilter)
+
     setFilter(nextFilter)
-    setPage(1)
-    setPosts([])
-    setFailedImagePostIds(new Set())
+    setPage(cachedSnapshot?.page ?? 1)
+    setPageInfo(cachedSnapshot?.pageInfo ?? EMPTY_TIMELINE_PAGE_INFO)
+    setPosts(cachedSnapshot?.posts ?? [])
+    setFailedImagePostIds(new Set(cachedSnapshot?.failedImagePostIds ?? []))
+    setIsLoading(!cachedSnapshot)
   }
 
   return (
