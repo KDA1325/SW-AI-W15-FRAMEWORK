@@ -16,6 +16,23 @@ const DEFAULT_REVIEW_SORT: PostSort = 'rating'
 const DEFAULT_REVIEW_LIMIT: JournalLimit = 10
 const DEFAULT_JOURNAL_SORT: PostSort = 'latest'
 const DEFAULT_JOURNAL_LIMIT: JournalLimit = 5
+const EMPTY_PAGE_INFO = {
+  hasNextPage: false,
+  hasPreviousPage: false,
+  total: 0,
+  totalPages: 0,
+}
+
+type PageInfo = typeof EMPTY_PAGE_INFO
+
+type JournalsPageSnapshot = {
+  journals: JournalPost[]
+  journalPageInfo: PageInfo
+  reviews: JournalPost[]
+  reviewPageInfo: PageInfo
+}
+
+const journalsPageCache = new Map<string, JournalsPageSnapshot>()
 
 function parsePostSort(value: string | null, fallback: PostSort): PostSort {
   return value === 'latest' || value === 'oldest' || value === 'rating'
@@ -51,47 +68,106 @@ function paginationWindow(currentPage: number, totalPages: number) {
   return Array.from({ length: end - start + 1 }, (_, index) => start + index)
 }
 
+function journalsCacheKey({
+  journalLimit,
+  journalPage,
+  journalSort,
+  reviewPage,
+  reviewSort,
+  searchQuery,
+}: {
+  journalLimit: JournalLimit
+  journalPage: number
+  journalSort: PostSort
+  reviewPage: number
+  reviewSort: PostSort
+  searchQuery: string
+}) {
+  return JSON.stringify({
+    journalLimit,
+    journalPage,
+    journalSort,
+    reviewPage,
+    reviewSort,
+    searchQuery,
+  })
+}
+
+function applySnapshot(
+  snapshot: JournalsPageSnapshot,
+  setters: {
+    setJournalPageInfo: (pageInfo: PageInfo) => void
+    setJournals: (posts: JournalPost[]) => void
+    setReviewPageInfo: (pageInfo: PageInfo) => void
+    setReviews: (posts: JournalPost[]) => void
+  },
+) {
+  setters.setReviews(snapshot.reviews)
+  setters.setJournals(snapshot.journals)
+  setters.setReviewPageInfo(snapshot.reviewPageInfo)
+  setters.setJournalPageInfo(snapshot.journalPageInfo)
+}
+
 export function useJournalsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const initialSearchQuery = searchParams.get('q')?.trim() ?? ''
+  const initialReviewSort = parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT)
+  const initialReviewPage = parseJournalPage(searchParams.get('reviewPage'))
+  const initialJournalSort = parseJournalSort(searchParams.get('journalSort'))
+  const initialJournalLimit = parseJournalLimit(searchParams.get('limit'))
+  const initialJournalPage = parseJournalPage(searchParams.get('page'))
+  const initialCacheKey = journalsCacheKey({
+    journalLimit: initialJournalLimit,
+    journalPage: initialJournalPage,
+    journalSort: initialJournalSort,
+    reviewPage: initialReviewPage,
+    reviewSort: initialReviewSort,
+    searchQuery: initialSearchQuery,
+  })
+  const initialSnapshot = journalsPageCache.get(initialCacheKey)
   const [activeModal, setActiveModal] = useState<JournalsModal>(null)
-  const [reviews, setReviews] = useState<JournalPost[]>([])
-  const [journals, setJournals] = useState<JournalPost[]>([])
+  const [reviews, setReviews] = useState<JournalPost[]>(() => initialSnapshot?.reviews ?? [])
+  const [journals, setJournals] = useState<JournalPost[]>(() => initialSnapshot?.journals ?? [])
+  const [isLoading, setIsLoading] = useState(!initialSnapshot)
   const [message, setMessage] = useState('')
   const [searchInput, setSearchInput] = useState(initialSearchQuery)
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
   const [selectedPost, setSelectedPost] = useState<JournalPost | null>(null)
-  const [reviewSort, setReviewSort] = useState<PostSort>(() =>
-    parsePostSort(searchParams.get('reviewSort'), DEFAULT_REVIEW_SORT),
+  const [reviewSort, setReviewSort] = useState<PostSort>(initialReviewSort)
+  const [reviewPage, setReviewPage] = useState(initialReviewPage)
+  const [journalSort, setJournalSort] = useState<PostSort>(initialJournalSort)
+  const [journalLimit, setJournalLimit] = useState<JournalLimit>(initialJournalLimit)
+  const [journalPage, setJournalPage] = useState(initialJournalPage)
+  const [journalPageInfo, setJournalPageInfo] = useState<PageInfo>(
+    () => initialSnapshot?.journalPageInfo ?? EMPTY_PAGE_INFO,
   )
-  const [reviewPage, setReviewPage] = useState(() =>
-    parseJournalPage(searchParams.get('reviewPage')),
+  const [reviewPageInfo, setReviewPageInfo] = useState<PageInfo>(
+    () => initialSnapshot?.reviewPageInfo ?? EMPTY_PAGE_INFO,
   )
-  const [journalSort, setJournalSort] = useState<PostSort>(() =>
-    parseJournalSort(searchParams.get('journalSort')),
-  )
-  const [journalLimit, setJournalLimit] = useState<JournalLimit>(() =>
-    parseJournalLimit(searchParams.get('limit')),
-  )
-  const [journalPage, setJournalPage] = useState(() =>
-    parseJournalPage(searchParams.get('page')),
-  )
-  const [journalPageInfo, setJournalPageInfo] = useState({
-    hasNextPage: false,
-    hasPreviousPage: false,
-    total: 0,
-    totalPages: 0,
-  })
-  const [reviewPageInfo, setReviewPageInfo] = useState({
-    hasNextPage: false,
-    hasPreviousPage: false,
-    total: 0,
-    totalPages: 0,
-  })
 
   const fetchPosts = useCallback(async () => {
+    const cacheKey = journalsCacheKey({
+      journalLimit,
+      journalPage,
+      journalSort,
+      reviewPage,
+      reviewSort,
+      searchQuery,
+    })
+    const cachedSnapshot = journalsPageCache.get(cacheKey)
+
+    if (cachedSnapshot) {
+      applySnapshot(cachedSnapshot, {
+        setJournalPageInfo,
+        setJournals,
+        setReviewPageInfo,
+        setReviews,
+      })
+    }
+
     try {
       setMessage('')
+      setIsLoading(true)
       const reviewParams = new URLSearchParams({
         limit: String(DEFAULT_REVIEW_LIMIT),
         page: String(reviewPage),
@@ -119,20 +195,28 @@ export function useJournalsPage() {
       const reviewPageData = reviewResponse.data
       const journalPageData = journalResponse.data
 
+      const nextSnapshot = {
+        reviews: reviewPageData.items,
+        journals: journalPageData.items,
+        reviewPageInfo: {
+          hasNextPage: reviewPageData.hasNextPage,
+          hasPreviousPage: reviewPageData.hasPreviousPage,
+          total: reviewPageData.total,
+          totalPages: reviewPageData.totalPages,
+        },
+        journalPageInfo: {
+          hasNextPage: journalPageData.hasNextPage,
+          hasPreviousPage: journalPageData.hasPreviousPage,
+          total: journalPageData.total,
+          totalPages: journalPageData.totalPages,
+        },
+      }
+
+      journalsPageCache.set(cacheKey, nextSnapshot)
       setReviews(reviewPageData.items)
       setJournals(journalPageData.items)
-      setReviewPageInfo({
-        hasNextPage: reviewPageData.hasNextPage,
-        hasPreviousPage: reviewPageData.hasPreviousPage,
-        total: reviewPageData.total,
-        totalPages: reviewPageData.totalPages,
-      })
-      setJournalPageInfo({
-        hasNextPage: journalPageData.hasNextPage,
-        hasPreviousPage: journalPageData.hasPreviousPage,
-        total: journalPageData.total,
-        totalPages: journalPageData.totalPages,
-      })
+      setReviewPageInfo(nextSnapshot.reviewPageInfo)
+      setJournalPageInfo(nextSnapshot.journalPageInfo)
 
       if (journalPageData.totalPages > 0 && journalPage > journalPageData.totalPages) {
         setJournalPage(journalPageData.totalPages)
@@ -142,6 +226,8 @@ export function useJournalsPage() {
       }
     } catch (error) {
       setMessage(getApiErrorMessage(error, 'POSTS LOAD FAILED'))
+    } finally {
+      setIsLoading(false)
     }
   }, [journalLimit, journalPage, journalSort, reviewPage, reviewSort, searchQuery])
 
@@ -243,6 +329,7 @@ export function useJournalsPage() {
     closeModal,
     fetchPosts,
     handleSearch,
+    isLoading,
     journalLimit,
     journalPage,
     journalPageInfo,

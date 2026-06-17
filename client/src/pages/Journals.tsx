@@ -25,6 +25,7 @@ function Journals() {
     closeModal,
     fetchPosts,
     handleSearch,
+    isLoading,
     journalLimit,
     journalPage,
     journalPageInfo,
@@ -121,7 +122,12 @@ function Journals() {
           </div>
 
           <div className="flex gap-8 overflow-x-auto pb-12" id="reviews-scroll-container">
-            {reviews.length === 0 ? (
+            {isLoading && reviews.length === 0 ? (
+              <p className="w-full border-2 border-dashed border-primary bg-surface-container-lowest p-6 text-center font-label-caps text-xs uppercase tracking-widest text-secondary">
+                LOADING_REVIEW_LOGS...
+              </p>
+            ) : null}
+            {!isLoading && reviews.length === 0 ? (
               <p className="w-full border-2 border-dashed border-primary bg-surface-container-lowest p-6 text-center font-label-caps text-xs uppercase tracking-widest text-secondary">
                 NO_REVIEW_RESULTS
               </p>
@@ -263,7 +269,12 @@ function Journals() {
           </div>
 
           <div className="flex flex-col gap-6">
-            {journals.length === 0 ? (
+            {isLoading && journals.length === 0 ? (
+              <p className="border-2 border-dashed border-primary bg-surface-container-lowest p-6 text-center font-label-caps text-xs uppercase tracking-widest text-secondary">
+                LOADING_JOURNAL_LOGS...
+              </p>
+            ) : null}
+            {!isLoading && journals.length === 0 ? (
               <p className="border-2 border-dashed border-primary bg-surface-container-lowest p-6 text-center font-label-caps text-xs uppercase tracking-widest text-secondary">
                 NO_JOURNAL_RESULTS
               </p>
