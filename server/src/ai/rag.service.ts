@@ -22,9 +22,11 @@ import {
   EmbeddingSourceType,
 } from '../auth/entities/embeddingDocument.entity';
 
-const DEFAULT_TOP_K = 6;
+const DEFAULT_TOP_K = 12;
 const MAX_TOP_K = 12;
 const MAX_EMBEDDING_INPUT_CHARS = 12000;
+const MAX_ARCHIVE_DIGEST_CHARS = 9000;
+const OPENAI_EMBEDDING_BATCH_SIZE = 64;
 
 type RagOptions = {
   refreshEmbeddings?: boolean;
@@ -84,6 +86,7 @@ type RagAnalysisDraft = {
 type OpenAiEmbeddingResponse = {
   data?: Array<{
     embedding?: number[];
+    index?: number;
   }>;
   model?: string;
 };
@@ -125,7 +128,9 @@ export class RagService {
       queryEmbedding.values,
       topK,
     );
+    const archiveProfileRow = this.toArchiveProfileContextRow(userId, posts);
     const contextRows = [
+      ...(archiveProfileRow ? [archiveProfileRow] : []),
       ...searchRows,
       ...playedGames.map((game) => this.toUserGameContextRow(game)),
     ];
@@ -204,13 +209,15 @@ export class RagService {
   private async refreshArchiveEmbeddings(
     posts: ArchivePostRow[],
   ): Promise<number> {
-    let refreshed = 0;
+    const repository = this.dataSource.getRepository(EmbeddingDocument);
+    const staleDocuments: Array<{
+      content: string;
+      document: EmbeddingDocument | null;
+      post: ArchivePostRow;
+    }> = [];
 
     for (const post of posts) {
       const content = this.buildArchiveEmbeddingContent(post);
-      const embedding = await this.createEmbedding(content);
-      const repository = this.dataSource.getRepository(EmbeddingDocument);
-
       let document = await repository.findOne({
         where: {
           sourceType: EmbeddingSourceType.ARCHIVE_POST,
@@ -218,37 +225,117 @@ export class RagService {
         },
       });
 
-      if (!document) {
-        document = repository.create();
+      if (this.isArchiveEmbeddingFresh(document, post, content)) {
+        continue;
       }
 
-      document.sourceType = EmbeddingSourceType.ARCHIVE_POST;
-      document.sourceId = post.id;
-      document.content = content;
-      document.metadata = {
-        dimensions: embedding.dimensions,
-        gameTitle: post.gameTitle,
-        model: embedding.model,
-        provider: embedding.provider,
-        title: post.title,
-        updatedAt: post.updatedAt,
-      };
-
-      const savedDocument = await repository.save(document);
-
-      await this.dataSource.query(
-        `
-          UPDATE "EmbeddingDocument"
-          SET "embedding" = $1::vector
-          WHERE "id" = $2
-        `,
-        [toPgVectorLiteral(embedding.values), savedDocument.id],
-      );
-
-      refreshed += 1;
+      staleDocuments.push({ content, document, post });
     }
 
-    return refreshed;
+    if (staleDocuments.length === 0) {
+      return 0;
+    }
+
+    const embeddings = await this.createEmbeddings(
+      staleDocuments.map((item) => item.content),
+    );
+
+    await Promise.all(
+      staleDocuments.map(async ({ content, document, post }, index) => {
+        const embedding = embeddings[index];
+
+        if (!document) {
+          document = repository.create();
+        }
+
+        document.sourceType = EmbeddingSourceType.ARCHIVE_POST;
+        document.sourceId = post.id;
+        document.content = content;
+        document.metadata = {
+          dimensions: embedding.dimensions,
+          gameTitle: post.gameTitle,
+          model: embedding.model,
+          provider: embedding.provider,
+          title: post.title,
+          updatedAt: this.toIsoTimestamp(post.updatedAt),
+        };
+
+        const savedDocument = await repository.save(document);
+
+        await this.dataSource.query(
+          `
+            UPDATE "EmbeddingDocument"
+            SET "embedding" = $1::vector
+            WHERE "id" = $2
+          `,
+          [toPgVectorLiteral(embedding.values), savedDocument.id],
+        );
+      }),
+    );
+
+    return staleDocuments.length;
+  }
+
+  private isArchiveEmbeddingFresh(
+    document: EmbeddingDocument | null,
+    post: ArchivePostRow,
+    content: string,
+  ): document is EmbeddingDocument {
+    if (!document || document.content !== content) {
+      return false;
+    }
+
+    const expectedModel =
+      this.config.get<string>('OPENAI_EMBEDDING_MODEL') ??
+      'text-embedding-3-small';
+    const expectedDimensions = Number(
+      this.config.get<string>('OPENAI_EMBEDDING_DIMENSIONS') ??
+        DEMO_EMBEDDING_DIMENSIONS,
+    );
+    const hasOpenAiKey = Boolean(this.config.get<string>('OPENAI_API_KEY'));
+
+    if (hasOpenAiKey && document.metadata.provider === 'demo') {
+      return false;
+    }
+
+    if (
+      document.metadata.model !== expectedModel ||
+      document.metadata.dimensions !== expectedDimensions
+    ) {
+      return false;
+    }
+
+    const embeddedUpdatedAt = this.toEpochMilliseconds(
+      document.metadata.updatedAt,
+    );
+    const postUpdatedAt = this.toEpochMilliseconds(post.updatedAt);
+
+    return (
+      embeddedUpdatedAt !== null &&
+      postUpdatedAt !== null &&
+      embeddedUpdatedAt >= postUpdatedAt
+    );
+  }
+
+  private toIsoTimestamp(value: unknown): string {
+    const timestamp = this.toEpochMilliseconds(value);
+    return timestamp === null
+      ? new Date().toISOString()
+      : new Date(timestamp).toISOString();
+  }
+
+  private toEpochMilliseconds(value: unknown): number | null {
+    if (value instanceof Date) {
+      const timestamp = value.getTime();
+      return Number.isNaN(timestamp) ? null : timestamp;
+    }
+
+    if (typeof value === 'number' || typeof value === 'string') {
+      const timestamp = new Date(value).getTime();
+      return Number.isNaN(timestamp) ? null : timestamp;
+    }
+
+    return null;
   }
 
   private buildArchiveEmbeddingContent(post: ArchivePostRow): string {
@@ -317,7 +404,7 @@ export class RagService {
       model,
     });
 
-    if (fastApiEmbedding) {
+    if (fastApiEmbedding && !(apiKey && fastApiEmbedding.provider === 'demo')) {
       return {
         dimensions: fastApiEmbedding.dimensions,
         model: fastApiEmbedding.model,
@@ -371,6 +458,89 @@ export class RagService {
       );
       return this.createDemoEmbedding(text);
     }
+  }
+
+  private async createEmbeddings(texts: string[]): Promise<EmbeddingResult[]> {
+    if (texts.length === 0) {
+      return [];
+    }
+
+    const apiKey = this.config.get<string>('OPENAI_API_KEY');
+
+    if (!apiKey) {
+      return Promise.all(texts.map((text) => this.createEmbedding(text)));
+    }
+
+    const model =
+      this.config.get<string>('OPENAI_EMBEDDING_MODEL') ??
+      'text-embedding-3-small';
+    const dimensions = Number(
+      this.config.get<string>('OPENAI_EMBEDDING_DIMENSIONS') ??
+        DEMO_EMBEDDING_DIMENSIONS,
+    );
+    const results: EmbeddingResult[] = [];
+
+    for (let start = 0; start < texts.length; start += OPENAI_EMBEDDING_BATCH_SIZE) {
+      const chunk = texts.slice(start, start + OPENAI_EMBEDDING_BATCH_SIZE);
+
+      try {
+        const payload: Record<string, unknown> = {
+          encoding_format: 'float',
+          input: chunk.map((text) => this.truncateEmbeddingInput(text)),
+          model,
+        };
+
+        if (model.startsWith('text-embedding-3')) {
+          payload.dimensions = dimensions;
+        }
+
+        const response = await axios.post<OpenAiEmbeddingResponse>(
+          'https://api.openai.com/v1/embeddings',
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            timeout: 30000,
+          },
+        );
+        const data = response.data.data ?? [];
+        const orderedData = data
+          .slice()
+          .sort((left, right) => (left.index ?? 0) - (right.index ?? 0));
+
+        if (orderedData.length !== chunk.length) {
+          throw new Error('OpenAI embedding response count did not match request count.');
+        }
+
+        results.push(
+          ...orderedData.map((item) => {
+            const values = item.embedding;
+
+            if (!values?.length) {
+              throw new Error('OpenAI embedding response did not include a vector.');
+            }
+
+            return {
+              dimensions: values.length,
+              model: response.data.model ?? model,
+              provider: 'openai' as const,
+              values,
+            };
+          }),
+        );
+      } catch (error) {
+        this.logger.warn(
+          `OpenAI batch embedding failed; falling back to per-document embeddings. ${this.errorMessage(error)}`,
+        );
+        results.push(
+          ...(await Promise.all(chunk.map((text) => this.createEmbedding(text)))),
+        );
+      }
+    }
+
+    return results;
   }
 
   private truncateEmbeddingInput(text: string): string {
@@ -448,7 +618,7 @@ export class RagService {
           messages: [
             {
               content:
-                'You analyze video game journal and review excerpts. Return concise JSON for a recommendation RAG context. Write playStyleSummary in polite formal Korean only, ending naturally with 합니다, 습니다, or 니다. Never use casual speech or 반말. Keep preferenceTags and wordCloud distinct: preferenceTags are enjoyed game elements such as genre, theme, mechanics, and presentation; wordCloud terms are player behavior/style patterns such as role, activity, pace, motivation, and social pattern.',
+                'You analyze one player profile from game reviews, journals, and play records. Return concise JSON for a recommendation RAG context. Write playStyleSummary in polite formal Korean only, ending naturally with 합니다, 습니다, or 니다. Never use casual speech or 반말. Keep preferenceTags and wordCloud distinct: preferenceTags are enjoyed game elements such as genre, theme, mechanics, and presentation; wordCloud terms are player behavior/style patterns such as role, activity, pace, motivation, and social pattern.',
               role: 'system',
             },
             {
@@ -498,9 +668,11 @@ export class RagService {
 
     return [
       'Extract two different analysis layers.',
-      '- preferenceTags: why positively rated/repeated games were enjoyable, for example STORY_RICH, CRAFTING, HORROR_ATMOSPHERE, COZY_SIM.',
-      '- wordCloud: how the user tends to play, for example FARMING_LOOP, TANK_ROLE, AESTHETIC_EXPLORER, SOLO_PLANNER, COOP_TEAMPLAYER.',
-      'Do not copy the same labels into both arrays unless the evidence truly names both a game feature and a play behavior.',
+      '- First read ARCHIVE_PROFILE_DIGEST if present; it summarizes the user across all archive posts, not only top-k vector hits.',
+      '- preferenceTags: enjoyed game features from positively rated/repeated games, for example STORY_RICH, CRAFTING, HORROR_ATMOSPHERE, COZY_SIM.',
+      '- wordCloud: player behavior from review/journal wording, for example FARMING_LOOP, TANK_ROLE, AESTHETIC_EXPLORER, SOLO_PLANNER, COOP_TEAMPLAYER.',
+      '- Prefer concrete actions, roles, pace, and motivations for wordCloud; prefer game mechanics, genre, theme, mood, and presentation for preferenceTags.',
+      'Do not copy the same labels into both arrays unless the evidence truly names both a game feature and a play behavior. Avoid generic labels when specific evidence exists.',
       'Write playStyleSummary as one polite formal Korean sentence. Do not use 반말, 해요체, or casual endings.',
       '',
       sourceText,
@@ -566,12 +738,12 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'TACTICAL_COMBAT',
-        terms: ['tactical', 'turn-based', 'strategy', 'planning', 'board'],
+        terms: ['tactical', 'turn-based', 'strategy', 'planning', 'board', '전술', '턴제', '전략', '계획'],
       },
       {
         category: 'theme',
         label: 'STORY_DRIVEN',
-        terms: ['story', 'narrative', 'dialogue', 'worldbuilding', 'choices'],
+        terms: ['story', 'narrative', 'dialogue', 'worldbuilding', 'choices', '스토리', '서사', '대화', '세계관', '선택'],
       },
       {
         category: 'mood',
@@ -586,7 +758,7 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'CRAFTING',
-        terms: ['crafting', 'craft', 'item synthesis', 'gear', 'equipment'],
+        terms: ['crafting', 'craft', 'item synthesis', 'gear', 'equipment', '제작', '장비', '강화', '아이템'],
       },
       {
         category: 'mechanic',
@@ -596,7 +768,7 @@ export class RagService {
       {
         category: 'mood',
         label: 'COZY_SIM',
-        terms: ['cozy', 'relaxed', 'life sim', 'farming', 'routine'],
+        terms: ['cozy', 'relaxed', 'life sim', 'farming', 'routine', '힐링', '느긋', '생활', '농사', '루틴'],
       },
       {
         category: 'theme',
@@ -611,7 +783,7 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'DEDUCTION',
-        terms: ['deduction', 'mystery', 'clue', 'case', 'observation'],
+        terms: ['deduction', 'mystery', 'clue', 'case', 'observation', '추리', '단서', '사건', '관찰'],
       },
       {
         category: 'mechanic',
@@ -638,7 +810,7 @@ export class RagService {
       {
         category: 'pace',
         label: 'DELIBERATE_PLANNER',
-        terms: ['planning', 'strategy', 'turn-based', 'deliberate', 'focus'],
+        terms: ['planning', 'strategy', 'turn-based', 'deliberate', 'focus', '계획', '신중', '집중', '전략'],
       },
       {
         category: 'mechanic',
@@ -648,17 +820,17 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'FARMING_LOOP',
-        terms: ['farming', 'grind', 'routine', 'harvest', 'repeat'],
+        terms: ['farming', 'grind', 'routine', 'harvest', 'repeat', '파밍', '반복', '수확', '노가다'],
       },
       {
         category: 'mechanic',
         label: 'HUNTING_LOOP',
-        terms: ['hunt', 'boss', 'monster', 'pattern', 'gear progression'],
+        terms: ['hunt', 'boss', 'monster', 'pattern', 'gear progression', '사냥', '보스', '몬스터', '패턴', '장비 성장'],
       },
       {
         category: 'theme',
         label: 'NARRATIVE_ROLEPLAYER',
-        terms: ['roleplay', 'choice', 'story', 'social link', 'quest'],
+        terms: ['roleplay', 'choice', 'story', 'social link', 'quest', '역할', '선택', '스토리', '퀘스트'],
       },
       {
         category: 'mood',
@@ -678,7 +850,7 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'SOLO_PROBLEM_SOLVER',
-        terms: ['solo', 'single player', 'puzzle', 'deduction', 'logic'],
+        terms: ['solo', 'single player', 'puzzle', 'deduction', 'logic', '솔로', '혼자', '퍼즐', '추리', '논리'],
       },
       {
         category: 'mechanic',
@@ -688,7 +860,7 @@ export class RagService {
       {
         category: 'mechanic',
         label: 'TANK_ROLE',
-        terms: ['tank', 'defense', 'shield', 'frontline', 'aggro'],
+        terms: ['tank', 'defense', 'shield', 'frontline', 'aggro', '탱커', '방어', '방패', '전열', '어그로'],
       },
     ];
 
@@ -832,6 +1004,67 @@ export class RagService {
     };
   }
 
+  private toArchiveProfileContextRow(
+    userId: string,
+    posts: ArchivePostRow[],
+  ): RagSearchRow | null {
+    if (posts.length === 0) {
+      return null;
+    }
+
+    const positivePosts = posts.filter(
+      (post) => post.type === 'JOURNAL' || (post.rating ?? 0) >= 3.5,
+    );
+    const evidencePosts = (positivePosts.length > 0 ? positivePosts : posts)
+      .slice()
+      .sort((left, right) => {
+        const ratingDelta = (right.rating ?? 0) - (left.rating ?? 0);
+        return ratingDelta !== 0
+          ? ratingDelta
+          : right.updatedAt.getTime() - left.updatedAt.getTime();
+      });
+    const genreCounts = this.countLabels(
+      evidencePosts.flatMap((post) => post.gameGenres),
+    );
+    const tagCounts = this.countLabels(
+      evidencePosts.flatMap((post) => post.gameTags),
+    );
+    const evidenceLines = evidencePosts.map((post, index) =>
+      [
+        `${index + 1}. ${post.type} / ${post.gameTitle}`,
+        `rating=${post.rating ?? 'none'}`,
+        `title=${post.title}`,
+        `genres=${post.gameGenres.join(', ') || 'none'}`,
+        `tags=${post.gameTags.join(', ') || 'none'}`,
+        `content=${this.excerpt(post.content)}`,
+      ].join(' | '),
+    );
+    const content = [
+      'ARCHIVE_PROFILE_DIGEST',
+      `Total archive posts: ${posts.length}`,
+      `Positive/relevant posts summarized: ${evidencePosts.length}`,
+      `Repeated genres: ${genreCounts.join(', ') || 'none'}`,
+      `Repeated game tags: ${tagCounts.join(', ') || 'none'}`,
+      'Use this digest to identify broad repeated player patterns across every archive post.',
+      'Evidence:',
+      ...evidenceLines,
+    ].join('\n');
+
+    return {
+      content:
+        content.length > MAX_ARCHIVE_DIGEST_CHARS
+          ? content.slice(0, MAX_ARCHIVE_DIGEST_CHARS)
+          : content,
+      metadata: {
+        gameTitle: null,
+        title: 'Archive profile digest',
+      },
+      similarity: 1,
+      sourceId: userId,
+      sourceType: 'AI_PROFILE',
+    };
+  }
+
   private toUserGameContextRow(game: UserGameRow): RagSearchRow {
     return {
       content: [
@@ -850,6 +1083,25 @@ export class RagService {
       sourceId: game.gameId,
       sourceType: 'GAME',
     };
+  }
+
+  private countLabels(labels: string[]): string[] {
+    const counts = new Map<string, number>();
+
+    for (const label of labels) {
+      const normalized = label.trim();
+
+      if (!normalized) {
+        continue;
+      }
+
+      counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
+    }
+
+    return [...counts.entries()]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, 12)
+      .map(([label, count]) => `${label}(${count})`);
   }
 
   private excerpt(content: string): string {
