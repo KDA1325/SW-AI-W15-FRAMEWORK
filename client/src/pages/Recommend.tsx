@@ -1,73 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { api, getApiErrorMessage } from '../api'
-import RecommendAnalyzingModal from './RecommendAnalyzingModal'
-import RecommendDataNoticeModal, {
-  type RecommendArchiveSignalCounts,
-} from './RecommendDataNoticeModal'
+import { useRecommendationSync } from '../features/recommendations/recommendationSyncContext'
+import type {
+  AiRecommendationCard,
+  AiWordCloudTerm,
+} from '../features/recommendations/types'
+import RecommendDataNoticeModal from './RecommendDataNoticeModal'
 import PageChrome from './PageChrome'
-import type { PostListResponse } from './Journals'
 import '../styles/Profile.css'
 import '../styles/Recommend.css'
-
-type AiPreferenceTag = {
-  label: string
-  sourceCount: number
-  weight: number
-}
-
-type AiWordCloudTerm = AiPreferenceTag & {
-  category: 'genre' | 'mood' | 'mechanic' | 'pace' | 'theme'
-}
-
-type AiRecommendationCard = {
-  externalId: {
-    id: string
-    provider: 'steam' | 'rawg' | 'igdb'
-  }
-  gameId: string | null
-  genres: string[]
-  imageUrl: string | null
-  matchedTags: string[]
-  matchScore: number
-  platforms: string[]
-  rank: number
-  reason: string
-  sourceUrl: string | null
-  tags: string[]
-  title: string
-}
-
-type AiRecommendationSyncResponse = {
-  contextSources: Array<{
-    sourceId: string
-    sourceType: 'ARCHIVE_POST' | 'GAME' | 'AI_PROFILE'
-  }>
-  generatedAt: string
-  lastSyncAt: string
-  pipeline: {
-    agent: {
-      iterations: number
-      maxIterations: number
-      stoppedReason: 'completed' | 'fallback' | 'max_iterations' | 'timeout'
-    }
-    mcp: {
-      resultCount: number
-      toolName: 'search_games'
-    }
-    rag: {
-      sourceCount: number
-      topK: number
-    }
-  }
-  playStyleSummary: string
-  preferenceTags: AiPreferenceTag[]
-  recommendations: AiRecommendationCard[]
-  requestId: string
-  userId: string
-  wordCloud: AiWordCloudTerm[]
-}
-
-type JsonRecord = Record<string, unknown>
 
 function normalizeLabel(label: string) {
   return label.replaceAll('_', ' ').toUpperCase()
@@ -150,281 +89,18 @@ function wordStyle(word: AiWordCloudTerm) {
   }
 }
 
-function isJsonRecord(value: unknown): value is JsonRecord {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-}
-
-function readString(value: unknown, fallback = '') {
-  return typeof value === 'string' ? value : fallback
-}
-
-function readNumber(value: unknown, fallback = 0) {
-  return typeof value === 'number' && Number.isFinite(value) ? value : fallback
-}
-
-function readStringArray(value: unknown) {
-  return Array.isArray(value)
-    ? value.filter((item): item is string => typeof item === 'string')
-    : []
-}
-
-function normalizePreferenceTags(value: unknown): AiPreferenceTag[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value.filter(isJsonRecord).map((tag) => ({
-    label: readString(tag.label, 'UNKNOWN'),
-    sourceCount: readNumber(tag.sourceCount),
-    weight: readNumber(tag.weight),
-  }))
-}
-
-function normalizeWordCloud(value: unknown): AiWordCloudTerm[] {
-  const categories = new Set<AiWordCloudTerm['category']>([
-    'genre',
-    'mood',
-    'mechanic',
-    'pace',
-    'theme',
-  ])
-
-  return normalizePreferenceTags(value).map((tag, index) => {
-    const rawTerm = Array.isArray(value) ? value[index] : null
-    const rawCategory = isJsonRecord(rawTerm) ? rawTerm.category : null
-    const category = categories.has(rawCategory as AiWordCloudTerm['category'])
-      ? (rawCategory as AiWordCloudTerm['category'])
-      : 'theme'
-
-    return {
-      ...tag,
-      category,
-    }
-  })
-}
-
-function normalizeRecommendations(value: unknown): AiRecommendationCard[] {
-  if (!Array.isArray(value)) {
-    return []
-  }
-
-  return value.filter(isJsonRecord).map((card, index) => {
-    const externalId = isJsonRecord(card.externalId) ? card.externalId : {}
-
-    return {
-      externalId: {
-        id: readString(externalId.id, `unknown-${index + 1}`),
-        provider:
-          readString(externalId.provider, 'igdb') === 'steam'
-            ? 'steam'
-            : readString(externalId.provider, 'igdb') === 'rawg'
-              ? 'rawg'
-              : 'igdb',
-      },
-      gameId: typeof card.gameId === 'string' ? card.gameId : null,
-      genres: readStringArray(card.genres),
-      imageUrl: typeof card.imageUrl === 'string' ? card.imageUrl : null,
-      matchedTags: readStringArray(card.matchedTags),
-      matchScore: readNumber(card.matchScore),
-      platforms: readStringArray(card.platforms),
-      rank: readNumber(card.rank, index + 1),
-      reason: readString(card.reason, 'No recommendation reason saved yet.'),
-      sourceUrl: typeof card.sourceUrl === 'string' ? card.sourceUrl : null,
-      tags: readStringArray(card.tags),
-      title: readString(card.title, 'UNKNOWN_GAME'),
-    }
-  })
-}
-
-function normalizeSyncResponse(
-  value: unknown,
-): AiRecommendationSyncResponse | null {
-  if (!isJsonRecord(value)) {
-    return null
-  }
-
-  const preferenceTags = normalizePreferenceTags(value.preferenceTags)
-  const wordCloud = normalizeWordCloud(value.wordCloud)
-  const recommendations = normalizeRecommendations(value.recommendations)
-  const playStyleSummary = readString(value.playStyleSummary)
-
-  if (
-    !playStyleSummary &&
-    preferenceTags.length === 0 &&
-    wordCloud.length === 0 &&
-    recommendations.length === 0
-  ) {
-    return null
-  }
-
-  const pipeline = isJsonRecord(value.pipeline) ? value.pipeline : {}
-  const rag = isJsonRecord(pipeline.rag) ? pipeline.rag : {}
-  const mcp = isJsonRecord(pipeline.mcp) ? pipeline.mcp : {}
-  const agent = isJsonRecord(pipeline.agent) ? pipeline.agent : {}
-
-  // Saved SYNC snapshots may come from an older schema, so the page normalizes them before rendering nested fields.
-  return {
-    contextSources: [],
-    generatedAt: readString(value.generatedAt),
-    lastSyncAt: readString(value.lastSyncAt),
-    pipeline: {
-      agent: {
-        iterations: readNumber(agent.iterations),
-        maxIterations: readNumber(agent.maxIterations),
-        stoppedReason:
-          readString(agent.stoppedReason, 'fallback') === 'completed'
-            ? 'completed'
-            : readString(agent.stoppedReason, 'fallback') === 'max_iterations'
-              ? 'max_iterations'
-              : readString(agent.stoppedReason, 'fallback') === 'timeout'
-                ? 'timeout'
-                : 'fallback',
-      },
-      mcp: {
-        resultCount: readNumber(mcp.resultCount),
-        toolName: 'search_games',
-      },
-      rag: {
-        sourceCount: readNumber(rag.sourceCount),
-        topK: readNumber(rag.topK),
-      },
-    },
-    playStyleSummary,
-    preferenceTags,
-    recommendations,
-    requestId: readString(value.requestId, 'saved-sync'),
-    userId: readString(value.userId),
-    wordCloud,
-  }
-}
-
 function Recommend() {
-  const [isAnalyzingOpen, setIsAnalyzingOpen] = useState(false)
-  const [isDataNoticeOpen, setIsDataNoticeOpen] = useState(true)
-  const [isSyncing, setIsSyncing] = useState(false)
-  const [archiveSignalCounts, setArchiveSignalCounts] =
-    useState<RecommendArchiveSignalCounts>({
-      isLoading: true,
-      journalCount: null,
-      reviewCount: null,
-    })
-  const [syncData, setSyncData] = useState<AiRecommendationSyncResponse | null>(
-    null,
-  )
-  const [syncError, setSyncError] = useState<string | null>(null)
-  const syncRequestIdRef = useRef(0)
-
-  const visibleWords = useMemo(
-    () => syncData?.wordCloud.slice(0, 16) ?? [],
-    [syncData],
-  )
-  const visibleTags = useMemo(
-    () => syncData?.preferenceTags.slice(0, 14) ?? [],
-    [syncData],
-  )
-
-  useEffect(() => {
-    let isMounted = true
-
-    async function loadArchiveSignalCounts() {
-      try {
-        const countParams = {
-          limit: '5',
-          mine: 'true',
-          page: '1',
-          sort: 'latest',
-        }
-        const reviewParams = new URLSearchParams({
-          ...countParams,
-          type: 'REVIEW',
-        })
-        const journalParams = new URLSearchParams({
-          ...countParams,
-          type: 'JOURNAL',
-        })
-        const [reviewResponse, journalResponse] = await Promise.all([
-          api.get<PostListResponse>(`/posts?${reviewParams.toString()}`),
-          api.get<PostListResponse>(`/posts?${journalParams.toString()}`),
-        ])
-
-        if (isMounted) {
-          setArchiveSignalCounts({
-            isLoading: false,
-            journalCount: journalResponse.data.total,
-            reviewCount: reviewResponse.data.total,
-          })
-        }
-      } catch {
-        if (isMounted) {
-          setArchiveSignalCounts({
-            isLoading: false,
-            journalCount: null,
-            reviewCount: null,
-          })
-        }
-      }
-    }
-
-    async function loadLatestSync() {
-      try {
-        const response = await api.get<unknown>('/ai/recommendations/latest')
-        const latestSync = normalizeSyncResponse(response.data)
-
-        // Page entry only restores the last saved snapshot; it never triggers a new AI analysis by itself.
-        if (isMounted) {
-          setSyncData(latestSync)
-
-          if (response.data && !latestSync) {
-            setSyncError('AI LAST SYNC DATA INVALID - PLEASE SYNC AGAIN')
-          }
-        }
-      } catch (error) {
-        if (isMounted) {
-          setSyncError(getApiErrorMessage(error, 'AI LAST SYNC LOAD FAILED'))
-        }
-      }
-    }
-
-    void loadArchiveSignalCounts()
-    void loadLatestSync()
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
-
-  const syncRecommendations = async () => {
-    const requestOrder = syncRequestIdRef.current + 1
-    syncRequestIdRef.current = requestOrder
-    setIsSyncing(true)
-    setIsAnalyzingOpen(true)
-    setIsDataNoticeOpen(false)
-    setSyncError(null)
-
-    try {
-      const response = await api.post<unknown>('/ai/recommendations/sync', {
-        forceRefresh: true,
-        requestId: `gjc-web-sync-${Date.now()}`,
-        topK: 6,
-      })
-      const nextSync = normalizeSyncResponse(response.data)
-
-      // 여러 번 빠르게 SYNC를 눌러도 가장 마지막 응답만 화면 상태를 바꾸게 합니다.
-      if (requestOrder === syncRequestIdRef.current) {
-        setSyncData(nextSync)
-        setSyncError(nextSync ? null : 'AI SYNC RESPONSE INVALID')
-      }
-    } catch (error) {
-      if (requestOrder === syncRequestIdRef.current) {
-        setSyncError(getApiErrorMessage(error, 'AI SYNC FAILED'))
-      }
-    } finally {
-      if (requestOrder === syncRequestIdRef.current) {
-        setIsSyncing(false)
-        setIsAnalyzingOpen(false)
-      }
-    }
-  }
+  const {
+    archiveSignalCounts,
+    isDataNoticeOpen,
+    isSyncing,
+    setIsDataNoticeOpen,
+    syncData,
+    syncError,
+    syncRecommendations,
+    visibleTags,
+    visibleWords,
+  } = useRecommendationSync()
 
   return (
     <PageChrome active="recommend">
@@ -648,10 +324,6 @@ function Recommend() {
         </section>
       </main>
 
-      <RecommendAnalyzingModal
-        isOpen={isAnalyzingOpen}
-        onClose={() => setIsAnalyzingOpen(false)}
-      />
       <RecommendDataNoticeModal
         archiveSignalCounts={archiveSignalCounts}
         isOpen={isDataNoticeOpen}
